@@ -1,0 +1,2021 @@
+# MeuRemedio OpenAPI 02.33.1 - completo
+# Base: MeuRemedio_OpenAPI_02.33_REVISADO.yaml
+# Correcao: DELETE /sessions com requestBody substituido por POST /sessions/revocations.
+# Mantem reautenticacao e Idempotency-Key para revogacao global de sessoes.
+openapi: 3.1.1
+info:
+  title: MeuRemedio API
+  version: 02.33.1
+  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.1
+  description: API declaratoria para conta individual, planos de medicamentos, ocorrencias, respostas, historico,
+    exportacoes e privacidade. Nao prescreve, nao valida medicamentos ou interacoes e nao substitui orientacao profissional.
+  contact:
+    name: Canal do produto a definir em GX-002
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+- url: https://api.example.invalid
+  description: URL ilustrativa. Substituir por ambiente autorizado.
+tags:
+- name: Accounts
+- name: Sessions
+- name: Plans
+- name: Occurrences
+- name: History
+- name: Exports
+- name: Privacy
+- name: Operations
+security:
+- sessionCookie: []
+paths:
+  /accounts:
+    post:
+      tags:
+      - Accounts
+      summary: Criar conta
+      operationId: createAccount
+      responses:
+        '201':
+          description: Conta criada
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+            example:
+              name: Ana Silva
+              email: ana.silva@example.com
+              password: ForteSenha123
+              account_timezone: America/Sao_Paulo
+              terms_version: 2026-09
+              privacy_notice_version: 2026-09
+              terms_accepted: true
+              privacy_notice_acknowledged: true
+      x-traceability:
+      - RF-001
+      - CA-001
+      - TS-038
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /accounts/verify:
+    post:
+      tags:
+      - Accounts
+      summary: Verificar conta
+      operationId: verifyAccount
+      responses:
+        '204':
+          description: Conta ativada ou token ja consumido sem novo efeito
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '410':
+          $ref: '#/components/responses/Gone'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyAccountRequest'
+      x-traceability:
+      - RF-001
+      - CA-002
+      - TS-009
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /accounts/verification-resends:
+    post:
+      tags:
+      - Accounts
+      summary: Solicitar reenvio de verificacao
+      operationId: resendVerification
+      responses:
+        '202':
+          description: Resposta neutra
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificationResendRequest'
+      x-traceability:
+      - RF-001
+      - TS-021
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /password-reset-requests:
+    post:
+      tags:
+      - Accounts
+      summary: Solicitar redefinicao de senha
+      operationId: requestPasswordReset
+      responses:
+        '202':
+          description: Resposta neutra
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      x-traceability:
+      - RF-002
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /password-resets:
+    post:
+      tags:
+      - Accounts
+      summary: Confirmar redefinicao de senha
+      operationId: confirmPasswordReset
+      responses:
+        '204':
+          description: Senha alterada e sessoes revogadas
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '410':
+          $ref: '#/components/responses/Gone'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+      x-traceability:
+      - RF-002
+      - TS-009
+      - TS-036
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /sessions:
+    post:
+      tags:
+      - Sessions
+      summary: Criar sessao
+      operationId: createSession
+      responses:
+        '201':
+          description: Sessao criada
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '423':
+          $ref: '#/components/responses/Locked'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      x-traceability:
+      - RF-002
+      - CA-003
+      - CA-004
+      - TS-018
+      - TS-033
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /sessions/current:
+    delete:
+      tags:
+      - Sessions
+      summary: Encerrar sessao atual
+      operationId: deleteCurrentSession
+      responses:
+        '204':
+          description: Sessao revogada de forma idempotente
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      x-traceability:
+      - RF-002
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /preferences/accessibility:
+    get:
+      tags:
+      - Accounts
+      summary: Consultar preferencias de acessibilidade
+      operationId: getAccessibilityPreferences
+      responses:
+        '200':
+          description: Preferencias
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessibilityPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+    put:
+      tags:
+      - Accounts
+      summary: Atualizar preferencias de acessibilidade
+      operationId: updateAccessibilityPreferences
+      responses:
+        '200':
+          description: Preferencias atualizadas
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessibilityPreferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessibilityPreferences'
+      x-traceability:
+      - RF-009
+      - TS-022
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /plans:
+    get:
+      tags:
+      - Plans
+      summary: Listar planos ativos
+      operationId: listPlans
+      responses:
+        '200':
+          description: Pagina de planos
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      x-traceability:
+      - RF-003
+      - TS-037
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+    post:
+      tags:
+      - Plans
+      summary: Criar plano
+      operationId: createPlan
+      responses:
+        '201':
+          description: Plano criado
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlanRequest'
+      x-traceability:
+      - RF-003
+      - CA-005
+      - TS-003
+      - TS-015
+      - TS-038
+      description: Se houver candidato de duplicidade, retorna 409 BUSINESS_RULE_VIOLATION com codigo DUPLICATE_CONFIRMATION_REQUIRED;
+        o cliente repete com os dados confirmados conforme contrato de produto.
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /plans/{plan_id}:
+    get:
+      tags:
+      - Plans
+      summary: Obter plano ativo
+      operationId: getPlan
+      responses:
+        '200':
+          description: Plano
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/PlanId'
+      x-traceability:
+      - RF-003
+      - TS-008
+      - TS-037
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+    put:
+      tags:
+      - Plans
+      summary: Editar plano
+      operationId: updatePlan
+      responses:
+        '200':
+          description: Plano alterado
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+      parameters:
+      - $ref: '#/components/parameters/PlanId'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlanRequest'
+      x-traceability:
+      - RF-003
+      - CA-006
+      - TS-004
+      - TS-014
+      - TS-027
+      - TS-038
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+      description: Controle de concorrencia otimista obrigatorio via ETag e If-Match. O row_version e interno a
+        persistencia e e representado externamente pelo ETag. Versao divergente retorna 409 VERSION_CONFLICT.
+    delete:
+      tags:
+      - Plans
+      summary: Excluir plano
+      operationId: deletePlan
+      responses:
+        '204':
+          description: Exclusao logica idempotente
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/PlanId'
+      x-traceability:
+      - RF-003
+      - TS-005
+      - TS-037
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /occurrences:
+    get:
+      tags:
+      - Occurrences
+      summary: Listar ocorrencias acionaveis
+      operationId: listOccurrences
+      responses:
+        '200':
+          description: Pagina de ocorrencias
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OccurrencePage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/OccurrenceStatus'
+          maxItems: 5
+        style: form
+        explode: false
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      x-traceability:
+      - RF-004
+      - RF-005
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /occurrences/{occurrence_id}/responses:
+    post:
+      tags:
+      - Occurrences
+      summary: Registrar resposta
+      operationId: createResponse
+      responses:
+        '201':
+          description: Resposta registrada
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '410':
+          $ref: '#/components/responses/Gone'
+      parameters:
+      - $ref: '#/components/parameters/OccurrenceId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateResponseRequest'
+      x-traceability:
+      - RF-006
+      - CA-007
+      - CA-013
+      - TS-001
+      - TS-007
+      - TS-013
+      - TS-038
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /history:
+    get:
+      tags:
+      - History
+      summary: Consultar historico
+      operationId: getHistory
+      responses:
+        '200':
+          description: Pagina do historico
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      parameters:
+      - name: start
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/Date'
+      - name: end
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/Date'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      x-traceability:
+      - RF-007
+      - CA-009
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /exports:
+    post:
+      tags:
+      - Exports
+      summary: Solicitar exportacao
+      operationId: createExport
+      responses:
+        '202':
+          description: Exportacao aceita
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExportRequest'
+      x-traceability:
+      - RF-008
+      - CA-010
+      - TS-020
+      - TS-038
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /exports/{export_id}:
+    get:
+      tags:
+      - Exports
+      summary: Consultar exportacao
+      operationId: getExport
+      responses:
+        '200':
+          description: Estado da exportacao
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/ExportId'
+      x-traceability:
+      - RF-008
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+    delete:
+      tags:
+      - Exports
+      summary: Cancelar exportacao
+      operationId: cancelExport
+      description: Cancela exportacao em estado REQUESTED ou PROCESSING. Estados terminais retornam conflito.
+      responses:
+        '204':
+          description: Exportacao cancelada
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      parameters:
+      - $ref: '#/components/parameters/ExportId'
+      x-traceability:
+      - RF-008
+      x-security-requirements: &id001
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /exports/{export_id}/file:
+    get:
+      tags:
+      - Exports
+      summary: Baixar PDF
+      operationId: downloadExport
+      responses:
+        '200':
+          description: PDF privado
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+            Cache-Control:
+              schema:
+                type: string
+              description: Sempre no-store
+            Content-Disposition:
+              schema:
+                type: string
+              description: attachment; filename seguro
+          content:
+            application/pdf:
+              schema:
+                type: string
+                contentMediaType: application/pdf
+                contentEncoding: base64
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '410':
+          $ref: '#/components/responses/Gone'
+      parameters:
+      - $ref: '#/components/parameters/ExportId'
+      x-traceability:
+      - RF-008
+      - CA-011
+      - TS-011
+      - TS-020
+      - TS-023
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /privacy:
+    get:
+      tags:
+      - Privacy
+      summary: Consultar area de privacidade
+      operationId: getPrivacy
+      responses:
+        '200':
+          description: Resumo de privacidade
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacySummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      x-traceability:
+      - RF-010
+      - RF-011
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /account-deletions:
+    post:
+      tags:
+      - Privacy
+      summary: Solicitar exclusao da conta
+      operationId: requestAccountDeletion
+      responses:
+        '202':
+          description: Exclusao agendada
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteAccountRequest'
+      x-traceability:
+      - RF-010
+      - CA-014
+      - TS-026
+      - TS-029
+      - TS-038
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /health:
+    get:
+      tags:
+      - Operations
+      summary: Consultar saude tecnica
+      operationId: getHealth
+      responses:
+        '200':
+          description: Servico operacional
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          description: Servico degradado ou indisponivel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+      security: []
+      x-traceability:
+      - RNF-015
+      description: Nao expor versoes, segredos, dependencias internas ou dados pessoais.
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+  /accounts/me:
+    get:
+      tags:
+      - Accounts
+      summary: Consultar conta atual
+      operationId: getCurrentAccount
+      responses:
+        '200':
+          description: Conta atual
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      x-traceability:
+      - RF-001
+      x-security-requirements: *id001
+    put:
+      tags:
+      - Accounts
+      summary: Atualizar dados editaveis da conta atual
+      operationId: updateCurrentAccount
+      description: Atualiza apenas o nome da conta. O fuso IANA permanece imutavel no MVP.
+      responses:
+        '200':
+          description: Conta atualizada
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccountRequest'
+      x-traceability:
+      - RF-001
+      x-security-requirements: *id001
+  /sessions/revocations:
+    post:
+      tags:
+      - Sessions
+      summary: Encerrar todas as sessoes
+      operationId: revokeAllSessions
+      responses:
+        '204':
+          description: Sessoes revogadas
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReauthenticationRequest'
+      x-traceability:
+      - RF-002
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: mr_session
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/IdempotencyKey'
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/OpaqueCursor'
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    PlanId:
+      name: plan_id
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Uuid'
+    OccurrenceId:
+      name: occurrence_id
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Uuid'
+    ExportId:
+      name: export_id
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Uuid'
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      schema:
+        type: string
+        pattern: ^"[1-9]\d*"$
+  headers:
+    CorrelationId:
+      description: Identificador de correlacao da requisicao.
+      schema:
+        type: string
+        format: uuid
+    RetryAfter:
+      description: Segundos ate nova tentativa.
+      schema:
+        type: integer
+        minimum: 1
+    ETag:
+      description: Versao opaca do recurso.
+      schema:
+        type: string
+        pattern: ^"[1-9]\d*"$
+  schemas:
+    Uuid:
+      type: string
+      format: uuid
+    Date:
+      type: string
+      format: date
+    Instant:
+      type: string
+      format: date-time
+      pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z$
+    Timezone:
+      type: string
+      pattern: ^[A-Za-z_]+(?:/[A-Za-z0-9_+\-]+)+$
+      maxLength: 64
+      examples:
+      - America/Sao_Paulo
+    LocalTime:
+      type: string
+      pattern: ^(?:[01]\d|2[0-3]):[0-5]\d$
+      examples:
+      - 08:00
+    Email:
+      type: string
+      format: email
+      maxLength: 254
+      examples:
+      - ana.silva@example.com
+    OpaqueCursor:
+      type: string
+      minLength: 1
+      maxLength: 512
+    IdempotencyKey:
+      type: string
+      minLength: 1
+      maxLength: 100
+      pattern: ^[A-Za-z0-9._~:+/=-]+$
+    RowVersion:
+      type: integer
+      format: int64
+      minimum: 1
+    Problem:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+          maxLength: 200
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        code:
+          type: string
+          pattern: ^[A-Z][A-Z0-9_]{2,63}$
+        detail:
+          type: string
+          maxLength: 500
+        instance:
+          type: string
+          format: uri-reference
+        correlation_id:
+          type: string
+          format: uuid
+        field_errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+          maxItems: 100
+      required:
+      - type
+      - title
+      - status
+      - code
+      - detail
+      - instance
+      - correlation_id
+    FieldError:
+      type: object
+      additionalProperties: false
+      properties:
+        field:
+          type: string
+          maxLength: 100
+        code:
+          type: string
+          maxLength: 64
+        message:
+          type: string
+          maxLength: 200
+      required:
+      - field
+      - code
+      - message
+    PageMeta:
+      type: object
+      additionalProperties: false
+      properties:
+        next_cursor:
+          anyOf:
+          - $ref: '#/components/schemas/OpaqueCursor'
+          - type: 'null'
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+      required:
+      - next_cursor
+      - limit
+    Accepted:
+      type: object
+      additionalProperties: false
+      properties:
+        request_id:
+          $ref: '#/components/schemas/Uuid'
+        status:
+          type: string
+          enum:
+          - REQUESTED
+      required:
+      - request_id
+      - status
+    Message:
+      type: object
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+          maxLength: 250
+      required:
+      - message
+    AccountStatus:
+      type: string
+      enum:
+      - PENDING_VERIFICATION
+      - ACTIVE
+      - DELETION_SCHEDULED
+    CreateAccountRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          type: string
+          minLength: 10
+          maxLength: 72
+          writeOnly: true
+          pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{10,72}$
+        account_timezone:
+          $ref: '#/components/schemas/Timezone'
+        terms_version:
+          type: string
+          minLength: 1
+          maxLength: 30
+        privacy_notice_version:
+          type: string
+          minLength: 1
+          maxLength: 30
+        terms_accepted:
+          const: true
+        privacy_notice_acknowledged:
+          const: true
+      required:
+      - name
+      - email
+      - password
+      - account_timezone
+      - terms_version
+      - privacy_notice_version
+      - terms_accepted
+      - privacy_notice_acknowledged
+    AccountSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/Uuid'
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+        account_timezone:
+          $ref: '#/components/schemas/Timezone'
+        created_at:
+          $ref: '#/components/schemas/Instant'
+      required:
+      - user_id
+      - status
+      - account_timezone
+      - created_at
+    VerifyAccountRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        token:
+          type: string
+          minLength: 32
+          maxLength: 512
+          writeOnly: true
+      required:
+      - token
+    VerificationResendRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          $ref: '#/components/schemas/Email'
+      required:
+      - email
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          type: string
+          minLength: 1
+          maxLength: 72
+          writeOnly: true
+      required:
+      - email
+      - password
+    Session:
+      type: object
+      additionalProperties: false
+      properties:
+        session_id:
+          $ref: '#/components/schemas/Uuid'
+        idle_expires_at:
+          $ref: '#/components/schemas/Instant'
+        absolute_expires_at:
+          $ref: '#/components/schemas/Instant'
+      required:
+      - session_id
+      - idle_expires_at
+      - absolute_expires_at
+    PasswordResetRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          $ref: '#/components/schemas/Email'
+      required:
+      - email
+    PasswordResetConfirmRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        token:
+          type: string
+          minLength: 32
+          maxLength: 512
+          writeOnly: true
+        new_password:
+          type: string
+          minLength: 10
+          maxLength: 72
+          writeOnly: true
+          pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{10,72}$
+      required:
+      - token
+      - new_password
+    ReauthenticationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 72
+          writeOnly: true
+      required:
+      - password
+    PlanStatus:
+      type: string
+      enum:
+      - ACTIVE
+      - DELETED
+    MedicationForm:
+      type: string
+      enum:
+      - TABLET
+      - CAPSULE
+      - LIQUID
+      - DROPS
+      - INJECTION
+      - CREAM
+      - OINTMENT
+      - INHALER
+      - PATCH
+      - OTHER
+    AdministrationRoute:
+      type: string
+      enum:
+      - ORAL
+      - TOPICAL
+      - INHALED
+      - NASAL
+      - OPHTHALMIC
+      - OTIC
+      - RECTAL
+      - VAGINAL
+      - SUBCUTANEOUS
+      - INTRAMUSCULAR
+      - OTHER
+    PlanWrite:
+      type: object
+      additionalProperties: false
+      properties:
+        medication_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        dose_text:
+          type: string
+          minLength: 1
+          maxLength: 80
+        medication_form:
+          $ref: '#/components/schemas/MedicationForm'
+        administration_route:
+          $ref: '#/components/schemas/AdministrationRoute'
+        instructions:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        prescriber_name:
+          anyOf:
+          - type: string
+            maxLength: 120
+          - type: 'null'
+        prescriber_crm:
+          anyOf:
+          - type: string
+            pattern: ^[A-Z]{2}-\d{4,10}$
+            maxLength: 13
+          - type: 'null'
+        start_date:
+          $ref: '#/components/schemas/Date'
+        end_date:
+          anyOf:
+          - $ref: '#/components/schemas/Date'
+          - type: 'null'
+        schedule_times:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalTime'
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+      required:
+      - medication_name
+      - dose_text
+      - medication_form
+      - administration_route
+      - start_date
+      - schedule_times
+    CreatePlanRequest:
+      allOf:
+      - $ref: '#/components/schemas/PlanWrite'
+    UpdatePlanRequest:
+      allOf:
+      - $ref: '#/components/schemas/PlanWrite'
+    Plan:
+      type: object
+      additionalProperties: false
+      properties:
+        plan_id:
+          $ref: '#/components/schemas/Uuid'
+        status:
+          $ref: '#/components/schemas/PlanStatus'
+        medication_name:
+          type: string
+          maxLength: 120
+        dose_text:
+          type: string
+          maxLength: 80
+        medication_form:
+          $ref: '#/components/schemas/MedicationForm'
+        administration_route:
+          $ref: '#/components/schemas/AdministrationRoute'
+        instructions:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        prescriber_name:
+          anyOf:
+          - type: string
+            maxLength: 120
+          - type: 'null'
+        prescriber_crm:
+          anyOf:
+          - type: string
+            maxLength: 13
+          - type: 'null'
+        start_date:
+          $ref: '#/components/schemas/Date'
+        end_date:
+          anyOf:
+          - $ref: '#/components/schemas/Date'
+          - type: 'null'
+        schedule_times:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalTime'
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+        row_version:
+          $ref: '#/components/schemas/RowVersion'
+        created_at:
+          $ref: '#/components/schemas/Instant'
+        updated_at:
+          $ref: '#/components/schemas/Instant'
+      required:
+      - plan_id
+      - status
+      - medication_name
+      - dose_text
+      - medication_form
+      - administration_route
+      - start_date
+      - schedule_times
+      - row_version
+      - created_at
+      - updated_at
+    PlanPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plan'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+      required:
+      - items
+      - page
+    DuplicateCandidate:
+      type: object
+      additionalProperties: false
+      properties:
+        plan_id:
+          $ref: '#/components/schemas/Uuid'
+        medication_name:
+          type: string
+          maxLength: 120
+        dose_text:
+          type: string
+          maxLength: 80
+      required:
+      - plan_id
+      - medication_name
+      - dose_text
+    DuplicateConfirmation:
+      type: object
+      additionalProperties: false
+      properties:
+        confirmation_token:
+          type: string
+          minLength: 16
+          maxLength: 256
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/DuplicateCandidate'
+          minItems: 1
+          maxItems: 20
+      required:
+      - confirmation_token
+      - candidates
+    OccurrenceStatus:
+      type: string
+      enum:
+      - PROGRAMMED
+      - NO_RESPONSE
+      - TAKEN
+      - NOT_TAKEN
+      - CANCELED
+    Occurrence:
+      type: object
+      additionalProperties: false
+      properties:
+        occurrence_id:
+          $ref: '#/components/schemas/Uuid'
+        plan_id:
+          $ref: '#/components/schemas/Uuid'
+        local_scheduled_date:
+          $ref: '#/components/schemas/Date'
+        local_time:
+          $ref: '#/components/schemas/LocalTime'
+        scheduled_at:
+          $ref: '#/components/schemas/Instant'
+        deadline_at:
+          $ref: '#/components/schemas/Instant'
+        status:
+          $ref: '#/components/schemas/OccurrenceStatus'
+        medication_name_snapshot:
+          type: string
+          maxLength: 120
+        dose_text_snapshot:
+          type: string
+          maxLength: 80
+        is_late:
+          type: boolean
+        no_response_reached_at:
+          anyOf:
+          - $ref: '#/components/schemas/Instant'
+          - type: 'null'
+        row_version:
+          $ref: '#/components/schemas/RowVersion'
+      required:
+      - occurrence_id
+      - plan_id
+      - local_scheduled_date
+      - local_time
+      - scheduled_at
+      - deadline_at
+      - status
+      - medication_name_snapshot
+      - dose_text_snapshot
+      - is_late
+      - no_response_reached_at
+      - row_version
+    OccurrencePage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Occurrence'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+      required:
+      - items
+      - page
+    ResponseType:
+      type: string
+      enum:
+      - TAKEN
+      - NOT_TAKEN
+    NotTakenReason:
+      type: string
+      enum:
+      - FORGOT
+      - UNAVAILABLE
+      - SIDE_EFFECT_CONCERN
+      - CHOSE_NOT_TO_TAKE
+      - OTHER
+    CreateResponseRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          $ref: '#/components/schemas/ResponseType'
+        reason:
+          anyOf:
+          - $ref: '#/components/schemas/NotTakenReason'
+          - type: 'null'
+      required:
+      - type
+      - reason
+      allOf:
+      - if:
+          properties:
+            type:
+              const: TAKEN
+        then:
+          properties:
+            reason:
+              type: 'null'
+      - if:
+          properties:
+            type:
+              const: NOT_TAKEN
+        then: {}
+    Response:
+      type: object
+      additionalProperties: false
+      properties:
+        response_id:
+          $ref: '#/components/schemas/Uuid'
+        occurrence_id:
+          $ref: '#/components/schemas/Uuid'
+        type:
+          $ref: '#/components/schemas/ResponseType'
+        reason:
+          anyOf:
+          - $ref: '#/components/schemas/NotTakenReason'
+          - type: 'null'
+        captured_at:
+          $ref: '#/components/schemas/Instant'
+        is_late:
+          type: boolean
+      required:
+      - response_id
+      - occurrence_id
+      - type
+      - reason
+      - captured_at
+      - is_late
+    HistoryItem:
+      type: object
+      additionalProperties: false
+      properties:
+        occurrence:
+          $ref: '#/components/schemas/Occurrence'
+        response:
+          anyOf:
+          - $ref: '#/components/schemas/Response'
+          - type: 'null'
+      required:
+      - occurrence
+      - response
+    HistoryPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryItem'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+      required:
+      - items
+      - page
+    ExportStatus:
+      type: string
+      enum:
+      - REQUESTED
+      - PROCESSING
+      - COMPLETED
+      - FAILED
+      - EXPIRED
+      - CANCELED
+    CreateExportRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        start_date:
+          $ref: '#/components/schemas/Date'
+        end_date:
+          $ref: '#/components/schemas/Date'
+      required:
+      - start_date
+      - end_date
+    ExportRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        export_id:
+          $ref: '#/components/schemas/Uuid'
+        status:
+          $ref: '#/components/schemas/ExportStatus'
+        start_date:
+          $ref: '#/components/schemas/Date'
+        end_date:
+          $ref: '#/components/schemas/Date'
+        requested_at:
+          $ref: '#/components/schemas/Instant'
+        completed_at:
+          anyOf:
+          - $ref: '#/components/schemas/Instant'
+          - type: 'null'
+        expires_at:
+          anyOf:
+          - $ref: '#/components/schemas/Instant'
+          - type: 'null'
+        failure_reason:
+          anyOf:
+          - type: string
+            enum:
+            - TECHNICAL_FAILURE
+            - ACCOUNT_NOT_ACTIVE
+          - type: 'null'
+      required:
+      - export_id
+      - status
+      - start_date
+      - end_date
+      - requested_at
+      - completed_at
+      - expires_at
+      - failure_reason
+    AccessibilityPreferences:
+      type: object
+      additionalProperties: false
+      properties:
+        text_scale:
+          type: integer
+          enum:
+          - 100
+          - 125
+          - 150
+          - 175
+          - 200
+        high_contrast:
+          type: boolean
+      required:
+      - text_scale
+      - high_contrast
+    PrivacySummary:
+      type: object
+      additionalProperties: false
+      properties:
+        automated_rights:
+          type: array
+          items:
+            type: string
+            enum:
+            - ACCESS_HISTORY
+            - EXPORT_PDF
+            - DELETE_ACCOUNT
+          uniqueItems: true
+        external_channel:
+          type: string
+          format: uri
+        retention:
+          type: object
+          additionalProperties: false
+          properties:
+            pdf_hours:
+              const: 24
+            idempotency_days:
+              const: 7
+            technical_logs_days:
+              const: 30
+            account_purge_days:
+              const: 30
+            tombstone_days:
+              const: 180
+          required:
+          - pdf_hours
+          - idempotency_days
+          - technical_logs_days
+          - account_purge_days
+          - tombstone_days
+      required:
+      - automated_rights
+      - external_channel
+      - retention
+    DeleteAccountRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 72
+          writeOnly: true
+        confirmation:
+          const: EXCLUIR MINHA CONTA
+      required:
+      - password
+      - confirmation
+    DeletionRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        deletion_request_id:
+          $ref: '#/components/schemas/Uuid'
+        status:
+          const: DELETION_SCHEDULED
+        requested_at:
+          $ref: '#/components/schemas/Instant'
+        purge_due_at:
+          $ref: '#/components/schemas/Instant'
+      required:
+      - deletion_request_id
+      - status
+      - requested_at
+      - purge_due_at
+    Health:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+          - UP
+          - DEGRADED
+          - DOWN
+        time:
+          $ref: '#/components/schemas/Instant'
+      required:
+      - status
+      - time
+    AccountProfile:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/Uuid'
+        name:
+          type: string
+          maxLength: 120
+        email:
+          $ref: '#/components/schemas/Email'
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+        account_timezone:
+          $ref: '#/components/schemas/Timezone'
+        created_at:
+          $ref: '#/components/schemas/Instant'
+      required:
+      - user_id
+      - name
+      - email
+      - status
+      - account_timezone
+      - created_at
+    UpdateAccountRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+      required:
+      - name
+  responses:
+    BadRequest:
+      description: Requisicao invalida
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/validation_failed
+            title: Requisicao invalida
+            status: 400
+            code: VALIDATION_FAILED
+            detail: Requisicao invalida
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111
+    Unauthorized:
+      description: Autenticacao obrigatoria
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/authentication_required
+            title: Autenticacao obrigatoria
+            status: 401
+            code: AUTHENTICATION_REQUIRED
+            detail: Autenticacao obrigatoria
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111
+    NotFound:
+      description: Recurso nao encontrado
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/resource_not_found
+            title: Recurso nao encontrado
+            status: 404
+            code: RESOURCE_NOT_FOUND
+            detail: Recurso nao encontrado
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111
+    Conflict:
+      description: Conflito de estado
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/state_conflict
+            title: Conflito de estado
+            status: 409
+            code: STATE_CONFLICT
+            detail: Conflito de estado
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111
+    Gone:
+      description: Recurso expirado ou inutilizavel
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/resource_expired
+            title: Recurso expirado ou inutilizavel
+            status: 410
+            code: RESOURCE_EXPIRED
+            detail: Recurso expirado ou inutilizavel
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111
+    Locked:
+      description: Conta temporariamente bloqueada
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/account_temporarily_locked
+            title: Conta temporariamente bloqueada
+            status: 423
+            code: ACCOUNT_TEMPORARILY_LOCKED
+            detail: Conta temporariamente bloqueada
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111
+    Unprocessable:
+      description: Regra de negocio violada
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/business_rule_violation
+            title: Regra de negocio violada
+            status: 422
+            code: BUSINESS_RULE_VIOLATION
+            detail: Regra de negocio violada
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111
+    RateLimited:
+      description: Limite excedido
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/rate_limited
+            title: Limite excedido
+            status: 429
+            code: RATE_LIMITED
+            detail: Limite excedido
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111
+    Unavailable:
+      description: Dependencia indisponivel
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/dependency_unavailable
+            title: Dependencia indisponivel
+            status: 503
+            code: DEPENDENCY_UNAVAILABLE
+            detail: Dependencia indisponivel
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111

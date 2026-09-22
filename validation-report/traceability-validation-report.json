@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "generated_at_utc": "2026-09-22T23:25:10.052853+00:00",
+  "github": {
+    "repository": null,
+    "workflow": null,
+    "run_id": null,
+    "run_number": null,
+    "sha": null,
+    "ref": null
+  },
+  "matrix_version": "2.0.0",
+  "schema_validation": {
+    "status": "PASS",
+    "errors": []
+  },
+  "semantic_validation": {
+    "status": "PASS",
+    "errors": [],
+    "counts": {
+      "requirements": 12,
+      "non_functional_requirements": 15,
+      "business_rules": 15,
+      "entities": 17,
+      "flows": 4,
+      "screen_states": 8,
+      "user_stories": 8,
+      "acceptance_criteria": 14,
+      "errors": 12,
+      "sentinel_tests": 40,
+      "decisions": 10,
+      "approved_questions": 4,
+      "production_gates": 6,
+      "operations": 27
+    }
+  },
+  "semantic_stderr": null
+}

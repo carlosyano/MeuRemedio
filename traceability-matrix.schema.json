@@ -1,0 +1,376 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meuremedio.invalid/schemas/traceability-matrix.schema.json",
+  "title": "MeuRemedio Traceability Matrix",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "matrix_version",
+    "status",
+    "generated_from",
+    "governance",
+    "requirements",
+    "non_functional_requirements",
+    "acceptance_criteria",
+    "sentinel_tests",
+    "operations",
+    "errors",
+    "production_gates",
+    "trace_links",
+    "validator",
+    "catalog_completeness",
+    "business_rules",
+    "entities",
+    "flows",
+    "screen_states",
+    "user_stories",
+    "decisions",
+    "approved_questions",
+    "source_catalogs"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "matrix_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "generated_from": {
+      "type": "object",
+      "required": [
+        "source_integrity"
+      ],
+      "properties": {
+        "source_integrity": {
+          "type": "object",
+          "required": [
+            "algorithm",
+            "artifacts"
+          ],
+          "properties": {
+            "algorithm": {
+              "const": "sha256"
+            },
+            "artifacts": {
+              "type": "object",
+              "minProperties": 4,
+              "additionalProperties": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "sha256"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "minProperties": 12,
+      "propertyNames": {
+        "pattern": "^RF-\\d{3}$"
+      }
+    },
+    "non_functional_requirements": {
+      "type": "object",
+      "minProperties": 15,
+      "propertyNames": {
+        "pattern": "^RNF-\\d{3}$"
+      },
+      "maxProperties": 15
+    },
+    "acceptance_criteria": {
+      "type": "object",
+      "minProperties": 14,
+      "propertyNames": {
+        "pattern": "^CA-\\d{3}$"
+      }
+    },
+    "sentinel_tests": {
+      "type": "object",
+      "minProperties": 40,
+      "propertyNames": {
+        "pattern": "^TS-\\d{3}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "title",
+          "priority",
+          "test_artifacts",
+          "mapping_provenance"
+        ],
+        "properties": {
+          "test_artifacts": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/testArtifact"
+            }
+          }
+        }
+      }
+    },
+    "operations": {
+      "type": "object",
+      "minProperties": 27,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "method",
+          "path",
+          "security",
+          "security_requirements",
+          "response_statuses",
+          "mapping_provenance"
+        ],
+        "properties": {
+          "method": {
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE",
+              "PATCH",
+              "HEAD",
+              "OPTIONS",
+              "TRACE"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^/"
+          },
+          "ownership_test": {
+            "type": "object",
+            "required": [
+              "required",
+              "acceptance_criterion",
+              "sentinel_tests",
+              "test_artifact",
+              "status"
+            ]
+          }
+        }
+      }
+    },
+    "errors": {
+      "type": "object",
+      "minProperties": 12,
+      "propertyNames": {
+        "pattern": "^ERR-\\d{3}$"
+      }
+    },
+    "production_gates": {
+      "type": "object",
+      "minProperties": 6,
+      "propertyNames": {
+        "pattern": "^GX-\\d{3}$"
+      }
+    },
+    "trace_links": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "relationship",
+          "provenance"
+        ],
+        "properties": {
+          "provenance": {
+            "type": "object",
+            "required": [
+              "source",
+              "location",
+              "mapping_type"
+            ]
+          }
+        }
+      }
+    },
+    "validator": {
+      "type": "object",
+      "required": [
+        "schema",
+        "executable",
+        "ci_command",
+        "fail_on"
+      ]
+    },
+    "catalog_completeness": {
+      "type": "object",
+      "minProperties": 13,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "authoritative_source",
+          "expected_ids",
+          "actual_ids",
+          "status"
+        ],
+        "properties": {
+          "expected_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "actual_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "status": {
+            "const": "complete"
+          }
+        }
+      }
+    },
+    "business_rules": {
+      "type": "object",
+      "minProperties": 15,
+      "maxProperties": 15,
+      "propertyNames": {
+        "pattern": "^RN-\\d{3}$"
+      }
+    },
+    "entities": {
+      "type": "object",
+      "minProperties": 17,
+      "maxProperties": 17,
+      "propertyNames": {
+        "pattern": "^ENT-\\d{3}$"
+      }
+    },
+    "flows": {
+      "type": "object",
+      "minProperties": 4,
+      "maxProperties": 4,
+      "propertyNames": {
+        "pattern": "^FL-\\d{3}$"
+      }
+    },
+    "screen_states": {
+      "type": "object",
+      "minProperties": 8,
+      "maxProperties": 8,
+      "propertyNames": {
+        "pattern": "^TL-\\d{3}$"
+      }
+    },
+    "user_stories": {
+      "type": "object",
+      "minProperties": 8,
+      "maxProperties": 8,
+      "propertyNames": {
+        "pattern": "^US-\\d{3}$"
+      }
+    },
+    "decisions": {
+      "type": "object",
+      "minProperties": 10,
+      "maxProperties": 10,
+      "propertyNames": {
+        "pattern": "^DEC-\\d{3}$"
+      }
+    },
+    "approved_questions": {
+      "type": "object",
+      "minProperties": 4,
+      "maxProperties": 4,
+      "propertyNames": {
+        "pattern": "^Q-\\d{3}$"
+      }
+    },
+    "source_catalogs": {
+      "type": "object",
+      "required": [
+        "requirements_source",
+        "non_functional_requirements_source",
+        "acceptance_criteria_source",
+        "errors_source",
+        "sentinel_tests_source",
+        "production_gates_source"
+      ],
+      "additionalProperties": {
+        "type": "object",
+        "minProperties": 1
+      }
+    }
+  },
+  "$defs": {
+    "testArtifact": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "level",
+        "owner",
+        "status",
+        "evidence",
+        "last_execution"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^tests/"
+        },
+        "level": {
+          "enum": [
+            "unit",
+            "integration",
+            "api",
+            "e2e",
+            "security",
+            "performance",
+            "contract",
+            "accessibility",
+            "mutation"
+          ]
+        },
+        "status": {
+          "enum": [
+            "planned",
+            "implemented",
+            "passing",
+            "failing",
+            "blocked"
+          ]
+        },
+        "evidence": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_execution": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

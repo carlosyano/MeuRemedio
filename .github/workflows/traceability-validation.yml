@@ -1,0 +1,96 @@
+name: Validate traceability baseline
+
+on:
+  pull_request:
+    paths:
+      - "traceability-matrix.yaml"
+      - "traceability-matrix.schema.json"
+      - "traceability-check.py"
+      - "validate_all.py"
+      - "requirements-validation.txt"
+      - "MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml"
+      - "MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx"
+      - "ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx"
+      - "AGENTS.md"
+      - ".github/workflows/traceability-validation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "traceability-matrix.yaml"
+      - "traceability-matrix.schema.json"
+      - "traceability-check.py"
+      - "validate_all.py"
+      - "requirements-validation.txt"
+      - "MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml"
+      - "MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx"
+      - "ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx"
+      - "AGENTS.md"
+      - ".github/workflows/traceability-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: traceability-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Schema and semantic validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements-validation.txt
+
+      - name: Install validation dependencies
+        run: python -m pip install -r requirements-validation.txt
+
+      - name: Verify required artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          required_files=(
+            "traceability-matrix.yaml"
+            "traceability-matrix.schema.json"
+            "traceability-check.py"
+            "validate_all.py"
+            "MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml"
+            "MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx"
+            "ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx"
+            "AGENTS.md"
+          )
+          for file in "${required_files[@]}"; do
+            test -f "$file" || { echo "Missing required artifact: $file"; exit 1; }
+          done
+
+      - name: Run validators and generate report
+        id: validation
+        continue-on-error: true
+        run: python validate_all.py
+
+      - name: Publish report as workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: traceability-validation-report-${{ github.run_number }}
+          path: validation-report/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce validation result
+        if: always() && steps.validation.outcome != 'success'
+        shell: bash
+        run: |
+          echo "Traceability validation failed. Read the job summary or download the published report."
+          exit 1

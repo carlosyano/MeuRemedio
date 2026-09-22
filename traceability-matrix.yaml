@@ -1,0 +1,5821 @@
+schema_version: 1.0.0
+matrix_version: 2.0.0
+status: baseline-development-and-testing
+generated_from:
+  functional_specification: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+  functional_specification_version: '02.32'
+  openapi: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+  openapi_version: 02.33.1
+  architecture: ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx
+  architecture_version: '1.4'
+  agents_policy: AGENTS.md
+  agents_policy_version: '1.2'
+  source_integrity:
+    algorithm: sha256
+    artifacts:
+      functional_specification:
+        file: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        sha256: 39000725070d6279c896bb39d841c365e6a780a60350c0d12de507bb588fb989
+      openapi:
+        file: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+        sha256: dde4471d3d57929b858ca6f7a01b03496273945b8cf2affeddfec8e2abb61f1e
+      architecture:
+        file: ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx
+        sha256: d1459150cebebe8e90bfba6741f24c859b156b62d943e9f1e93fe643478bccd3
+      agents_policy:
+        file: AGENTS.md
+        sha256: 6913560d99da4c449880c0410dd3c44ba8c01b0fd45cb8434cead37f9f6aa0ed
+governance:
+  http_source_of_truth: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+  functional_source_of_truth: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+  architecture_source_of_truth: ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx
+  production_authorization: blocked-until-GX-001-through-GX-006-closed
+  required_gates:
+  - QG-001
+  - QG-002
+  - QG-003
+  - QG-004
+  - QG-005
+  - QG-006
+  - QG-007
+  - QG-008
+  - QG-009
+  - QG-010
+  - QG-011
+  - QG-012
+requirements:
+  RF-001:
+    title: RN-001..005
+    rn:
+    - RN-001
+    - RN-002
+    - RN-003
+    - RN-004
+    - RN-005
+    entities:
+    - ENT-001
+    - ENT-002
+    - ENT-003
+    flows:
+    - FL-001
+    user_stories:
+    - US-001
+    acceptance_criteria:
+    - CA-001
+    - CA-002
+    sentinel_tests:
+    - TS-009
+    - TS-018
+    - TS-021
+    - TS-028
+    - TS-033
+    - TS-036
+    - TS-038
+    operationIds:
+    - createAccount
+    - getCurrentAccount
+    - resendVerification
+    - updateCurrentAccount
+    - verifyAccount
+    test_levels:
+    - contract
+    - integration
+    - e2e
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-002:
+    title: Autenticar, encerrar sessão, recuperar senha e limitar sessões.
+    rn:
+    - RN-003
+    - RN-004
+    - RN-005
+    entities:
+    - ENT-001
+    - ENT-003
+    - ENT-004
+    flows:
+    - FL-001
+    user_stories:
+    - US-002
+    acceptance_criteria:
+    - CA-003
+    - CA-004
+    sentinel_tests:
+    - TS-009
+    - TS-018
+    - TS-021
+    - TS-033
+    - TS-036
+    - TS-038
+    operationIds:
+    - confirmPasswordReset
+    - createSession
+    - deleteCurrentSession
+    - requestPasswordReset
+    - revokeAllSessions
+    test_levels:
+    - contract
+    - integration
+    - e2e
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-003:
+    title: RN-006,013
+    rn:
+    - RN-006
+    - RN-013
+    entities:
+    - ENT-005
+    - ENT-006
+    - ENT-007
+    flows:
+    - FL-002
+    user_stories:
+    - US-003
+    acceptance_criteria:
+    - CA-005
+    - CA-006
+    sentinel_tests:
+    - TS-003
+    - TS-004
+    - TS-005
+    - TS-014
+    - TS-015
+    - TS-027
+    - TS-037
+    - TS-038
+    operationIds:
+    - createPlan
+    - deletePlan
+    - getPlan
+    - listPlans
+    - updatePlan
+    test_levels:
+    - contract
+    - integration
+    - e2e
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-004:
+    title: Gerar ocorrências por horizonte móvel de 30 dias.
+    rn:
+    - RN-007
+    - RN-009
+    - RN-013
+    entities:
+    - ENT-005
+    - ENT-006
+    - ENT-007
+    - ENT-012
+    flows:
+    - FL-003
+    user_stories:
+    - US-004
+    acceptance_criteria:
+    - CA-008
+    sentinel_tests:
+    - TS-002
+    - TS-003
+    - TS-006
+    - TS-013
+    - TS-014
+    - TS-016
+    - TS-017
+    - TS-024
+    - TS-034
+    - TS-035
+    operationIds:
+    - listOccurrences
+    test_levels:
+    - contract
+    - integration
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-005:
+    title: Exibir lembrete web em página ativa e enviar e-mail minimizado.
+    rn:
+    - RN-007
+    - RN-009
+    - RN-014
+    entities:
+    - ENT-007
+    - ENT-009
+    - ENT-012
+    flows:
+    - FL-003
+    - FL-004
+    user_stories:
+    - US-005
+    acceptance_criteria:
+    - CA-008
+    - CA-014
+    sentinel_tests:
+    - TS-002
+    - TS-006
+    - TS-016
+    - TS-017
+    - TS-019
+    - TS-034
+    - TS-035
+    operationIds:
+    - listOccurrences
+    test_levels:
+    - contract
+    - integration
+    - e2e
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-006:
+    title: RN-008,009
+    rn:
+    - RN-008
+    - RN-009
+    entities:
+    - ENT-007
+    - ENT-008
+    - ENT-011
+    flows:
+    - FL-003
+    user_stories:
+    - US-006
+    acceptance_criteria:
+    - CA-007
+    - CA-013
+    sentinel_tests:
+    - TS-001
+    - TS-007
+    - TS-013
+    - TS-015
+    - TS-025
+    - TS-038
+    operationIds:
+    - createResponse
+    test_levels:
+    - contract
+    - integration
+    - e2e
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-007:
+    title: Consultar histórico por período civil de até 12 meses.
+    rn:
+    - RN-010
+    - RN-013
+    entities:
+    - ENT-007
+    - ENT-008
+    flows: []
+    user_stories:
+    - US-007
+    acceptance_criteria:
+    - CA-009
+    sentinel_tests:
+    - TS-008
+    - TS-023
+    operationIds:
+    - getHistory
+    test_levels:
+    - contract
+    - integration
+    - e2e
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-008:
+    title: Gerar e baixar PDF declaratório privado.
+    rn:
+    - RN-011
+    entities:
+    - ENT-010
+    - ENT-012
+    flows: []
+    user_stories:
+    - US-007
+    acceptance_criteria:
+    - CA-010
+    - CA-011
+    sentinel_tests:
+    - TS-011
+    - TS-020
+    - TS-023
+    - TS-038
+    operationIds:
+    - cancelExport
+    - createExport
+    - downloadExport
+    - getExport
+    test_levels:
+    - contract
+    - integration
+    - e2e
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-009:
+    title: Persistir preferências de acessibilidade.
+    rn: []
+    entities:
+    - ENT-001
+    flows: []
+    user_stories: []
+    acceptance_criteria: []
+    sentinel_tests:
+    - TS-022
+    operationIds:
+    - updateAccessibilityPreferences
+    test_levels:
+    - contract
+    - integration
+    - e2e
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-010:
+    title: RN-012
+    rn:
+    - RN-012
+    entities:
+    - ENT-001
+    - ENT-014
+    flows:
+    - FL-001
+    user_stories:
+    - US-008
+    acceptance_criteria:
+    - CA-014
+    sentinel_tests:
+    - TS-026
+    - TS-028
+    - TS-029
+    - TS-034
+    - TS-038
+    operationIds:
+    - getPrivacy
+    - requestAccountDeletion
+    test_levels:
+    - contract
+    - integration
+    - e2e
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-011:
+    title: Receber solicitações externas de direitos por canal aprovado.
+    rn:
+    - RN-012
+    entities:
+    - ENT-016
+    flows: []
+    user_stories: []
+    acceptance_criteria: []
+    sentinel_tests:
+    - TS-032
+    operationIds:
+    - getPrivacy
+    test_levels:
+    - contract
+    - integration
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+  RF-012:
+    title: Registrar e tratar incidentes de segurança.
+    rn: []
+    entities:
+    - ENT-015
+    flows: []
+    user_stories: []
+    acceptance_criteria: []
+    sentinel_tests:
+    - TS-030
+    operationIds: []
+    test_levels:
+    - contract
+    - integration
+    quality_gates:
+    - QG-001
+    - QG-004
+    - QG-011
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seções 6 a 8
+      mapping_type: explicit-source-and-openapi
+non_functional_requirements:
+  RNF-001:
+    title: WCAG 2.2 AA nas telas essenciais; teclado, foco, semântica e zoom 200% em 320 CSS px.
+    tests:
+    - TS-022
+    gates:
+    - QG-008
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-002:
+    title: TLS 1.3 em trânsito; criptografia em repouso AES-256 ou serviço gerenciado equivalente.
+    tests:
+    - TS-031
+    gates:
+    - QG-005
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-003:
+    title: RBAC e ownership server-side em 100% das rotas privadas.
+    tests:
+    - TS-008
+    - TS-023
+    gates:
+    - QG-009
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-004:
+    title: p95 interativo <=2 s sob PerformanceProfile aprovado.
+    tests:
+    - TS-039
+    gates: []
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-005:
+    title: p95 de exportação <=30 s sob PerformanceProfile aprovado.
+    tests:
+    - TS-039
+    gates: []
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-006:
+    title: 'Rate limit: 100 req/min por usuário autenticado e 20 req/min por IP em rotas públicas.'
+    tests:
+    - TS-033
+    gates:
+    - QG-005
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-007:
+    title: Timeout externo padrão de 30 s; retries 1 s, 2 s e 4 s apenas para operações idempotentes.
+    tests:
+    - TS-010
+    - TS-013
+    - TS-017
+    - TS-035
+    gates:
+    - QG-004
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-008:
+    title: Logs estruturados sem senha, token, e-mail completo ou conteúdo de saúde.
+    tests:
+    - TS-030
+    - TS-032
+    gates:
+    - QG-005
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-009:
+    title: SAST, SCA, DAST e secret scan; nenhum achado crítico/alto aberto.
+    tests: []
+    gates:
+    - QG-005
+    - QG-006
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-010:
+    title: Datas UTC ISO 8601; dinheiro decimal exato; UTF-8; paginação 20, máximo 100.
+    tests:
+    - TS-024
+    - TS-039
+    gates:
+    - QG-001
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-011:
+    title: Backups criptografados; restore reconciliado com tombstones.
+    tests:
+    - TS-029
+    gates:
+    - QG-004
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-012:
+    title: Chaves em serviço dedicado, rotação e menor privilégio.
+    tests:
+    - TS-031
+    gates:
+    - QG-005
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-013:
+    title: SBOM e bloqueio de vulnerabilidades críticas/altas.
+    tests: []
+    gates:
+    - QG-006
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-014:
+    title: OpenAPI validado contra implementação e testes de contrato.
+    tests:
+    - TS-040
+    gates:
+    - QG-001
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-015:
+    title: Relógios sincronizados; desvio acima do limite configurado bloqueia decisões temporais críticas.
+    tests:
+    - TS-024
+    gates:
+    - QG-004
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+acceptance_criteria:
+  CA-001:
+    title: Criar conta PENDING_VERIFICATION e token de 24 h
+    operationIds:
+    - createAccount
+    functional_requirements:
+    - RF-001
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-002:
+    title: Consumir token e ativar conta atomicamente
+    operationIds:
+    - verifyAccount
+    functional_requirements:
+    - RF-001
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-003:
+    title: Criar terceira sessão e rejeitar quarta
+    operationIds:
+    - createSession
+    functional_requirements:
+    - RF-001
+    - RF-002
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-004:
+    title: Bloquear login após cinco falhas
+    operationIds:
+    - createSession
+    functional_requirements:
+    - RF-001
+    - RF-002
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-005:
+    title: Criar plano com horários únicos e horizonte sem duplicata
+    operationIds:
+    - createPlan
+    functional_requirements:
+    - RF-003
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-006:
+    title: Editar plano com concorrência otimista e VERSION_CONFLICT
+    operationIds:
+    - updatePlan
+    functional_requirements:
+    - RF-003
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-007:
+    title: Aceitar exatamente uma resposta concorrente
+    operationIds:
+    - createResponse
+    functional_requirements:
+    - RF-006
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-008:
+    title: Transicionar uma vez para NO_RESPONSE após prazo
+    operationIds: []
+    functional_requirements:
+    - RF-004
+    - RF-005
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-009:
+    title: Consultar histórico do titular em período civil
+    operationIds:
+    - getHistory
+    functional_requirements:
+    - RF-007
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-010:
+    title: Gerar PDF privado pesquisável com expiração
+    operationIds:
+    - createExport
+    functional_requirements:
+    - RF-008
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-011:
+    title: Negar download de PDF expirado
+    operationIds:
+    - downloadExport
+    functional_requirements:
+    - RF-008
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-012:
+    title: Retornar 404 em acesso horizontal
+    operationIds: []
+    functional_requirements: []
+    non_functional_requirements:
+    - RNF-003
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-013:
+    title: Repetir mutação idempotente e devolver snapshot original
+    operationIds:
+    - createResponse
+    functional_requirements:
+    - RF-006
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-014:
+    title: Suprimir efeitos externos após exclusão agendada
+    operationIds:
+    - requestAccountDeletion
+    functional_requirements:
+    - RF-005
+    - RF-010
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+sentinel_tests:
+  TS-001:
+    title: Concorrência TAKEN x NOT_TAKEN
+    requirements:
+    - RF-006
+    operationIds:
+    - createResponse
+    priority: P0
+    test_artifacts:
+    - id: TS-001-PRIMARY
+      path: tests/integration/ts-001.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-002:
+    title: Falha de e-mail
+    requirements:
+    - RF-004
+    - RF-005
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-002-PRIMARY
+      path: tests/integration/ts-002.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-003:
+    title: Reexecução do gerador
+    requirements:
+    - RF-003
+    - RF-004
+    operationIds:
+    - createPlan
+    priority: scope
+    test_artifacts:
+    - id: TS-003-PRIMARY
+      path: tests/integration/ts-003.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-004:
+    title: Edição de plano
+    requirements:
+    - RF-003
+    operationIds:
+    - updatePlan
+    priority: scope
+    test_artifacts:
+    - id: TS-004-PRIMARY
+      path: tests/integration/ts-004.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-005:
+    title: Exclusão lógica
+    requirements:
+    - RF-003
+    operationIds:
+    - deletePlan
+    priority: scope
+    test_artifacts:
+    - id: TS-005-PRIMARY
+      path: tests/integration/ts-005.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-006:
+    title: Prazo sem canais
+    requirements:
+    - RF-004
+    - RF-005
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-006-PRIMARY
+      path: tests/integration/ts-006.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-007:
+    title: Resposta tardia
+    requirements:
+    - RF-006
+    operationIds:
+    - createResponse
+    priority: scope
+    test_artifacts:
+    - id: TS-007-PRIMARY
+      path: tests/integration/ts-007.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-008:
+    title: Acesso horizontal
+    requirements:
+    - RF-007
+    operationIds:
+    - getPlan
+    priority: scope
+    test_artifacts:
+    - id: TS-008-PRIMARY
+      path: tests/e2e/ts-008.spec.ts
+      level: e2e
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-009:
+    title: Token usado ou expirado
+    requirements:
+    - RF-001
+    - RF-002
+    operationIds:
+    - confirmPasswordReset
+    - verifyAccount
+    priority: scope
+    test_artifacts:
+    - id: TS-009-PRIMARY
+      path: tests/integration/ts-009.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-010:
+    title: Servidor indisponível
+    requirements: []
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-010-PRIMARY
+      path: tests/e2e/ts-010.spec.ts
+      level: e2e
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-011:
+    title: PDF expirado
+    requirements:
+    - RF-008
+    operationIds:
+    - downloadExport
+    priority: scope
+    test_artifacts:
+    - id: TS-011-PRIMARY
+      path: tests/e2e/ts-011.spec.ts
+      level: e2e
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-012:
+    title: CRM somente formato
+    requirements: []
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-012-PRIMARY
+      path: tests/security/ts-012.spec.ts
+      level: security
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-013:
+    title: Resposta versus prazo
+    requirements:
+    - RF-004
+    - RF-006
+    operationIds:
+    - createResponse
+    priority: scope
+    test_artifacts:
+    - id: TS-013-PRIMARY
+      path: tests/integration/ts-013.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-014:
+    title: Gerador versus edição
+    requirements:
+    - RF-003
+    - RF-004
+    operationIds:
+    - updatePlan
+    priority: scope
+    test_artifacts:
+    - id: TS-014-PRIMARY
+      path: tests/integration/ts-014.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-015:
+    title: Idempotência divergente
+    requirements:
+    - RF-003
+    - RF-006
+    operationIds:
+    - createPlan
+    priority: P0
+    test_artifacts:
+    - id: TS-015-PRIMARY
+      path: tests/integration/ts-015.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-016:
+    title: Dispatcher ou broker indisponível
+    requirements:
+    - RF-004
+    - RF-005
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-016-PRIMARY
+      path: tests/integration/ts-016.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-017:
+    title: Retomada de worker
+    requirements:
+    - RF-004
+    - RF-005
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-017-PRIMARY
+      path: tests/integration/ts-017.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-018:
+    title: Quarta sessão
+    requirements:
+    - RF-001
+    - RF-002
+    operationIds:
+    - createSession
+    priority: scope
+    test_artifacts:
+    - id: TS-018-PRIMARY
+      path: tests/integration/ts-018.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-019:
+    title: Link sem sessão
+    requirements:
+    - RF-005
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-019-PRIMARY
+      path: tests/e2e/ts-019.spec.ts
+      level: e2e
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-020:
+    title: Snapshot PDF
+    requirements:
+    - RF-008
+    operationIds:
+    - createExport
+    - downloadExport
+    priority: scope
+    test_artifacts:
+    - id: TS-020-PRIMARY
+      path: tests/e2e/ts-020.spec.ts
+      level: e2e
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-021:
+    title: Reenvio de verificação
+    requirements:
+    - RF-001
+    - RF-002
+    operationIds:
+    - resendVerification
+    priority: scope
+    test_artifacts:
+    - id: TS-021-PRIMARY
+      path: tests/integration/ts-021.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-022:
+    title: Acessibilidade
+    requirements:
+    - RF-009
+    operationIds:
+    - updateAccessibilityPreferences
+    priority: scope
+    test_artifacts:
+    - id: TS-022-PRIMARY
+      path: tests/e2e/ts-022.spec.ts
+      level: e2e
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-023:
+    title: BOLA e IDOR
+    requirements:
+    - RF-007
+    - RF-008
+    operationIds:
+    - downloadExport
+    priority: scope
+    test_artifacts:
+    - id: TS-023-PRIMARY
+      path: tests/e2e/ts-023.spec.ts
+      level: e2e
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-024:
+    title: DST
+    requirements:
+    - RF-004
+    operationIds: []
+    priority: P0
+    test_artifacts:
+    - id: TS-024-PRIMARY
+      path: tests/integration/ts-024.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-025:
+    title: Constraints
+    requirements:
+    - RF-006
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-025-PRIMARY
+      path: tests/integration/ts-025.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-026:
+    title: Exclusão de conta
+    requirements:
+    - RF-010
+    operationIds:
+    - requestAccountDeletion
+    priority: scope
+    test_artifacts:
+    - id: TS-026-PRIMARY
+      path: tests/e2e/ts-026.spec.ts
+      level: e2e
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-027:
+    title: Edição no instante
+    requirements:
+    - RF-003
+    operationIds:
+    - updatePlan
+    priority: scope
+    test_artifacts:
+    - id: TS-027-PRIMARY
+      path: tests/integration/ts-027.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-028:
+    title: Conta pendente antiga
+    requirements:
+    - RF-001
+    - RF-010
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-028-PRIMARY
+      path: tests/integration/ts-028.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-029:
+    title: Restore e tombstone
+    requirements:
+    - RF-010
+    operationIds:
+    - requestAccountDeletion
+    priority: scope
+    test_artifacts:
+    - id: TS-029-PRIMARY
+      path: tests/integration/ts-029.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-030:
+    title: Incidente de segurança
+    requirements:
+    - RF-012
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-030-PRIMARY
+      path: tests/security/ts-030.spec.ts
+      level: security
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-031:
+    title: Rotação de chave
+    requirements: []
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-031-PRIMARY
+      path: tests/security/ts-031.spec.ts
+      level: security
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-032:
+    title: Direito externo
+    requirements:
+    - RF-011
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-032-PRIMARY
+      path: tests/security/ts-032.spec.ts
+      level: security
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-033:
+    title: Bloqueio de login
+    requirements:
+    - RF-001
+    - RF-002
+    operationIds:
+    - createSession
+    priority: scope
+    test_artifacts:
+    - id: TS-033-PRIMARY
+      path: tests/security/ts-033.spec.ts
+      level: security
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-034:
+    title: Evento atrasado
+    requirements:
+    - RF-004
+    - RF-005
+    - RF-010
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-034-PRIMARY
+      path: tests/integration/ts-034.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-035:
+    title: Entrega incerta
+    requirements:
+    - RF-004
+    - RF-005
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-035-PRIMARY
+      path: tests/integration/ts-035.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-036:
+    title: Senha comprometida
+    requirements:
+    - RF-001
+    - RF-002
+    operationIds:
+    - confirmPasswordReset
+    priority: scope
+    test_artifacts:
+    - id: TS-036-PRIMARY
+      path: tests/security/ts-036.spec.ts
+      level: security
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-037:
+    title: Plano excluído
+    requirements:
+    - RF-003
+    operationIds:
+    - deletePlan
+    - getPlan
+    - listPlans
+    priority: scope
+    test_artifacts:
+    - id: TS-037-PRIMARY
+      path: tests/integration/ts-037.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-038:
+    title: Matriz de idempotência
+    requirements:
+    - RF-001
+    - RF-002
+    - RF-003
+    - RF-006
+    - RF-008
+    - RF-010
+    operationIds:
+    - createAccount
+    - createExport
+    - createPlan
+    - createResponse
+    - requestAccountDeletion
+    - updatePlan
+    priority: P0
+    test_artifacts:
+    - id: TS-038-PRIMARY
+      path: tests/integration/ts-038.spec.ts
+      level: integration
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-039:
+    title: Desempenho
+    requirements: []
+    operationIds: []
+    priority: scope
+    test_artifacts:
+    - id: TS-039-PRIMARY
+      path: tests/performance/ts-039.spec.ts
+      level: performance
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-040:
+    title: Contrato OpenAPI
+    requirements: []
+    operationIds: []
+    priority: P0
+    test_artifacts:
+    - id: TS-040-PRIMARY
+      path: tests/contract/ts-040.spec.ts
+      level: contract
+      owner: TBD-CODEOWNER
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 11: Testes Sentinela'
+operations:
+  createAccount:
+    method: POST
+    path: /accounts
+    summary: Criar conta
+    security: public
+    traceability:
+    - RF-001
+    - CA-001
+    - TS-038
+    requirements:
+    - RF-001
+    acceptance_criteria:
+    - CA-001
+    sentinel_tests:
+    - TS-038
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '201'
+    - '400'
+    - '409'
+    - '429'
+    - '503'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1accounts/post'
+  verifyAccount:
+    method: POST
+    path: /accounts/verify
+    summary: Verificar conta
+    security: public
+    traceability:
+    - RF-001
+    - CA-002
+    - TS-009
+    requirements:
+    - RF-001
+    acceptance_criteria:
+    - CA-002
+    sentinel_tests:
+    - TS-009
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '204'
+    - '400'
+    - '409'
+    - '410'
+    - '429'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1accounts~1verify/post'
+  resendVerification:
+    method: POST
+    path: /accounts/verification-resends
+    summary: Solicitar reenvio de verificacao
+    security: public
+    traceability:
+    - RF-001
+    - TS-021
+    requirements:
+    - RF-001
+    acceptance_criteria: []
+    sentinel_tests:
+    - TS-021
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '202'
+    - '400'
+    - '429'
+    - '503'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1accounts~1verification-resends/post'
+  requestPasswordReset:
+    method: POST
+    path: /password-reset-requests
+    summary: Solicitar redefinicao de senha
+    security: public
+    traceability:
+    - RF-002
+    requirements:
+    - RF-002
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '202'
+    - '400'
+    - '429'
+    - '503'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1password-reset-requests/post'
+  confirmPasswordReset:
+    method: POST
+    path: /password-resets
+    summary: Confirmar redefinicao de senha
+    security: public
+    traceability:
+    - RF-002
+    - TS-009
+    - TS-036
+    requirements:
+    - RF-002
+    acceptance_criteria: []
+    sentinel_tests:
+    - TS-009
+    - TS-036
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '204'
+    - '400'
+    - '409'
+    - '410'
+    - '429'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1password-resets/post'
+  createSession:
+    method: POST
+    path: /sessions
+    summary: Criar sessao
+    security: public
+    traceability:
+    - RF-002
+    - CA-003
+    - CA-004
+    - TS-018
+    - TS-033
+    requirements:
+    - RF-002
+    acceptance_criteria:
+    - CA-003
+    - CA-004
+    sentinel_tests:
+    - TS-018
+    - TS-033
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '201'
+    - '401'
+    - '423'
+    - '429'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1sessions/post'
+  deleteCurrentSession:
+    method: DELETE
+    path: /sessions/current
+    summary: Encerrar sessao atual
+    security: sessionCookie
+    traceability:
+    - RF-002
+    requirements:
+    - RF-002
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '204'
+    - '401'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1sessions~1current/delete'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/deleteCurrentSession.ownership.spec.ts
+      status: planned
+  getAccessibilityPreferences:
+    method: GET
+    path: /preferences/accessibility
+    summary: Consultar preferencias de acessibilidade
+    security: sessionCookie
+    traceability: []
+    requirements: []
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '401'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1preferences~1accessibility/get'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/getAccessibilityPreferences.ownership.spec.ts
+      status: planned
+  updateAccessibilityPreferences:
+    method: PUT
+    path: /preferences/accessibility
+    summary: Atualizar preferencias de acessibilidade
+    security: sessionCookie
+    traceability:
+    - RF-009
+    - TS-022
+    requirements:
+    - RF-009
+    acceptance_criteria: []
+    sentinel_tests:
+    - TS-022
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '400'
+    - '401'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1preferences~1accessibility/put'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/updateAccessibilityPreferences.ownership.spec.ts
+      status: planned
+  listPlans:
+    method: GET
+    path: /plans
+    summary: Listar planos ativos
+    security: sessionCookie
+    traceability:
+    - RF-003
+    - TS-037
+    requirements:
+    - RF-003
+    acceptance_criteria: []
+    sentinel_tests:
+    - TS-037
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '400'
+    - '401'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1plans/get'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/listPlans.ownership.spec.ts
+      status: planned
+  createPlan:
+    method: POST
+    path: /plans
+    summary: Criar plano
+    security: sessionCookie
+    traceability:
+    - RF-003
+    - CA-005
+    - TS-003
+    - TS-015
+    - TS-038
+    requirements:
+    - RF-003
+    acceptance_criteria:
+    - CA-005
+    sentinel_tests:
+    - TS-003
+    - TS-015
+    - TS-038
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '201'
+    - '400'
+    - '401'
+    - '409'
+    - '422'
+    - '429'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1plans/post'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/createPlan.ownership.spec.ts
+      status: planned
+  getPlan:
+    method: GET
+    path: /plans/{plan_id}
+    summary: Obter plano ativo
+    security: sessionCookie
+    traceability:
+    - RF-003
+    - TS-008
+    - TS-037
+    requirements:
+    - RF-003
+    acceptance_criteria: []
+    sentinel_tests:
+    - TS-008
+    - TS-037
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '401'
+    - '404'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1plans~1{plan_id}/get'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/getPlan.ownership.spec.ts
+      status: planned
+  updatePlan:
+    method: PUT
+    path: /plans/{plan_id}
+    summary: Editar plano
+    security: sessionCookie
+    traceability:
+    - RF-003
+    - CA-006
+    - TS-004
+    - TS-014
+    - TS-027
+    - TS-038
+    requirements:
+    - RF-003
+    acceptance_criteria:
+    - CA-006
+    sentinel_tests:
+    - TS-004
+    - TS-014
+    - TS-027
+    - TS-038
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '400'
+    - '401'
+    - '404'
+    - '409'
+    - '422'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1plans~1{plan_id}/put'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/updatePlan.ownership.spec.ts
+      status: planned
+  deletePlan:
+    method: DELETE
+    path: /plans/{plan_id}
+    summary: Excluir plano
+    security: sessionCookie
+    traceability:
+    - RF-003
+    - TS-005
+    - TS-037
+    requirements:
+    - RF-003
+    acceptance_criteria: []
+    sentinel_tests:
+    - TS-005
+    - TS-037
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '204'
+    - '401'
+    - '404'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1plans~1{plan_id}/delete'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/deletePlan.ownership.spec.ts
+      status: planned
+  listOccurrences:
+    method: GET
+    path: /occurrences
+    summary: Listar ocorrencias acionaveis
+    security: sessionCookie
+    traceability:
+    - RF-004
+    - RF-005
+    requirements:
+    - RF-004
+    - RF-005
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '400'
+    - '401'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1occurrences/get'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/listOccurrences.ownership.spec.ts
+      status: planned
+  createResponse:
+    method: POST
+    path: /occurrences/{occurrence_id}/responses
+    summary: Registrar resposta
+    security: sessionCookie
+    traceability:
+    - RF-006
+    - CA-007
+    - CA-013
+    - TS-001
+    - TS-007
+    - TS-013
+    - TS-038
+    requirements:
+    - RF-006
+    acceptance_criteria:
+    - CA-007
+    - CA-013
+    sentinel_tests:
+    - TS-001
+    - TS-007
+    - TS-013
+    - TS-038
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '201'
+    - '400'
+    - '401'
+    - '404'
+    - '409'
+    - '410'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1occurrences~1{occurrence_id}~1responses/post'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/createResponse.ownership.spec.ts
+      status: planned
+  getHistory:
+    method: GET
+    path: /history
+    summary: Consultar historico
+    security: sessionCookie
+    traceability:
+    - RF-007
+    - CA-009
+    requirements:
+    - RF-007
+    acceptance_criteria:
+    - CA-009
+    sentinel_tests: []
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '400'
+    - '401'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1history/get'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/getHistory.ownership.spec.ts
+      status: planned
+  createExport:
+    method: POST
+    path: /exports
+    summary: Solicitar exportacao
+    security: sessionCookie
+    traceability:
+    - RF-008
+    - CA-010
+    - TS-020
+    - TS-038
+    requirements:
+    - RF-008
+    acceptance_criteria:
+    - CA-010
+    sentinel_tests:
+    - TS-020
+    - TS-038
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '202'
+    - '400'
+    - '401'
+    - '409'
+    - '422'
+    - '429'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1exports/post'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/createExport.ownership.spec.ts
+      status: planned
+  getExport:
+    method: GET
+    path: /exports/{export_id}
+    summary: Consultar exportacao
+    security: sessionCookie
+    traceability:
+    - RF-008
+    requirements:
+    - RF-008
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '401'
+    - '404'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1exports~1{export_id}/get'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/getExport.ownership.spec.ts
+      status: planned
+  cancelExport:
+    method: DELETE
+    path: /exports/{export_id}
+    summary: Cancelar exportacao
+    security: sessionCookie
+    traceability:
+    - RF-008
+    requirements:
+    - RF-008
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements: &id001
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '204'
+    - '401'
+    - '404'
+    - '409'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1exports~1{export_id}/delete'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/cancelExport.ownership.spec.ts
+      status: planned
+  downloadExport:
+    method: GET
+    path: /exports/{export_id}/file
+    summary: Baixar PDF
+    security: sessionCookie
+    traceability:
+    - RF-008
+    - CA-011
+    - TS-011
+    - TS-020
+    - TS-023
+    requirements:
+    - RF-008
+    acceptance_criteria:
+    - CA-011
+    sentinel_tests:
+    - TS-011
+    - TS-020
+    - TS-023
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '401'
+    - '404'
+    - '410'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1exports~1{export_id}~1file/get'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/downloadExport.ownership.spec.ts
+      status: planned
+  getPrivacy:
+    method: GET
+    path: /privacy
+    summary: Consultar area de privacidade
+    security: sessionCookie
+    traceability:
+    - RF-010
+    - RF-011
+    requirements:
+    - RF-010
+    - RF-011
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '401'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1privacy/get'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/getPrivacy.ownership.spec.ts
+      status: planned
+  requestAccountDeletion:
+    method: POST
+    path: /account-deletions
+    summary: Solicitar exclusao da conta
+    security: sessionCookie
+    traceability:
+    - RF-010
+    - CA-014
+    - TS-026
+    - TS-029
+    - TS-038
+    requirements:
+    - RF-010
+    acceptance_criteria:
+    - CA-014
+    sentinel_tests:
+    - TS-026
+    - TS-029
+    - TS-038
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '202'
+    - '401'
+    - '409'
+    - '429'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1account-deletions/post'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/requestAccountDeletion.ownership.spec.ts
+      status: planned
+  getHealth:
+    method: GET
+    path: /health
+    summary: Consultar saude tecnica
+    security: public
+    traceability:
+    - RNF-015
+    requirements: []
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '200'
+    - '503'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1health/get'
+  getCurrentAccount:
+    method: GET
+    path: /accounts/me
+    summary: Consultar conta atual
+    security: sessionCookie
+    traceability:
+    - RF-001
+    requirements:
+    - RF-001
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements: *id001
+    response_statuses:
+    - '200'
+    - '401'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1accounts~1me/get'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/getCurrentAccount.ownership.spec.ts
+      status: planned
+  updateCurrentAccount:
+    method: PUT
+    path: /accounts/me
+    summary: Atualizar dados editaveis da conta atual
+    security: sessionCookie
+    traceability:
+    - RF-001
+    requirements:
+    - RF-001
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements: *id001
+    response_statuses:
+    - '200'
+    - '400'
+    - '401'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1accounts~1me/put'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/updateCurrentAccount.ownership.spec.ts
+      status: planned
+  revokeAllSessions:
+    method: POST
+    path: /sessions/revocations
+    summary: Encerrar todas as sessoes
+    security: sessionCookie
+    traceability:
+    - RF-002
+    requirements:
+    - RF-002
+    acceptance_criteria: []
+    sentinel_tests: []
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    response_statuses:
+    - '204'
+    - '401'
+    - '409'
+    - '429'
+    mapping_provenance:
+      operation: explicit-openapi
+      traceability: explicit-openapi-x-traceability
+      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source_pointer: '#/paths/~1sessions~1revocations/post'
+    cross_cutting_controls:
+    - CA-012
+    - RNF-003
+    - TS-008
+    - TS-023
+    ownership_test:
+      required: true
+      acceptance_criterion: CA-012
+      sentinel_tests:
+      - TS-008
+      - TS-023
+      test_artifact: tests/security/ownership/revokeAllSessions.ownership.spec.ts
+      status: planned
+validation_rules:
+- id: TR-001
+  description: Todo operationId da OpenAPI deve existir em operations.
+- id: TR-002
+  description: Toda referência RF, CA e TS deve existir no catálogo correspondente.
+- id: TR-003
+  description: Todo RF com operação HTTP deve possuir pelo menos um operationId.
+- id: TR-004
+  description: Todo operationId privado deve possuir cobertura de ownership conforme TS-023 no escopo.
+- id: TR-005
+  description: TS-001, TS-015, TS-024, TS-038 e TS-040 são bloqueadores P0.
+- id: TR-006
+  description: Referências x-traceability da OpenAPI não podem ser removidas sem alteração normativa.
+known_gaps:
+- id: GAP-001
+  severity: informational
+  description: RF-012 é funcional e operacional, mas não possui endpoint público específico na OpenAPI 02.33.1.
+- id: GAP-002
+  severity: informational
+  description: CA-012 é transversal a todas as rotas privadas e é validado por TS-008 e TS-023, sem operationId exclusivo.
+- id: GAP-003
+  severity: informational
+  description: A Especificação Funcional 02.32 contém anexo histórico da OpenAPI 02.32; a superfície HTTP normativa é a OpenAPI
+    02.33.1.
+trace_links:
+- from: RF-001
+  to: CA-001
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-001
+  to: CA-002
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-001
+  to: CA-003
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-001
+  to: CA-004
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-001
+  to: TS-009
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-001
+  to: TS-018
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-001
+  to: TS-021
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-001
+  to: TS-028
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-001
+  to: TS-033
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-001
+  to: TS-036
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-001
+  to: TS-038
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-001
+  to: createAccount
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/createAccount/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-001
+  to: getCurrentAccount
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/getCurrentAccount/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-001
+  to: resendVerification
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/resendVerification/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-001
+  to: updateCurrentAccount
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/updateCurrentAccount/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-001
+  to: verifyAccount
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/verifyAccount/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-002
+  to: CA-003
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-002
+  to: CA-004
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-002
+  to: TS-009
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-002
+  to: TS-018
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-002
+  to: TS-021
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-002
+  to: TS-033
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-002
+  to: TS-036
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-002
+  to: TS-038
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-002
+  to: confirmPasswordReset
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/confirmPasswordReset/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-002
+  to: createSession
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/createSession/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-002
+  to: deleteCurrentSession
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/deleteCurrentSession/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-002
+  to: requestPasswordReset
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/requestPasswordReset/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-002
+  to: revokeAllSessions
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/revokeAllSessions/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-003
+  to: CA-005
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-003
+  to: CA-006
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-003
+  to: TS-003
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-003
+  to: TS-004
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-003
+  to: TS-005
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-003
+  to: TS-014
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-003
+  to: TS-015
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-003
+  to: TS-027
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-003
+  to: TS-037
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-003
+  to: TS-038
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-003
+  to: createPlan
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/createPlan/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-003
+  to: deletePlan
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/deletePlan/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-003
+  to: getPlan
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/getPlan/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-003
+  to: listPlans
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/listPlans/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-003
+  to: updatePlan
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/updatePlan/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-004
+  to: CA-008
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-004
+  to: TS-002
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-004
+  to: TS-003
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-004
+  to: TS-006
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-004
+  to: TS-013
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-004
+  to: TS-014
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-004
+  to: TS-016
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-004
+  to: TS-017
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-004
+  to: TS-024
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-004
+  to: TS-034
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-004
+  to: TS-035
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-004
+  to: listOccurrences
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/listOccurrences/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-005
+  to: CA-008
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-005
+  to: CA-014
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-005
+  to: TS-002
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-005
+  to: TS-006
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-005
+  to: TS-016
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-005
+  to: TS-017
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-005
+  to: TS-019
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-005
+  to: TS-034
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-005
+  to: TS-035
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-005
+  to: listOccurrences
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/listOccurrences/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-006
+  to: CA-007
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-006
+  to: CA-013
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-006
+  to: TS-001
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-006
+  to: TS-007
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-006
+  to: TS-013
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-006
+  to: TS-015
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-006
+  to: TS-025
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-006
+  to: TS-038
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-006
+  to: createResponse
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/createResponse/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-007
+  to: CA-009
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-007
+  to: TS-008
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-007
+  to: TS-023
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-007
+  to: getHistory
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/getHistory/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-008
+  to: CA-010
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-008
+  to: CA-011
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-008
+  to: TS-011
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-008
+  to: TS-020
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-008
+  to: TS-023
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-008
+  to: TS-038
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-008
+  to: cancelExport
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/cancelExport/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-008
+  to: createExport
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/createExport/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-008
+  to: downloadExport
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/downloadExport/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-008
+  to: getExport
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/getExport/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-009
+  to: TS-022
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-009
+  to: updateAccessibilityPreferences
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/updateAccessibilityPreferences/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-010
+  to: CA-014
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-010
+  to: TS-026
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-010
+  to: TS-028
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-010
+  to: TS-029
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-010
+  to: TS-034
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-010
+  to: TS-038
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-010
+  to: getPrivacy
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/getPrivacy/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-010
+  to: requestAccountDeletion
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/requestAccountDeletion/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-011
+  to: TS-032
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-011
+  to: getPrivacy
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    location: operation/getPrivacy/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-012
+  to: TS-030
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: deleteCurrentSession
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: deleteCurrentSession
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: getAccessibilityPreferences
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: getAccessibilityPreferences
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: updateAccessibilityPreferences
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: updateAccessibilityPreferences
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: listPlans
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: listPlans
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: createPlan
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: createPlan
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: getPlan
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: getPlan
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: updatePlan
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: updatePlan
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: deletePlan
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: deletePlan
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: listOccurrences
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: listOccurrences
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: createResponse
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: createResponse
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: getHistory
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: getHistory
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: createExport
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: createExport
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: getExport
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: getExport
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: cancelExport
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: cancelExport
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: downloadExport
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: downloadExport
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: getPrivacy
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: getPrivacy
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: requestAccountDeletion
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: requestAccountDeletion
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: getCurrentAccount
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: getCurrentAccount
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: updateCurrentAccount
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: updateCurrentAccount
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+- from: revokeAllSessions
+  to: CA-012
+  relationship: ownership_acceptance
+  provenance:
+    source: AGENTS.md
+    location: Seção 13.2/13.3
+    mapping_type: cross-cutting-policy
+- from: revokeAllSessions
+  to: TS-023
+  relationship: ownership_test
+  provenance:
+    source: AGENTS.md
+    location: QG-009
+    mapping_type: cross-cutting-policy
+errors:
+  ERR-001:
+    code: VALIDATION_FAILED
+    http_status: 400
+    user_message: Revise os campos destacados e tente novamente.
+    operationIds:
+    - confirmPasswordReset
+    - createAccount
+    - createExport
+    - createPlan
+    - createResponse
+    - getHistory
+    - listOccurrences
+    - listPlans
+    - requestPasswordReset
+    - resendVerification
+    - updateAccessibilityPreferences
+    - updateCurrentAccount
+    - updatePlan
+    - verifyAccount
+    negative_test_artifact: tests/api/errors/err-001.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-002:
+    code: AUTHENTICATION_REQUIRED
+    http_status: 401
+    user_message: Sua sessão terminou. Entre novamente.
+    operationIds:
+    - cancelExport
+    - createExport
+    - createPlan
+    - createResponse
+    - createSession
+    - deleteCurrentSession
+    - deletePlan
+    - downloadExport
+    - getAccessibilityPreferences
+    - getCurrentAccount
+    - getExport
+    - getHistory
+    - getPlan
+    - getPrivacy
+    - listOccurrences
+    - listPlans
+    - requestAccountDeletion
+    - revokeAllSessions
+    - updateAccessibilityPreferences
+    - updateCurrentAccount
+    - updatePlan
+    negative_test_artifact: tests/api/errors/err-002.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-003:
+    code: RESOURCE_NOT_FOUND
+    http_status: 404
+    user_message: O item solicitado não foi encontrado.
+    operationIds:
+    - cancelExport
+    - createResponse
+    - deletePlan
+    - downloadExport
+    - getExport
+    - getPlan
+    - updatePlan
+    negative_test_artifact: tests/api/errors/err-003.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-004:
+    code: ACCOUNT_TEMPORARILY_LOCKED
+    http_status: 423
+    user_message: Não foi possível entrar agora. Tente novamente após o período informado.
+    operationIds:
+    - createSession
+    negative_test_artifact: tests/api/errors/err-004.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-005:
+    code: VERSION_CONFLICT
+    http_status: 409
+    user_message: Este plano foi alterado em outra sessão. Recarregue antes de tentar novamente.
+    operationIds:
+    - updatePlan
+    negative_test_artifact: tests/api/errors/err-005.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-006:
+    code: IDEMPOTENCY_KEY_REUSED
+    http_status: 409
+    user_message: A solicitação repetida contém dados diferentes.
+    operationIds:
+    - createAccount
+    - createPlan
+    - updatePlan
+    - createResponse
+    - createExport
+    - requestAccountDeletion
+    - revokeAllSessions
+    negative_test_artifact: tests/api/errors/err-006.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-007:
+    code: STATE_CONFLICT
+    http_status: 409
+    user_message: Esta ocorrência já recebeu uma resposta.
+    operationIds:
+    - createResponse
+    negative_test_artifact: tests/api/errors/err-007.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-008:
+    code: TOKEN_EXPIRED
+    http_status: 410
+    user_message: Este link não pode mais ser usado. Solicite um novo.
+    operationIds:
+    - verifyAccount
+    - confirmPasswordReset
+    negative_test_artifact: tests/api/errors/err-008.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-009:
+    code: BUSINESS_RULE_VIOLATION
+    http_status: 422
+    user_message: A operação não atende às regras informadas.
+    operationIds:
+    - createExport
+    - createPlan
+    - updatePlan
+    negative_test_artifact: tests/api/errors/err-009.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-010:
+    code: RATE_LIMITED
+    http_status: 429
+    user_message: Muitas tentativas. Aguarde o tempo informado e tente novamente.
+    operationIds:
+    - confirmPasswordReset
+    - createAccount
+    - createExport
+    - createPlan
+    - createSession
+    - requestAccountDeletion
+    - requestPasswordReset
+    - resendVerification
+    - revokeAllSessions
+    - verifyAccount
+    negative_test_artifact: tests/api/errors/err-010.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-011:
+    code: DEPENDENCY_UNAVAILABLE
+    http_status: 503
+    user_message: O serviço está temporariamente indisponível. Tente novamente.
+    operationIds:
+    - createAccount
+    - getHealth
+    - requestPasswordReset
+    - resendVerification
+    negative_test_artifact: tests/api/errors/err-011.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-012:
+    code: RESOURCE_EXPIRED
+    http_status: 410
+    user_message: Este arquivo expirou. Solicite uma nova exportação.
+    operationIds:
+    - downloadExport
+    negative_test_artifact: tests/api/errors/err-012.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+production_gates:
+  GX-001:
+    title: Controlador, operadores e base legal por finalidade
+    status: open
+    owner: TBD
+    evidence: null
+    blocks: production
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seção 10
+  GX-002:
+    title: Aviso de privacidade, termos, canal e direitos
+    status: open
+    owner: TBD
+    evidence: null
+    blocks: production
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seção 10
+  GX-003:
+    title: Retenção, backups, idempotência e tombstone
+    status: open
+    owner: TBD
+    evidence: null
+    blocks: production
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seção 10
+  GX-004:
+    title: Avaliação de impacto, transferências e contratos
+    status: open
+    owner: TBD
+    evidence: null
+    blocks: production
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seção 10
+  GX-005:
+    title: RPO, RTO e operação
+    status: open
+    owner: TBD
+    evidence: null
+    blocks: production
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seção 10
+  GX-006:
+    title: Incidentes e fornecedores
+    status: open
+    owner: TBD
+    evidence: null
+    blocks: production
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source_section: Seção 10
+validator:
+  schema: traceability-matrix.schema.json
+  executable: traceability-check.py
+  ci_command: python traceability-check.py traceability-matrix.yaml MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+  fail_on:
+  - schema-error
+  - source-hash-mismatch
+  - unknown-reference
+  - missing-operation
+  - missing-ownership-test
+  - missing-test-artifact
+  - missing-error-catalog
+resolved_findings:
+- id: V-001
+  resolution: Ownership/BOLA controls and planned test artifact added to every private operation.
+- id: G-ERR
+  resolution: ERR-001..ERR-012 cataloged and mapped to operations and negative-test artifacts.
+- id: V-003
+  resolution: SHA-256 hashes added for all normative sources.
+- id: G-TESTART
+  resolution: Every TS now contains a planned executable test artifact and evidence fields.
+- id: V-004
+  resolution: Per-link and per-record provenance added.
+- id: G-VALIDATOR
+  resolution: JSON Schema and executable semantic validator added.
+- id: GAP-RNF-RANGE
+  resolution: DEC-002 corrected to RNF-001 through RNF-015, matching the explicit catalog.
+- id: GAP-GX-RANGE
+  resolution: Production-blocking text corrected to GX-001 through GX-006.
+- id: GAP-CATALOGS
+  resolution: RN, ENT, FL, TL, US, DEC and Q catalogs added with exact source provenance.
+catalog_completeness:
+  requirements:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - RF-001
+    - RF-002
+    - RF-003
+    - RF-004
+    - RF-005
+    - RF-006
+    - RF-007
+    - RF-008
+    - RF-009
+    - RF-010
+    - RF-011
+    - RF-012
+    actual_ids:
+    - RF-001
+    - RF-002
+    - RF-003
+    - RF-004
+    - RF-005
+    - RF-006
+    - RF-007
+    - RF-008
+    - RF-009
+    - RF-010
+    - RF-011
+    - RF-012
+    status: complete
+  non_functional_requirements:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - RNF-001
+    - RNF-002
+    - RNF-003
+    - RNF-004
+    - RNF-005
+    - RNF-006
+    - RNF-007
+    - RNF-008
+    - RNF-009
+    - RNF-010
+    - RNF-011
+    - RNF-012
+    - RNF-013
+    - RNF-014
+    - RNF-015
+    actual_ids:
+    - RNF-001
+    - RNF-002
+    - RNF-003
+    - RNF-004
+    - RNF-005
+    - RNF-006
+    - RNF-007
+    - RNF-008
+    - RNF-009
+    - RNF-010
+    - RNF-011
+    - RNF-012
+    - RNF-013
+    - RNF-014
+    - RNF-015
+    status: complete
+  acceptance_criteria:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - CA-001
+    - CA-002
+    - CA-003
+    - CA-004
+    - CA-005
+    - CA-006
+    - CA-007
+    - CA-008
+    - CA-009
+    - CA-010
+    - CA-011
+    - CA-012
+    - CA-013
+    - CA-014
+    actual_ids:
+    - CA-001
+    - CA-002
+    - CA-003
+    - CA-004
+    - CA-005
+    - CA-006
+    - CA-007
+    - CA-008
+    - CA-009
+    - CA-010
+    - CA-011
+    - CA-012
+    - CA-013
+    - CA-014
+    status: complete
+  errors:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - ERR-001
+    - ERR-002
+    - ERR-003
+    - ERR-004
+    - ERR-005
+    - ERR-006
+    - ERR-007
+    - ERR-008
+    - ERR-009
+    - ERR-010
+    - ERR-011
+    - ERR-012
+    actual_ids:
+    - ERR-001
+    - ERR-002
+    - ERR-003
+    - ERR-004
+    - ERR-005
+    - ERR-006
+    - ERR-007
+    - ERR-008
+    - ERR-009
+    - ERR-010
+    - ERR-011
+    - ERR-012
+    status: complete
+  sentinel_tests:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - TS-001
+    - TS-002
+    - TS-003
+    - TS-004
+    - TS-005
+    - TS-006
+    - TS-007
+    - TS-008
+    - TS-009
+    - TS-010
+    - TS-011
+    - TS-012
+    - TS-013
+    - TS-014
+    - TS-015
+    - TS-016
+    - TS-017
+    - TS-018
+    - TS-019
+    - TS-020
+    - TS-021
+    - TS-022
+    - TS-023
+    - TS-024
+    - TS-025
+    - TS-026
+    - TS-027
+    - TS-028
+    - TS-029
+    - TS-030
+    - TS-031
+    - TS-032
+    - TS-033
+    - TS-034
+    - TS-035
+    - TS-036
+    - TS-037
+    - TS-038
+    - TS-039
+    - TS-040
+    actual_ids:
+    - TS-001
+    - TS-002
+    - TS-003
+    - TS-004
+    - TS-005
+    - TS-006
+    - TS-007
+    - TS-008
+    - TS-009
+    - TS-010
+    - TS-011
+    - TS-012
+    - TS-013
+    - TS-014
+    - TS-015
+    - TS-016
+    - TS-017
+    - TS-018
+    - TS-019
+    - TS-020
+    - TS-021
+    - TS-022
+    - TS-023
+    - TS-024
+    - TS-025
+    - TS-026
+    - TS-027
+    - TS-028
+    - TS-029
+    - TS-030
+    - TS-031
+    - TS-032
+    - TS-033
+    - TS-034
+    - TS-035
+    - TS-036
+    - TS-037
+    - TS-038
+    - TS-039
+    - TS-040
+    status: complete
+  production_gates:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - GX-001
+    - GX-002
+    - GX-003
+    - GX-004
+    - GX-005
+    - GX-006
+    actual_ids:
+    - GX-001
+    - GX-002
+    - GX-003
+    - GX-004
+    - GX-005
+    - GX-006
+    status: complete
+  business_rules:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - RN-001
+    - RN-002
+    - RN-003
+    - RN-004
+    - RN-005
+    - RN-006
+    - RN-007
+    - RN-008
+    - RN-009
+    - RN-010
+    - RN-011
+    - RN-012
+    - RN-013
+    - RN-014
+    - RN-015
+    actual_ids:
+    - RN-001
+    - RN-002
+    - RN-003
+    - RN-004
+    - RN-005
+    - RN-006
+    - RN-007
+    - RN-008
+    - RN-009
+    - RN-010
+    - RN-011
+    - RN-012
+    - RN-013
+    - RN-014
+    - RN-015
+    status: complete
+  entities:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - ENT-001
+    - ENT-002
+    - ENT-003
+    - ENT-004
+    - ENT-005
+    - ENT-006
+    - ENT-007
+    - ENT-008
+    - ENT-009
+    - ENT-010
+    - ENT-011
+    - ENT-012
+    - ENT-013
+    - ENT-014
+    - ENT-015
+    - ENT-016
+    - ENT-017
+    actual_ids:
+    - ENT-001
+    - ENT-002
+    - ENT-003
+    - ENT-004
+    - ENT-005
+    - ENT-006
+    - ENT-007
+    - ENT-008
+    - ENT-009
+    - ENT-010
+    - ENT-011
+    - ENT-012
+    - ENT-013
+    - ENT-014
+    - ENT-015
+    - ENT-016
+    - ENT-017
+    status: complete
+  flows:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - FL-001
+    - FL-002
+    - FL-003
+    - FL-004
+    actual_ids:
+    - FL-001
+    - FL-002
+    - FL-003
+    - FL-004
+    status: complete
+  screen_states:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - TL-001
+    - TL-002
+    - TL-003
+    - TL-004
+    - TL-005
+    - TL-006
+    - TL-007
+    - TL-008
+    actual_ids:
+    - TL-001
+    - TL-002
+    - TL-003
+    - TL-004
+    - TL-005
+    - TL-006
+    - TL-007
+    - TL-008
+    status: complete
+  user_stories:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - US-001
+    - US-002
+    - US-003
+    - US-004
+    - US-005
+    - US-006
+    - US-007
+    - US-008
+    actual_ids:
+    - US-001
+    - US-002
+    - US-003
+    - US-004
+    - US-005
+    - US-006
+    - US-007
+    - US-008
+    status: complete
+  decisions:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - DEC-001
+    - DEC-002
+    - DEC-003
+    - DEC-004
+    - DEC-005
+    - DEC-006
+    - DEC-007
+    - DEC-008
+    - DEC-009
+    - DEC-010
+    actual_ids:
+    - DEC-001
+    - DEC-002
+    - DEC-003
+    - DEC-004
+    - DEC-005
+    - DEC-006
+    - DEC-007
+    - DEC-008
+    - DEC-009
+    - DEC-010
+    status: complete
+  approved_questions:
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    expected_ids:
+    - Q-001
+    - Q-002
+    - Q-003
+    - Q-004
+    actual_ids:
+    - Q-001
+    - Q-002
+    - Q-003
+    - Q-004
+    status: complete
+business_rules:
+  RN-001:
+    termo_regra: Natureza declaratória
+    defini_o_normativa: O sistema NÃO DEVE prescrever, validar medicamento, interação, médico ou CRM, nem recomendar tratamento.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 1
+      mapping_type: explicit-catalog-row
+  RN-002:
+    termo_regra: Titularidade
+    defini_o_normativa: Cada conta DEVE ser individual; o usuário só pode acessar seus próprios registros.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 2
+      mapping_type: explicit-catalog-row
+  RN-003:
+    termo_regra: Conta
+    defini_o_normativa: Conta nova inicia PENDING_VERIFICATION e não autentica antes da verificação.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 3
+      mapping_type: explicit-catalog-row
+  RN-004:
+    termo_regra: Sessão
+    defini_o_normativa: Sessão expira após 30 minutos de inatividade e 24 horas de duração absoluta; máximo de 3 sessões ativas.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 4
+      mapping_type: explicit-catalog-row
+  RN-005:
+    termo_regra: Bloqueio
+    defini_o_normativa: Após 5 falhas em 15 minutos, bloquear novas tentativas por 15 minutos.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 5
+      mapping_type: explicit-catalog-row
+  RN-006:
+    termo_regra: Plano
+    defini_o_normativa: Cada plano ACTIVE possui de 1 a 10 horários civis únicos.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 6
+      mapping_type: explicit-catalog-row
+  RN-007:
+    termo_regra: Ocorrência
+    defini_o_normativa: Deve existir no máximo uma ocorrência por plano, horário e data civil local.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 7
+      mapping_type: explicit-catalog-row
+  RN-008:
+    termo_regra: Resposta
+    defini_o_normativa: Somente a primeira resposta concorrente é aceita; resposta aceita é imutável.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 8
+      mapping_type: explicit-catalog-row
+  RN-009:
+    termo_regra: Prazo
+    defini_o_normativa: Sem resposta até 60 minutos após scheduled_at, a ocorrência passa a NO_RESPONSE; resposta tardia continua
+      permitida.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 9
+      mapping_type: explicit-catalog-row
+  RN-010:
+    termo_regra: Histórico
+    defini_o_normativa: Consulta cobre período civil inclusivo de até 12 meses, implementado como intervalo semiaberto no
+      fuso da conta.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 10
+      mapping_type: explicit-catalog-row
+  RN-011:
+    termo_regra: PDF
+    defini_o_normativa: PDF é privado, pesquisável, baseado em snapshot e expira após 24 horas.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 11
+      mapping_type: explicit-catalog-row
+  RN-012:
+    termo_regra: Exclusão
+    defini_o_normativa: Solicitação bloqueia acesso de imediato; expurgo ocorre em até 30 dias [APROVADO Q-001].
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 12
+      mapping_type: explicit-catalog-row
+  RN-013:
+    termo_regra: Tempo
+    defini_o_normativa: Instantes são persistidos em UTC; datas civis usam account_timezone IANA, imutável no MVP.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 13
+      mapping_type: explicit-catalog-row
+  RN-014:
+    termo_regra: E-mail
+    defini_o_normativa: SENT significa aceito tecnicamente pelo provedor, não entregue ou lido.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 14
+      mapping_type: explicit-catalog-row
+  RN-015:
+    termo_regra: Página offline
+    defini_o_normativa: A aplicação NÃO DEVE declarar sucesso nem criar fila offline sem confirmação do servidor.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 3
+      row_index: 15
+      mapping_type: explicit-catalog-row
+entities:
+  ENT-001:
+    campo: account_timezone
+    tipo: string
+    obrig: sim
+    tam_prec: '64'
+    formato_valores: identificador IANA
+    padr_o: '-'
+    unicidade: não
+    fk: '-'
+    lgpd: operacional
+    valida_o: imutável no MVP
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 5
+      row_index: 3
+      mapping_type: explicit-catalog-row
+  ENT-002:
+    entidade: VerificationToken
+    finalidade: Token hash de verificação, emissão, expiração e uso.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 4
+      row_index: 2
+      mapping_type: explicit-catalog-row
+  ENT-003:
+    entidade: PasswordResetToken
+    finalidade: Token hash de redefinição, emissão, expiração e uso.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 4
+      row_index: 3
+      mapping_type: explicit-catalog-row
+  ENT-004:
+    entidade: Session
+    finalidade: Sessão hash, atividade, expirações, revogação e versão.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 4
+      row_index: 4
+      mapping_type: explicit-catalog-row
+  ENT-005:
+    campo: row_version
+    tipo: integer
+    obrig: sim
+    tam_prec: 64 bits
+    formato_valores: '>=1'
+    padr_o: '1'
+    unicidade: não
+    fk: '-'
+    lgpd: operacional
+    valida_o: incrementar uma vez por edição
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 5
+      row_index: 4
+      mapping_type: explicit-catalog-row
+  ENT-006:
+    campo: time_of_day
+    tipo: time
+    obrig: sim
+    tam_prec: HH:MM
+    formato_valores: ^([01]\d|2[0-3]):[0-5]\d$
+    padr_o: '-'
+    unicidade: único por plano
+    fk: ENT-005
+    lgpd: saúde sensível
+    valida_o: 1 a 10 por plano
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 5
+      row_index: 5
+      mapping_type: explicit-catalog-row
+  ENT-007:
+    campo: status
+    tipo: enum
+    obrig: sim
+    tam_prec: '-'
+    formato_valores: PROGRAMMED|NO_RESPONSE|TAKEN|NOT_TAKEN|CANCELED
+    padr_o: PROGRAMMED
+    unicidade: não
+    fk: '-'
+    lgpd: saúde sensível
+    valida_o: transições fechadas
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 5
+      row_index: 7
+      mapping_type: explicit-catalog-row
+  ENT-008:
+    campo: reason
+    tipo: enum
+    obrig: não
+    tam_prec: '-'
+    formato_valores: lista fechada aprovada
+    padr_o: 'null'
+    unicidade: não
+    fk: '-'
+    lgpd: saúde sensível
+    valida_o: proibido quando type=TAKEN
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 5
+      row_index: 9
+      mapping_type: explicit-catalog-row
+  ENT-009:
+    campo: status
+    tipo: enum
+    obrig: sim
+    tam_prec: '-'
+    formato_valores: REQUESTED|DELIVERY_UNKNOWN|SENT|FAILED
+    padr_o: REQUESTED
+    unicidade: não
+    fk: ENT-007
+    lgpd: operacional
+    valida_o: SENT não significa entrega
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 5
+      row_index: 10
+      mapping_type: explicit-catalog-row
+  ENT-010:
+    campo: expires_at
+    tipo: timestamp
+    obrig: cond.
+    tam_prec: RFC3339 UTC
+    formato_valores: posterior a completed_at
+    padr_o: '-'
+    unicidade: não
+    fk: '-'
+    lgpd: operacional
+    valida_o: obrigatório em COMPLETED
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 5
+      row_index: 11
+      mapping_type: explicit-catalog-row
+  ENT-011:
+    campo: key
+    tipo: string
+    obrig: sim
+    tam_prec: 1..100
+    formato_valores: caracteres seguros
+    padr_o: '-'
+    unicidade: composta
+    fk: ENT-001
+    lgpd: operacional
+    valida_o: payload divergente retorna conflito
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 5
+      row_index: 12
+      mapping_type: explicit-catalog-row
+  ENT-012:
+    entidade: OutboxEvent
+    finalidade: Evento transacional para processamento assíncrono.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 4
+      row_index: 12
+      mapping_type: explicit-catalog-row
+  ENT-013:
+    entidade: AuditEvent
+    finalidade: Trilha imutável e minimizada de ações críticas.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 4
+      row_index: 13
+      mapping_type: explicit-catalog-row
+  ENT-014:
+    entidade: PurgeTombstone
+    finalidade: Impressão irreversível para impedir restauração indevida.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 4
+      row_index: 14
+      mapping_type: explicit-catalog-row
+  ENT-015:
+    entidade: IncidentRecord
+    finalidade: Registro segregado de incidente de segurança.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 4
+      row_index: 15
+      mapping_type: explicit-catalog-row
+  ENT-016:
+    entidade: ExternalRightsRequest
+    finalidade: Protocolo de solicitação externa de direito.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 4
+      row_index: 16
+      mapping_type: explicit-catalog-row
+  ENT-017:
+    entidade: PerformanceProfile
+    finalidade: Perfil versionado e reproduzível de desempenho.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 4
+      row_index: 17
+      mapping_type: explicit-catalog-row
+flows:
+  FL-001:
+    estado_atual: DELETION_SCHEDULED
+    evento_condi_o: expurgo concluído
+    pr_ximo_estado: REGISTRO_REMOVIDO
+    efeito: manter somente tombstone minimizado
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 9
+      row_index: 3
+      mapping_type: explicit-catalog-row
+  FL-002:
+    estado_atual: ACTIVE plan
+    evento_condi_o: excluir
+    pr_ximo_estado: DELETED
+    efeito: cancelar futuras PROGRAMMED e preservar snapshots
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 9
+      row_index: 4
+      mapping_type: explicit-catalog-row
+  FL-003:
+    estado_atual: NO_RESPONSE
+    evento_condi_o: primeira resposta tardia
+    pr_ximo_estado: TAKEN/NOT_TAKEN
+    efeito: preservar marco de atraso
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 9
+      row_index: 7
+      mapping_type: explicit-catalog-row
+  FL-004:
+    estado_atual: DELIVERY_UNKNOWN
+    evento_condi_o: janela encerrada
+    pr_ximo_estado: FAILED
+    efeito: código DELIVERY_UNCONFIRMED
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 9
+      row_index: 10
+      mapping_type: explicit-catalog-row
+screen_states:
+  TL-001:
+    tela: Cadastro
+    estados_obrigat_rios: inicial; preenchimento; validação; enviando; sucesso; erro; rate limit.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 8
+      row_index: 1
+      mapping_type: explicit-catalog-row
+  TL-002:
+    tela: Login
+    estados_obrigat_rios: inicial; autenticando; bloqueado; credencial inválida; limite de sessões; indisponível.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 8
+      row_index: 2
+      mapping_type: explicit-catalog-row
+  TL-003:
+    tela: Planos
+    estados_obrigat_rios: carregando; lista vazia; lista; erro; sem permissão; conflito de versão.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 8
+      row_index: 3
+      mapping_type: explicit-catalog-row
+  TL-004:
+    tela: Editor de plano
+    estados_obrigat_rios: novo; editando; validação; confirmação de possível duplicidade; salvando; sucesso; conflito; timeout.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 8
+      row_index: 4
+      mapping_type: explicit-catalog-row
+  TL-005:
+    tela: Ocorrências
+    estados_obrigat_rios: carregando; vazio; acionável; respondendo; sucesso; conflito; desconectado.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 8
+      row_index: 5
+      mapping_type: explicit-catalog-row
+  TL-006:
+    tela: Histórico
+    estados_obrigat_rios: filtros; carregando; vazio; resultados; período inválido; erro.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 8
+      row_index: 6
+      mapping_type: explicit-catalog-row
+  TL-007:
+    tela: Exportação
+    estados_obrigat_rios: solicitando; processando; concluída; falha; expirada; sem permissão.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 8
+      row_index: 7
+      mapping_type: explicit-catalog-row
+  TL-008:
+    tela: Privacidade
+    estados_obrigat_rios: carregando; dados; confirmação destrutiva; reautenticação; exclusão agendada; erro.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 8
+      row_index: 8
+      mapping_type: explicit-catalog-row
+user_stories:
+  US-001:
+    hist_ria: Como titular, quero criar e verificar minha conta para acessar o serviço.
+    v_nculo: RF-001
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 10
+      row_index: 1
+      mapping_type: explicit-catalog-row
+  US-002:
+    hist_ria: Como titular, quero autenticar e gerenciar sessões para proteger meu acesso.
+    v_nculo: RF-002
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 10
+      row_index: 2
+      mapping_type: explicit-catalog-row
+  US-003:
+    hist_ria: Como titular, quero cadastrar e manter planos para declarar minha rotina.
+    v_nculo: RF-003
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 10
+      row_index: 3
+      mapping_type: explicit-catalog-row
+  US-004:
+    hist_ria: Como sistema, quero gerar ocorrências sem duplicidade para materializar a rotina.
+    v_nculo: RF-004
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 10
+      row_index: 4
+      mapping_type: explicit-catalog-row
+  US-005:
+    hist_ria: Como titular, quero receber lembretes para visualizar ocorrências acionáveis.
+    v_nculo: RF-005
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 10
+      row_index: 5
+      mapping_type: explicit-catalog-row
+  US-006:
+    hist_ria: Como titular, quero registrar TAKEN ou NOT_TAKEN para manter meu histórico.
+    v_nculo: RF-006
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 10
+      row_index: 6
+      mapping_type: explicit-catalog-row
+  US-007:
+    hist_ria: Como titular, quero consultar e exportar meu histórico para acompanhamento declaratório.
+    v_nculo: RF-007/RF-008
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 10
+      row_index: 7
+      mapping_type: explicit-catalog-row
+  US-008:
+    hist_ria: Como titular, quero excluir minha conta para interromper o tratamento dos meus dados.
+    v_nculo: RF-010
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 10
+      row_index: 8
+      mapping_type: explicit-catalog-row
+decisions:
+  DEC-001:
+    criticidade: Alta
+    problema_causa: Cabeçalho interno 02.20 conflitava com versão 02.30.
+    decis_o_adotada: Uniformizar para 02.32 e declarar prevalência.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 2
+      row_index: 1
+      mapping_type: explicit-catalog-row
+  DEC-002:
+    criticidade: Alta
+    problema_causa: Faixas antigas RNF01-24 e ST01-32 ficaram obsoletas após complementos.
+    decis_o_adotada: Baseline consolidada usa RNF-001 a RNF-015 e TS-001 a TS-040.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 2
+      row_index: 2
+      mapping_type: explicit-catalog-row
+  DEC-003:
+    criticidade: Alta
+    problema_causa: Critérios eram AC, mas o framework exige CA.
+    decis_o_adotada: Mapear AC01-AC14 para CA-001 a CA-014 sem alterar semântica.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 2
+      row_index: 3
+      mapping_type: explicit-catalog-row
+  DEC-004:
+    criticidade: Alta
+    problema_causa: Lista ativa do plano excluído não tinha regra única em todo o texto.
+    decis_o_adotada: Planos DELETED ficam ocultos da operação e preservados apenas por snapshots históricos.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 2
+      row_index: 4
+      mapping_type: explicit-catalog-row
+  DEC-005:
+    criticidade: Alta
+    problema_causa: Entrega incerta de e-mail não tinha estado inicial uniforme.
+    decis_o_adotada: Adotar DELIVERY_UNKNOWN e conciliação sem reenvio cego.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 2
+      row_index: 5
+      mapping_type: explicit-catalog-row
+  DEC-006:
+    criticidade: Média
+    problema_causa: Paginação padrão conflitava entre 20 e 50.
+    decis_o_adotada: Adotar 20 itens por padrão e máximo 100, conforme baseline mestre.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 2
+      row_index: 6
+      mapping_type: explicit-catalog-row
+  DEC-007:
+    criticidade: Alta
+    problema_causa: TLS/AES estavam descritos de forma genérica.
+    decis_o_adotada: Exigir TLS 1.3 em trânsito e AES-256 ou controle gerenciado equivalente em repouso.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 2
+      row_index: 7
+      mapping_type: explicit-catalog-row
+  DEC-008:
+    criticidade: Alta
+    problema_causa: Dado de medicamento e resposta requer proteção conservadora.
+    decis_o_adotada: Classificar como dado pessoal sensível de saúde.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 2
+      row_index: 8
+      mapping_type: explicit-catalog-row
+  DEC-009:
+    criticidade: Média
+    problema_causa: Operações mutáveis não tinham matriz única.
+    decis_o_adotada: Idempotency-Key obrigatória para criar conta/plano, editar plano, responder, exportar e excluir conta.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 2
+      row_index: 9
+      mapping_type: explicit-catalog-row
+  DEC-010:
+    criticidade: Alta
+    problema_causa: Produção poderia parecer liberada apesar de gates.
+    decis_o_adotada: Status BASELINE DEV-FINAL até aprovações Q/GX.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 2
+      row_index: 10
+      mapping_type: explicit-catalog-row
+approved_questions:
+  Q-001:
+    decis_o_aprovada: Retenção e exclusão
+    regra_normativa: Por quanto tempo os dados devem permanecer antes do expurgo definitivo?
+    alternativa_aprovada: 'A: aprovar conta em até 30 dias, PDF 24 h, logs 30 dias, idempotência 7 dias e tombstone 180 dias.
+      B: fornecer outros prazos aprovados.'
+    justificativa: A reduz ambiguidade e preserva as premissas já usadas.
+    status: APROVADO
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 14
+      row_index: 1
+      mapping_type: explicit-catalog-row
+  Q-002:
+    decis_o_aprovada: Continuidade
+    regra_normativa: Qual nível de recuperação deve ser prometido para o MVP?
+    alternativa_aprovada: 'A: aceitar perda máxima de 24 h e retorno em até 8 h. B: definir metas menores, com maior custo
+      operacional.'
+    justificativa: A é compatível com um MVP, desde que o risco seja aceito.
+    status: APROVADO
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 14
+      row_index: 2
+      mapping_type: explicit-catalog-row
+  Q-003:
+    decis_o_aprovada: Privacidade e base legal
+    regra_normativa: Quem será responsável pelos dados e qual fundamento autoriza cada uso?
+    alternativa_aprovada: 'A: aprovar controlador, operadores, canal, textos e base legal antes da produção. B: não lançar
+      até redefinir o produto.'
+    justificativa: A permite desenvolver sem antecipar decisão jurídica.
+    status: APROVADO
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 14
+      row_index: 3
+      mapping_type: explicit-catalog-row
+  Q-004:
+    decis_o_aprovada: Canal de direitos
+    regra_normativa: Como o usuário fará pedidos não automatizados, como correção de e-mail ou oposição?
+    alternativa_aprovada: 'A: canal externo com protocolo e prazo aprovado. B: desenvolver fluxo interno adicional, ampliando
+      escopo.'
+    justificativa: A preserva o escopo do MVP e mantém rastreabilidade.
+    status: APROVADO
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      table_index: 14
+      row_index: 4
+      mapping_type: explicit-catalog-row
+source_catalogs:
+  requirements_source:
+    RF-001:
+      rn: RN-001..005
+      ent: ENT-001..003
+      fl: FL-001
+      us: US-001
+      ca: CA-001..004
+      ts: TS-009,018,021,028,033,036
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 12
+        row_index: 1
+        mapping_type: explicit-catalog-row
+    RF-002:
+      requisito: Autenticar, encerrar sessão, recuperar senha e limitar sessões.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 6
+        row_index: 2
+        mapping_type: explicit-catalog-row
+    RF-003:
+      rn: RN-006,013
+      ent: ENT-005..007
+      fl: FL-002
+      us: US-003
+      ca: CA-005..006
+      ts: TS-003..005,014,015,027,037,038
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 12
+        row_index: 2
+        mapping_type: explicit-catalog-row
+    RF-004:
+      requisito: Gerar ocorrências por horizonte móvel de 30 dias.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 6
+        row_index: 4
+        mapping_type: explicit-catalog-row
+    RF-005:
+      requisito: Exibir lembrete web em página ativa e enviar e-mail minimizado.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 6
+        row_index: 5
+        mapping_type: explicit-catalog-row
+    RF-006:
+      rn: RN-008,009
+      ent: ENT-007/008
+      fl: FL-003
+      us: US-006
+      ca: CA-007
+      ts: TS-001,007,013,025
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 12
+        row_index: 4
+        mapping_type: explicit-catalog-row
+    RF-007:
+      requisito: Consultar histórico por período civil de até 12 meses.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 6
+        row_index: 7
+        mapping_type: explicit-catalog-row
+    RF-008:
+      requisito: Gerar e baixar PDF declaratório privado.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 6
+        row_index: 8
+        mapping_type: explicit-catalog-row
+    RF-009:
+      requisito: Persistir preferências de acessibilidade.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 6
+        row_index: 9
+        mapping_type: explicit-catalog-row
+    RF-010:
+      rn: RN-012
+      ent: ENT-001,014
+      fl: FL-001
+      us: US-008
+      ca: CA-014
+      ts: TS-026,029
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 12
+        row_index: 6
+        mapping_type: explicit-catalog-row
+    RF-011:
+      requisito: Receber solicitações externas de direitos por canal aprovado.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 6
+        row_index: 11
+        mapping_type: explicit-catalog-row
+    RF-012:
+      requisito: Registrar e tratar incidentes de segurança.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 6
+        row_index: 12
+        mapping_type: explicit-catalog-row
+  non_functional_requirements_source:
+    RNF-001:
+      requisito_mensur_vel: WCAG 2.2 AA nas telas essenciais; teclado, foco, semântica e zoom 200% em 320 CSS px.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 1
+        mapping_type: explicit-catalog-row
+    RNF-002:
+      requisito_mensur_vel: TLS 1.3 em trânsito; criptografia em repouso AES-256 ou serviço gerenciado equivalente.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 2
+        mapping_type: explicit-catalog-row
+    RNF-003:
+      requisito_mensur_vel: RBAC e ownership server-side em 100% das rotas privadas.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 3
+        mapping_type: explicit-catalog-row
+    RNF-004:
+      requisito_mensur_vel: p95 interativo <=2 s sob PerformanceProfile aprovado.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 4
+        mapping_type: explicit-catalog-row
+    RNF-005:
+      requisito_mensur_vel: p95 de exportação <=30 s sob PerformanceProfile aprovado.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 5
+        mapping_type: explicit-catalog-row
+    RNF-006:
+      requisito_mensur_vel: 'Rate limit: 100 req/min por usuário autenticado e 20 req/min por IP em rotas públicas.'
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 6
+        mapping_type: explicit-catalog-row
+    RNF-007:
+      requisito_mensur_vel: Timeout externo padrão de 30 s; retries 1 s, 2 s e 4 s apenas para operações idempotentes.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 7
+        mapping_type: explicit-catalog-row
+    RNF-008:
+      requisito_mensur_vel: Logs estruturados sem senha, token, e-mail completo ou conteúdo de saúde.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 8
+        mapping_type: explicit-catalog-row
+    RNF-009:
+      requisito_mensur_vel: SAST, SCA, DAST e secret scan; nenhum achado crítico/alto aberto.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 9
+        mapping_type: explicit-catalog-row
+    RNF-010:
+      requisito_mensur_vel: Datas UTC ISO 8601; dinheiro decimal exato; UTF-8; paginação 20, máximo 100.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 10
+        mapping_type: explicit-catalog-row
+    RNF-011:
+      requisito_mensur_vel: Backups criptografados; restore reconciliado com tombstones.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 11
+        mapping_type: explicit-catalog-row
+    RNF-012:
+      requisito_mensur_vel: Chaves em serviço dedicado, rotação e menor privilégio.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 12
+        mapping_type: explicit-catalog-row
+    RNF-013:
+      requisito_mensur_vel: SBOM e bloqueio de vulnerabilidades críticas/altas.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 13
+        mapping_type: explicit-catalog-row
+    RNF-014:
+      requisito_mensur_vel: OpenAPI validado contra implementação e testes de contrato.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 14
+        mapping_type: explicit-catalog-row
+    RNF-015:
+      requisito_mensur_vel: Relógios sincronizados; desvio acima do limite configurado bloqueia decisões temporais críticas.
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 7
+        row_index: 15
+        mapping_type: explicit-catalog-row
+  acceptance_criteria_source:
+    CA-001:
+      gherkin_condensado: Dado um e-mail novo e payload válido | Quando confirmar cadastro | Então criar exatamente 1 conta
+        PENDING_VERIFICATION e 1 token de 24 h.
+      dados_concretos: ana.silva@example.com; America/Sao_Paulo
+      sa_da_exata: 201; status=PENDING_VERIFICATION
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 1
+        mapping_type: explicit-catalog-row
+    CA-002:
+      gherkin_condensado: Dado token válido e não usado | Quando confirmar | Então consumir token e ativar conta atomicamente.
+      dados_concretos: token_hash válido
+      sa_da_exata: 204; User.status=ACTIVE
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 2
+        mapping_type: explicit-catalog-row
+    CA-003:
+      gherkin_condensado: Dada conta ACTIVE e 2 sessões | Quando login válido | Então criar a 3ª sessão; na 4ª, rejeitar.
+      dados_concretos: 2 sessões ativas
+      sa_da_exata: 201 na 3ª; 409 na 4ª
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 3
+        mapping_type: explicit-catalog-row
+    CA-004:
+      gherkin_condensado: Dadas 5 falhas em 15 min | Quando tentar novamente | Então rejeitar por 15 min sem enumerar conta.
+      dados_concretos: 5 falhas
+      sa_da_exata: 423 ACCOUNT_TEMPORARILY_LOCKED
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 4
+        mapping_type: explicit-catalog-row
+    CA-005:
+      gherkin_condensado: Dado plano com horários 08:00 e 20:00 | Quando criar | Então persistir ACTIVE e gerar horizonte
+        sem duplicata.
+      dados_concretos: Comprimido; 08:00,20:00
+      sa_da_exata: 201; 2 horários únicos
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 5
+        mapping_type: explicit-catalog-row
+    CA-006:
+      gherkin_condensado: Dada row_version=7 | Quando editar com expected=7 | Então salvar e retornar versão 8; expected=6
+        conflita.
+      dados_concretos: expected=7/6
+      sa_da_exata: 200 versão 8 / 409 VERSION_CONFLICT
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 6
+        mapping_type: explicit-catalog-row
+    CA-007:
+      gherkin_condensado: Dada ocorrência PROGRAMMED | Quando TAKEN e NOT_TAKEN concorrem | Então exatamente uma resposta
+        é aceita.
+      dados_concretos: duas requisições simultâneas
+      sa_da_exata: um 201 e um 409 STATE_CONFLICT
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 7
+        mapping_type: explicit-catalog-row
+    CA-008:
+      gherkin_condensado: Dada ocorrência sem resposta por 60 min | Quando job executar | Então mudar uma vez para NO_RESPONSE.
+      dados_concretos: scheduled_at=10:00; agora=11:00
+      sa_da_exata: status=NO_RESPONSE
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 8
+        mapping_type: explicit-catalog-row
+    CA-009:
+      gherkin_condensado: Dado período 01/01/2026 a 31/01/2026 | Quando consultar | Então retornar apenas registros do titular
+        em ordem decrescente.
+      dados_concretos: start=2026-01-01; end=2026-01-31
+      sa_da_exata: 200; intervalo local semiaberto
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 9
+        mapping_type: explicit-catalog-row
+    CA-010:
+      gherkin_condensado: Dado snapshot de histórico | Quando exportar | Então produzir PDF privado pesquisável com expiração
+        em 24 h.
+      dados_concretos: período de 30 dias
+      sa_da_exata: 202; depois COMPLETED
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 10
+        mapping_type: explicit-catalog-row
+    CA-011:
+      gherkin_condensado: Dado PDF expirado | Quando baixar | Então negar sem revelar armazenamento.
+      dados_concretos: agora>=expires_at
+      sa_da_exata: 410 RESOURCE_EXPIRED
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 11
+        mapping_type: explicit-catalog-row
+    CA-012:
+      gherkin_condensado: Dado recurso de outro titular | Quando acessar | Então retornar 404 e auditar tentativa.
+      dados_concretos: user A acessa id de B
+      sa_da_exata: 404 RESOURCE_NOT_FOUND
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 12
+        mapping_type: explicit-catalog-row
+    CA-013:
+      gherkin_condensado: Dada mutação confirmada com timeout no cliente | Quando repetir mesma chave | Então devolver snapshot
+        original.
+      dados_concretos: mesma chave e payload
+      sa_da_exata: mesmo status e corpo lógico
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 13
+        mapping_type: explicit-catalog-row
+    CA-014:
+      gherkin_condensado: Dada conta em exclusão | Quando worker de e-mail executar | Então não enviar e registrar supressão.
+      dados_concretos: User=DELETION_SCHEDULED
+      sa_da_exata: nenhum efeito externo
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 11
+        row_index: 14
+        mapping_type: explicit-catalog-row
+  errors_source:
+    ERR-001:
+      c_digo: VALIDATION_FAILED
+      http: '400'
+      mensagem_ao_usu_rio: Revise os campos destacados e tente novamente.
+      estado_resultante: estado preservado
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 1
+        mapping_type: explicit-catalog-row
+    ERR-002:
+      c_digo: AUTHENTICATION_REQUIRED
+      http: '401'
+      mensagem_ao_usu_rio: Sua sessão terminou. Entre novamente.
+      estado_resultante: sessão inválida
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 2
+        mapping_type: explicit-catalog-row
+    ERR-003:
+      c_digo: RESOURCE_NOT_FOUND
+      http: '404'
+      mensagem_ao_usu_rio: O item solicitado não foi encontrado.
+      estado_resultante: sem alteração
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 3
+        mapping_type: explicit-catalog-row
+    ERR-004:
+      c_digo: ACCOUNT_TEMPORARILY_LOCKED
+      http: '423'
+      mensagem_ao_usu_rio: Não foi possível entrar agora. Tente novamente após o período informado.
+      estado_resultante: conta bloqueada
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 4
+        mapping_type: explicit-catalog-row
+    ERR-005:
+      c_digo: VERSION_CONFLICT
+      http: '409'
+      mensagem_ao_usu_rio: Este plano foi alterado em outra sessão. Recarregue antes de tentar novamente.
+      estado_resultante: nenhum overwrite
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 5
+        mapping_type: explicit-catalog-row
+    ERR-006:
+      c_digo: IDEMPOTENCY_KEY_REUSED
+      http: '409'
+      mensagem_ao_usu_rio: A solicitação repetida contém dados diferentes.
+      estado_resultante: sem novo efeito
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 6
+        mapping_type: explicit-catalog-row
+    ERR-007:
+      c_digo: STATE_CONFLICT
+      http: '409'
+      mensagem_ao_usu_rio: Esta ocorrência já recebeu uma resposta.
+      estado_resultante: primeira resposta preservada
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 7
+        mapping_type: explicit-catalog-row
+    ERR-008:
+      c_digo: TOKEN_EXPIRED
+      http: '410'
+      mensagem_ao_usu_rio: Este link não pode mais ser usado. Solicite um novo.
+      estado_resultante: sem efeito
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 8
+        mapping_type: explicit-catalog-row
+    ERR-009:
+      c_digo: BUSINESS_RULE_VIOLATION
+      http: '422'
+      mensagem_ao_usu_rio: A operação não atende às regras informadas.
+      estado_resultante: sem alteração
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 9
+        mapping_type: explicit-catalog-row
+    ERR-010:
+      c_digo: RATE_LIMITED
+      http: '429'
+      mensagem_ao_usu_rio: Muitas tentativas. Aguarde o tempo informado e tente novamente.
+      estado_resultante: sem alteração
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 10
+        mapping_type: explicit-catalog-row
+    ERR-011:
+      c_digo: DEPENDENCY_UNAVAILABLE
+      http: '503'
+      mensagem_ao_usu_rio: O serviço está temporariamente indisponível. Tente novamente.
+      estado_resultante: não declarar sucesso
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 11
+        mapping_type: explicit-catalog-row
+    ERR-012:
+      c_digo: RESOURCE_EXPIRED
+      http: '410'
+      mensagem_ao_usu_rio: Este arquivo expirou. Solicite uma nova exportação.
+      estado_resultante: download negado
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 13
+        row_index: 12
+        mapping_type: explicit-catalog-row
+  sentinel_tests_source:
+    TS-001:
+      cen_rio: Concorrência TAKEN x NOT_TAKEN
+      resultado_esperado_proibido: uma resposta 201; outra 409; uma linha Response
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 1
+        mapping_type: explicit-catalog-row
+    TS-002:
+      cen_rio: Falha de e-mail
+      resultado_esperado_proibido: ocorrência não muda; EmailReminder FAILED auditado
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 2
+        mapping_type: explicit-catalog-row
+    TS-003:
+      cen_rio: Reexecução do gerador
+      resultado_esperado_proibido: nenhuma duplicata civil
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 3
+        mapping_type: explicit-catalog-row
+    TS-004:
+      cen_rio: Edição de plano
+      resultado_esperado_proibido: preserva iniciadas; cancela apenas futuras PROGRAMMED
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 4
+        mapping_type: explicit-catalog-row
+    TS-005:
+      cen_rio: Exclusão lógica
+      resultado_esperado_proibido: oculta plano; preserva histórico
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 5
+        mapping_type: explicit-catalog-row
+    TS-006:
+      cen_rio: Prazo sem canais
+      resultado_esperado_proibido: NO_RESPONSE ocorre mesmo sem e-mail/web
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 6
+        mapping_type: explicit-catalog-row
+    TS-007:
+      cen_rio: Resposta tardia
+      resultado_esperado_proibido: is_late=true e marco preservado
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 7
+        mapping_type: explicit-catalog-row
+    TS-008:
+      cen_rio: Acesso horizontal
+      resultado_esperado_proibido: titular A recebe 404 no recurso de B
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 8
+        mapping_type: explicit-catalog-row
+    TS-009:
+      cen_rio: Token usado/expirado
+      resultado_esperado_proibido: nenhum novo efeito
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 9
+        mapping_type: explicit-catalog-row
+    TS-010:
+      cen_rio: Servidor indisponível
+      resultado_esperado_proibido: UI não declara sucesso nem enfileira offline
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 10
+        mapping_type: explicit-catalog-row
+    TS-011:
+      cen_rio: PDF expirado
+      resultado_esperado_proibido: download retorna 410
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 11
+        mapping_type: explicit-catalog-row
+    TS-012:
+      cen_rio: CRM
+      resultado_esperado_proibido: somente valida formato, sem consulta externa
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 12
+        mapping_type: explicit-catalog-row
+    TS-013:
+      cen_rio: Resposta versus prazo
+      resultado_esperado_proibido: estado final consistente e único
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 13
+        mapping_type: explicit-catalog-row
+    TS-014:
+      cen_rio: Gerador versus edição
+      resultado_esperado_proibido: nenhum futuro inválido
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 14
+        mapping_type: explicit-catalog-row
+    TS-015:
+      cen_rio: Idempotência divergente
+      resultado_esperado_proibido: 409 ERR-006
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 15
+        mapping_type: explicit-catalog-row
+    TS-016:
+      cen_rio: Broker indisponível
+      resultado_esperado_proibido: outbox permanece após commit
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 16
+        mapping_type: explicit-catalog-row
+    TS-017:
+      cen_rio: Retomada worker
+      resultado_esperado_proibido: sem efeito funcional duplicado
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 17
+        mapping_type: explicit-catalog-row
+    TS-018:
+      cen_rio: Quarta sessão
+      resultado_esperado_proibido: rejeitada; expirações aplicadas
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 18
+        mapping_type: explicit-catalog-row
+    TS-019:
+      cen_rio: Link sem sessão
+      resultado_esperado_proibido: não enumera ocorrência
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 19
+        mapping_type: explicit-catalog-row
+    TS-020:
+      cen_rio: Snapshot PDF
+      resultado_esperado_proibido: edição posterior não altera PDF
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 20
+        mapping_type: explicit-catalog-row
+    TS-021:
+      cen_rio: Reenvio verificação
+      resultado_esperado_proibido: invalida token anterior
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 21
+        mapping_type: explicit-catalog-row
+    TS-022:
+      cen_rio: Acessibilidade
+      resultado_esperado_proibido: teclado, foco, zoom e leitura linear aprovados
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 22
+        mapping_type: explicit-catalog-row
+    TS-023:
+      cen_rio: BOLA/IDOR
+      resultado_esperado_proibido: todas as rotas privadas cobertas
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 23
+        mapping_type: explicit-catalog-row
+    TS-024:
+      cen_rio: DST
+      resultado_esperado_proibido: horários inexistentes/ambíguos seguem regra
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 24
+        mapping_type: explicit-catalog-row
+    TS-025:
+      cen_rio: Constraints
+      resultado_esperado_proibido: estados inválidos rejeitados
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 25
+        mapping_type: explicit-catalog-row
+    TS-026:
+      cen_rio: Exclusão de conta
+      resultado_esperado_proibido: acesso bloqueado, artefatos removidos
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 26
+        mapping_type: explicit-catalog-row
+    TS-027:
+      cen_rio: Edição no instante
+      resultado_esperado_proibido: scheduled_at<=action_at preservada
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 27
+        mapping_type: explicit-catalog-row
+    TS-028:
+      cen_rio: Conta pendente antiga
+      resultado_esperado_proibido: removida sem órfãos
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 28
+        mapping_type: explicit-catalog-row
+    TS-029:
+      cen_rio: Restore
+      resultado_esperado_proibido: tombstone impede recriação
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 29
+        mapping_type: explicit-catalog-row
+    TS-030:
+      cen_rio: Incidente
+      resultado_esperado_proibido: registro, contenção, decisão e relatório
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 30
+        mapping_type: explicit-catalog-row
+    TS-031:
+      cen_rio: Rotação de chave
+      resultado_esperado_proibido: leitura autorizada mantida
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 31
+        mapping_type: explicit-catalog-row
+    TS-032:
+      cen_rio: Direito externo
+      resultado_esperado_proibido: protocolo sem exposição em logs
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 32
+        mapping_type: explicit-catalog-row
+    TS-033:
+      cen_rio: Bloqueio login
+      resultado_esperado_proibido: 423 estável após 5 falhas
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 33
+        mapping_type: explicit-catalog-row
+    TS-034:
+      cen_rio: Evento atrasado
+      resultado_esperado_proibido: nenhum e-mail após resposta/exclusão
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 34
+        mapping_type: explicit-catalog-row
+    TS-035:
+      cen_rio: Entrega incerta
+      resultado_esperado_proibido: DELIVERY_UNKNOWN sem reenvio cego
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 35
+        mapping_type: explicit-catalog-row
+    TS-036:
+      cen_rio: Senha comprometida
+      resultado_esperado_proibido: rejeitada sem log/chamada remota
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 36
+        mapping_type: explicit-catalog-row
+    TS-037:
+      cen_rio: Plano excluído
+      resultado_esperado_proibido: invisível operacionalmente, presente em snapshot
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 37
+        mapping_type: explicit-catalog-row
+    TS-038:
+      cen_rio: Matriz idempotência
+      resultado_esperado_proibido: replay igual e conflito divergente
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 38
+        mapping_type: explicit-catalog-row
+    TS-039:
+      cen_rio: Desempenho
+      resultado_esperado_proibido: evidência sem perfil é inválida
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 39
+        mapping_type: explicit-catalog-row
+    TS-040:
+      cen_rio: Contrato
+      resultado_esperado_proibido: OpenAPI, implementação e testes não divergem
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 16
+        row_index: 40
+        mapping_type: explicit-catalog-row
+  production_gates_source:
+    GX-001:
+      gate: Controlador, operadores e base legal por finalidade
+      evid_ncia_obrigat_ria: registro de operações e parecer aprovado
+      bloqueia: produção
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 15
+        row_index: 1
+        mapping_type: explicit-catalog-row
+    GX-002:
+      gate: Aviso de privacidade, termos, canal e direitos
+      evid_ncia_obrigat_ria: textos versionados e aceite rastreável
+      bloqueia: produção
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 15
+        row_index: 2
+        mapping_type: explicit-catalog-row
+    GX-003:
+      gate: Tabela de retenção, backups, idempotência e tombstone
+      evid_ncia_obrigat_ria: tabela aprovada e teste de expurgo/restore
+      bloqueia: produção
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 15
+        row_index: 3
+        mapping_type: explicit-catalog-row
+    GX-004:
+      gate: Avaliação de impacto, transferências e contratos
+      evid_ncia_obrigat_ria: relatório e contratos aprovados
+      bloqueia: produção
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 15
+        row_index: 4
+        mapping_type: explicit-catalog-row
+    GX-005:
+      gate: RPO/RTO e operação
+      evid_ncia_obrigat_ria: aprovação formal, alertas e runbooks
+      bloqueia: produção
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 15
+        row_index: 5
+        mapping_type: explicit-catalog-row
+    GX-006:
+      gate: Incidentes e fornecedores
+      evid_ncia_obrigat_ria: exercício, contatos, preservação de evidências
+      bloqueia: produção
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        table_index: 15
+        row_index: 6
+        mapping_type: explicit-catalog-row
