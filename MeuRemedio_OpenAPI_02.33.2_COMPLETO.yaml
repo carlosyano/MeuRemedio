@@ -1,14 +1,19 @@
-# MeuRemedio OpenAPI 02.33.1 - completo
-# Base: MeuRemedio_OpenAPI_02.33_REVISADO.yaml
-# Correcao: DELETE /sessions com requestBody substituido por POST /sessions/revocations.
-# Mantem reautenticacao e Idempotency-Key para revogacao global de sessoes.
+# MeuRemedio OpenAPI 02.33.2 - completo
+# Base: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+# Mudancas 02.33.2: CSRF (csrfToken/Origin/403); 409 SESSION_LIMIT_REACHED em createSession; confirmacao de duplicidade em createPlan
+# (DuplicateConfirmationProblem + duplicate_confirmation_token); enum fechado em Problem.code; 429 em todas as operacoes (exceto getHealth);
+# examples multiplos em Conflict/Gone; rastreabilidade ampliada; schema orfao Accepted removido.
+# Mantem as 27 operacoes e os operationId da 02.33.1.
 openapi: 3.1.1
 info:
   title: MeuRemedio API
-  version: 02.33.1
-  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.1
+  version: 02.33.2
+  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.2
   description: API declaratoria para conta individual, planos de medicamentos, ocorrencias, respostas, historico,
     exportacoes e privacidade. Nao prescreve, nao valida medicamentos ou interacoes e nao substitui orientacao profissional.
+    Todas as mutacoes autenticadas exigem protecao CSRF (cookie mr_csrf + cabecalho X-CSRF-Token) e validacao do
+    cabecalho Origin; a API nao habilita CORS para origens fora da lista configurada do ambiente (same-site com
+    a aplicacao web).
   contact:
     name: Canal do produto a definir em GX-002
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
@@ -78,6 +83,8 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Cria conta PENDING_VERIFICATION e emite token de verificacao (24 h). Resposta nao revela se o
+        e-mail ja existe alem do 409 contratual.
   /accounts/verify:
     post:
       tags:
@@ -111,6 +118,8 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Consome o token de verificacao e ativa a conta de forma atomica. Token ja consumido nao produz
+        novo efeito.
   /accounts/verification-resends:
     post:
       tags:
@@ -145,6 +154,7 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Resposta neutra (202) independente da existencia da conta; invalida o token anterior.
   /password-reset-requests:
     post:
       tags:
@@ -178,6 +188,8 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: 'Resposta neutra (202) independente da existencia da conta. Token de redefinicao: uso unico,
+        validade de 60 min.'
   /password-resets:
     post:
       tags:
@@ -211,6 +223,7 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Troca a senha com token valido e revoga todas as sessoes da conta.
   /sessions:
     post:
       tags:
@@ -223,6 +236,8 @@ paths:
           headers:
             X-Correlation-ID:
               $ref: '#/components/headers/CorrelationId'
+            Set-Cookie:
+              $ref: '#/components/headers/SetCookie'
           content:
             application/json:
               schema:
@@ -233,6 +248,8 @@ paths:
           $ref: '#/components/responses/Locked'
         '429':
           $ref: '#/components/responses/RateLimited'
+        '409':
+          $ref: '#/components/responses/SessionLimitReached'
       security: []
       requestBody:
         required: true
@@ -251,6 +268,9 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Falhas por e-mail inexistente e por senha incorreta sao indistinguiveis (401). O contador de
+        falhas (5 em 15 min) e mantido por hash do e-mail normalizado, inclusive para e-mails inexistentes, e o
+        bloqueio retorna sempre 423 com Retry-After. A 4a sessao ativa retorna 409 SESSION_LIMIT_REACHED.
   /sessions/current:
     delete:
       tags:
@@ -260,15 +280,29 @@ paths:
       responses:
         '204':
           description: Sessao revogada de forma idempotente
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/SetCookie'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       x-traceability:
       - RF-002
+      - CA-018
+      - TS-041
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
+      description: Revoga a sessao atual de forma idempotente e limpa os cookies mr_session e mr_csrf.
   /preferences/accessibility:
     get:
       tags:
@@ -287,11 +321,16 @@ paths:
                 $ref: '#/components/schemas/AccessibilityPreferences'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
+      x-traceability:
+      - RF-009
+      description: Retorna as preferencias de acessibilidade do titular autenticado.
     put:
       tags:
       - Accounts
@@ -311,6 +350,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       requestBody:
         required: true
         content:
@@ -320,11 +363,18 @@ paths:
       x-traceability:
       - RF-009
       - TS-022
+      - CA-018
+      - TS-041
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
+      description: Substitui as preferencias de acessibilidade do titular autenticado.
   /plans:
     get:
       tags:
@@ -345,6 +395,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       parameters:
       - $ref: '#/components/parameters/Cursor'
       - $ref: '#/components/parameters/Limit'
@@ -356,6 +408,8 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Lista planos ACTIVE do titular com paginacao por cursor (padrao 20, maximo 100). Planos DELETED
+        nao sao listados.
     post:
       tags:
       - Plans
@@ -378,11 +432,13 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '409':
-          $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/ConflictOrDuplicateConfirmation'
         '422':
           $ref: '#/components/responses/Unprocessable'
         '429':
           $ref: '#/components/responses/RateLimited'
+        '403':
+          $ref: '#/components/responses/Forbidden'
       parameters:
       - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -397,13 +453,23 @@ paths:
       - TS-003
       - TS-015
       - TS-038
-      description: Se houver candidato de duplicidade, retorna 409 BUSINESS_RULE_VIOLATION com codigo DUPLICATE_CONFIRMATION_REQUIRED;
-        o cliente repete com os dados confirmados conforme contrato de produto.
+      - CA-018
+      - TS-041
+      - CA-017
+      - TS-043
+      description: Se houver candidato de duplicidade e o corpo nao trouxer duplicate_confirmation_token valido,
+        retorna 409 com code DUPLICATE_CONFIRMATION_REQUIRED (schema DuplicateConfirmationProblem). Esse 409 nao
+        e persistido como snapshot de idempotencia; a confirmacao e reenviada com o token e uma NOVA Idempotency-Key.
+        A verificacao de duplicidade aplica-se somente a criacao.
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
   /plans/{plan_id}:
     get:
       tags:
@@ -426,6 +492,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       parameters:
       - $ref: '#/components/parameters/PlanId'
       x-traceability:
@@ -437,6 +505,8 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Retorna plano ACTIVE do titular com ETag. Recurso inexistente, excluido ou de outro titular retorna
+        404.
     put:
       tags:
       - Plans
@@ -464,6 +534,10 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/Unprocessable'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       parameters:
       - $ref: '#/components/parameters/PlanId'
       - $ref: '#/components/parameters/IfMatch'
@@ -481,13 +555,19 @@ paths:
       - TS-014
       - TS-027
       - TS-038
+      - CA-018
+      - TS-041
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
-      description: Controle de concorrencia otimista obrigatorio via ETag e If-Match. O row_version e interno a
-        persistencia e e representado externamente pelo ETag. Versao divergente retorna 409 VERSION_CONFLICT.
+      - CSRF X-CSRF-Token + Origin
+      description: 'Concorrencia otimista: If-Match ausente ou malformado retorna 400 VALIDATION_FAILED; ETag obsoleto
+        retorna 409 VERSION_CONFLICT. O cliente nao envia row_version nem expected_row_version.'
+      security:
+      - sessionCookie: []
+        csrfToken: []
     delete:
       tags:
       - Plans
@@ -500,17 +580,28 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       parameters:
       - $ref: '#/components/parameters/PlanId'
       x-traceability:
       - RF-003
       - TS-005
       - TS-037
+      - CA-018
+      - TS-041
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
+      description: 'Exclusao logica: cancela ocorrencias futuras PROGRAMMED e preserva snapshots historicos.'
   /occurrences:
     get:
       tags:
@@ -531,6 +622,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       parameters:
       - name: status
         in: query
@@ -552,6 +645,7 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Lista ocorrencias do titular, filtravel por status, ordenadas e paginadas por cursor.
   /occurrences/{occurrence_id}/responses:
     post:
       tags:
@@ -578,6 +672,10 @@ paths:
           $ref: '#/components/responses/Conflict'
         '410':
           $ref: '#/components/responses/Gone'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       parameters:
       - $ref: '#/components/parameters/OccurrenceId'
       - $ref: '#/components/parameters/IdempotencyKey'
@@ -595,11 +693,19 @@ paths:
       - TS-007
       - TS-013
       - TS-038
+      - CA-018
+      - TS-041
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
+      description: 'Registra a primeira resposta TAKEN/NOT_TAKEN da ocorrencia. Respostas concorrentes: uma 201
+        e as demais 409 STATE_CONFLICT.'
   /history:
     get:
       tags:
@@ -620,6 +726,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       parameters:
       - name: start
         in: query
@@ -641,6 +749,8 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Historico por periodo civil inclusivo de ate 12 meses (intervalo semiaberto no fuso da conta),
+        em ordem decrescente.
   /exports:
     post:
       tags:
@@ -667,6 +777,8 @@ paths:
           $ref: '#/components/responses/Unprocessable'
         '429':
           $ref: '#/components/responses/RateLimited'
+        '403':
+          $ref: '#/components/responses/Forbidden'
       parameters:
       - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -680,11 +792,18 @@ paths:
       - CA-010
       - TS-020
       - TS-038
+      - CA-018
+      - TS-041
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
+      description: Solicita PDF privado a partir de snapshot do historico; processamento assincrono (202).
   /exports/{export_id}:
     get:
       tags:
@@ -705,6 +824,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       parameters:
       - $ref: '#/components/parameters/ExportId'
       x-traceability:
@@ -714,12 +835,13 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Consulta o estado da exportacao do titular.
     delete:
       tags:
       - Exports
       summary: Cancelar exportacao
       operationId: cancelExport
-      description: Cancela exportacao em estado REQUESTED ou PROCESSING. Estados terminais retornam conflito.
+      description: Permitido em REQUESTED ou PROCESSING (-> CANCELED). Estados terminais retornam 409 STATE_CONFLICT.
       responses:
         '204':
           description: Exportacao cancelada
@@ -729,15 +851,27 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       parameters:
       - $ref: '#/components/parameters/ExportId'
       x-traceability:
       - RF-008
-      x-security-requirements: &id001
+      - CA-018
+      - TS-041
+      - CA-016
+      - TS-042
+      x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
   /exports/{export_id}/file:
     get:
       tags:
@@ -770,6 +904,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '410':
           $ref: '#/components/responses/Gone'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       parameters:
       - $ref: '#/components/parameters/ExportId'
       x-traceability:
@@ -783,6 +919,7 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Baixa o PDF enquanto COMPLETED e nao expirado; apos expires_at retorna 410 RESOURCE_EXPIRED.
   /privacy:
     get:
       tags:
@@ -801,6 +938,8 @@ paths:
                 $ref: '#/components/schemas/PrivacySummary'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       x-traceability:
       - RF-010
       - RF-011
@@ -809,6 +948,7 @@ paths:
       - UTF-8
       - application/problem+json
       - correlation_id
+      description: Retorna direitos automatizados, canal externo de direitos e prazos de retencao vigentes.
   /account-deletions:
     post:
       tags:
@@ -831,6 +971,8 @@ paths:
           $ref: '#/components/responses/Conflict'
         '429':
           $ref: '#/components/responses/RateLimited'
+        '403':
+          $ref: '#/components/responses/Forbidden'
       parameters:
       - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -845,11 +987,19 @@ paths:
       - TS-026
       - TS-029
       - TS-038
+      - CA-018
+      - TS-041
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
+      description: Exige reautenticacao e confirmacao textual; bloqueia o acesso de imediato e agenda o expurgo
+        em ate 30 dias.
   /health:
     get:
       tags:
@@ -872,7 +1022,8 @@ paths:
       security: []
       x-traceability:
       - RNF-015
-      description: Nao expor versoes, segredos, dependencias internas ou dados pessoais.
+      description: Isento de rate limit para sondas de infraestrutura. Retorna DEGRADED quando o desvio de relogio
+        excede CLOCK_SKEW_MAX_MS (RNF-015).
       x-security-requirements:
       - TLS 1.3
       - UTF-8
@@ -896,9 +1047,17 @@ paths:
                 $ref: '#/components/schemas/AccountProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       x-traceability:
       - RF-001
-      x-security-requirements: *id001
+      - CA-015
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+      description: Retorna o perfil do titular autenticado.
     put:
       tags:
       - Accounts
@@ -919,6 +1078,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       requestBody:
         required: true
         content:
@@ -927,7 +1090,18 @@ paths:
               $ref: '#/components/schemas/UpdateAccountRequest'
       x-traceability:
       - RF-001
-      x-security-requirements: *id001
+      - CA-018
+      - TS-041
+      - CA-015
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
   /sessions/revocations:
     post:
       tags:
@@ -943,6 +1117,8 @@ paths:
           $ref: '#/components/responses/Conflict'
         '429':
           $ref: '#/components/responses/RateLimited'
+        '403':
+          $ref: '#/components/responses/Forbidden'
       parameters:
       - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -953,17 +1129,37 @@ paths:
               $ref: '#/components/schemas/ReauthenticationRequest'
       x-traceability:
       - RF-002
+      - CA-018
+      - TS-041
+      - TS-044
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
+      description: Exige reautenticacao (senha), Idempotency-Key e CSRF. Senha incorreta retorna 401. Revoga todas
+        as sessoes, inclusive a atual.
 components:
   securitySchemes:
     sessionCookie:
       type: apiKey
       in: cookie
       name: mr_session
+      description: 'Cookie opaco mr_session emitido por createSession: HttpOnly; Secure; SameSite=Lax; Path=/; sem
+        atributo Domain; expira por inatividade (30 min) e duracao absoluta (24 h). Revogado por deleteCurrentSession
+        e revokeAllSessions.'
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: 'Protecao CSRF por double-submit: createSession emite o cookie mr_csrf (Secure; SameSite=Lax;
+        Path=/; legivel por JavaScript) com token HMAC vinculado a sessao; o cliente reenvia o valor em X-CSRF-Token.
+        Exigido em toda mutacao autenticada. O servidor tambem valida Origin (ou Sec-Fetch-Site) contra a lista
+        de origens do ambiente. Falha: 403 CSRF_VALIDATION_FAILED.'
   parameters:
     IdempotencyKey:
       name: Idempotency-Key
@@ -1027,6 +1223,10 @@ components:
       schema:
         type: string
         pattern: ^"[1-9]\d*"$
+    SetCookie:
+      description: Define/limpa mr_session (HttpOnly) e mr_csrf conforme sessionCookie/csrfToken.
+      schema:
+        type: string
   schemas:
     Uuid:
       type: string
@@ -1044,6 +1244,8 @@ components:
       maxLength: 64
       examples:
       - America/Sao_Paulo
+      description: Identificador IANA canonico reconhecido pela versao de tzdata fixada na plataforma (Node/ICU).
+        Imutavel apos a criacao da conta.
     LocalTime:
       type: string
       pattern: ^(?:[01]\d|2[0-3]):[0-5]\d$
@@ -1085,6 +1287,24 @@ components:
         code:
           type: string
           pattern: ^[A-Z][A-Z0-9_]{2,63}$
+          enum:
+          - VALIDATION_FAILED
+          - AUTHENTICATION_REQUIRED
+          - RESOURCE_NOT_FOUND
+          - ACCOUNT_TEMPORARILY_LOCKED
+          - VERSION_CONFLICT
+          - IDEMPOTENCY_KEY_REUSED
+          - STATE_CONFLICT
+          - TOKEN_EXPIRED
+          - BUSINESS_RULE_VIOLATION
+          - RATE_LIMITED
+          - DEPENDENCY_UNAVAILABLE
+          - RESOURCE_EXPIRED
+          - SESSION_LIMIT_REACHED
+          - DUPLICATE_CONFIRMATION_REQUIRED
+          - CSRF_VALIDATION_FAILED
+          description: Catalogo fechado ERR-001..ERR-015 da Especificacao Funcional 02.33. Codigos novos exigem
+            atualizacao contratual.
         detail:
           type: string
           maxLength: 500
@@ -1117,6 +1337,8 @@ components:
         code:
           type: string
           maxLength: 64
+          description: 'Codigo de validacao por campo. Valores reservados: PASSWORD_COMPROMISED (senha presente
+            na lista local de senhas comprometidas).'
         message:
           type: string
           maxLength: 200
@@ -1139,19 +1361,6 @@ components:
       required:
       - next_cursor
       - limit
-    Accepted:
-      type: object
-      additionalProperties: false
-      properties:
-        request_id:
-          $ref: '#/components/schemas/Uuid'
-        status:
-          type: string
-          enum:
-          - REQUESTED
-      required:
-      - request_id
-      - status
     Message:
       type: object
       additionalProperties: false
@@ -1183,6 +1392,8 @@ components:
           maxLength: 72
           writeOnly: true
           pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{10,72}$
+          description: Senha presente na lista local de senhas comprometidas e rejeitada com 400 VALIDATION_FAILED
+            (field_errors[].code=PASSWORD_COMPROMISED), sem consulta remota.
         account_timezone:
           $ref: '#/components/schemas/Timezone'
         terms_version:
@@ -1293,6 +1504,8 @@ components:
           maxLength: 72
           writeOnly: true
           pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{10,72}$
+          description: Senha presente na lista local de senhas comprometidas e rejeitada com 400 VALIDATION_FAILED
+            (field_errors[].code=PASSWORD_COMPROMISED), sem consulta remota.
       required:
       - token
       - new_password
@@ -1384,7 +1597,7 @@ components:
           minItems: 1
           maxItems: 10
           uniqueItems: true
-      required:
+      required: &id001
       - medication_name
       - dose_text
       - medication_form
@@ -1392,8 +1605,57 @@ components:
       - start_date
       - schedule_times
     CreatePlanRequest:
-      allOf:
-      - $ref: '#/components/schemas/PlanWrite'
+      type: object
+      additionalProperties: false
+      properties:
+        medication_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        dose_text:
+          type: string
+          minLength: 1
+          maxLength: 80
+        medication_form:
+          $ref: '#/components/schemas/MedicationForm'
+        administration_route:
+          $ref: '#/components/schemas/AdministrationRoute'
+        instructions:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        prescriber_name:
+          anyOf:
+          - type: string
+            maxLength: 120
+          - type: 'null'
+        prescriber_crm:
+          anyOf:
+          - type: string
+            pattern: ^[A-Z]{2}-\d{4,10}$
+            maxLength: 13
+          - type: 'null'
+        start_date:
+          $ref: '#/components/schemas/Date'
+        end_date:
+          anyOf:
+          - $ref: '#/components/schemas/Date'
+          - type: 'null'
+        schedule_times:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalTime'
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+        duplicate_confirmation_token:
+          type: string
+          minLength: 16
+          maxLength: 256
+          description: Informar apenas ao confirmar a criacao apos 409 DUPLICATE_CONFIRMATION_REQUIRED. Reenviar
+            com NOVA Idempotency-Key.
+      required: *id001
     UpdatePlanRequest:
       allOf:
       - $ref: '#/components/schemas/PlanWrite'
@@ -1507,6 +1769,10 @@ components:
       required:
       - confirmation_token
       - candidates
+      description: 'Token opaco de uso unico, TTL 10 min, vinculado ao titular e ao hash do payload (sem o proprio
+        token). Candidato a duplicidade: plano ACTIVE do mesmo titular com medication_name e dose_text iguais apos
+        normalizacao (trim, colapso de espacos, remocao de diacriticos, case-insensitive) e periodos [start_date,
+        end_date|infinito) com intersecao.'
     OccurrenceStatus:
       type: string
       enum:
@@ -1859,6 +2125,46 @@ components:
           maxLength: 120
       required:
       - name
+    DuplicateConfirmationProblem:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+          maxLength: 200
+        status:
+          const: 409
+        code:
+          const: DUPLICATE_CONFIRMATION_REQUIRED
+        detail:
+          type: string
+          maxLength: 500
+        instance:
+          type: string
+          format: uri-reference
+        correlation_id:
+          type: string
+          format: uuid
+        field_errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+          maxItems: 100
+        duplicate_confirmation:
+          $ref: '#/components/schemas/DuplicateConfirmation'
+      required:
+      - type
+      - title
+      - status
+      - code
+      - detail
+      - instance
+      - correlation_id
+      - duplicate_confirmation
+      description: Problem 409 com dados para confirmar a criacao de plano potencialmente duplicado.
   responses:
     BadRequest:
       description: Requisicao invalida
@@ -1912,7 +2218,7 @@ components:
             instance: /example
             correlation_id: 11111111-1111-4111-8111-111111111111
     Conflict:
-      description: Conflito de estado
+      description: 'Conflito de estado. Codigos possiveis: STATE_CONFLICT, VERSION_CONFLICT, IDEMPOTENCY_KEY_REUSED.'
       headers:
         X-Correlation-ID:
           $ref: '#/components/headers/CorrelationId'
@@ -1920,16 +2226,37 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/Problem'
-          example:
-            type: https://api.example.invalid/problems/state_conflict
-            title: Conflito de estado
-            status: 409
-            code: STATE_CONFLICT
-            detail: Conflito de estado
-            instance: /example
-            correlation_id: 11111111-1111-4111-8111-111111111111
+          examples:
+            state_conflict:
+              value:
+                type: https://api.example.invalid/problems/state_conflict
+                title: Conflito de estado
+                status: 409
+                code: STATE_CONFLICT
+                detail: Conflito de estado
+                instance: /example
+                correlation_id: 11111111-1111-4111-8111-111111111111
+            version_conflict:
+              value:
+                type: https://api.example.invalid/problems/version_conflict
+                title: Versao do recurso divergente
+                status: 409
+                code: VERSION_CONFLICT
+                detail: Versao do recurso divergente
+                instance: /example
+                correlation_id: 11111111-1111-4111-8111-111111111111
+            idempotency_key_reused:
+              value:
+                type: https://api.example.invalid/problems/idempotency_key_reused
+                title: Idempotency-Key reutilizada com payload diferente
+                status: 409
+                code: IDEMPOTENCY_KEY_REUSED
+                detail: Idempotency-Key reutilizada com payload diferente
+                instance: /example
+                correlation_id: 11111111-1111-4111-8111-111111111111
     Gone:
-      description: Recurso expirado ou inutilizavel
+      description: Recurso expirado ou inutilizavel. TOKEN_EXPIRED nas operacoes de verificacao/redefinicao; RESOURCE_EXPIRED
+        nas demais.
       headers:
         X-Correlation-ID:
           $ref: '#/components/headers/CorrelationId'
@@ -1937,14 +2264,25 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/Problem'
-          example:
-            type: https://api.example.invalid/problems/resource_expired
-            title: Recurso expirado ou inutilizavel
-            status: 410
-            code: RESOURCE_EXPIRED
-            detail: Recurso expirado ou inutilizavel
-            instance: /example
-            correlation_id: 11111111-1111-4111-8111-111111111111
+          examples:
+            resource_expired:
+              value:
+                type: https://api.example.invalid/problems/resource_expired
+                title: Recurso expirado
+                status: 410
+                code: RESOURCE_EXPIRED
+                detail: Recurso expirado
+                instance: /example
+                correlation_id: 11111111-1111-4111-8111-111111111111
+            token_expired:
+              value:
+                type: https://api.example.invalid/problems/token_expired
+                title: Token expirado ou ja utilizado
+                status: 410
+                code: TOKEN_EXPIRED
+                detail: Token expirado ou ja utilizado
+                instance: /example
+                correlation_id: 11111111-1111-4111-8111-111111111111
     Locked:
       description: Conta temporariamente bloqueada
       headers:
@@ -2019,3 +2357,73 @@ components:
             detail: Dependencia indisponivel
             instance: /example
             correlation_id: 11111111-1111-4111-8111-111111111111
+    Forbidden:
+      description: Validacao CSRF ou de origem falhou
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/csrf_validation_failed
+            title: Validacao CSRF ou de origem falhou
+            status: 403
+            code: CSRF_VALIDATION_FAILED
+            detail: Validacao CSRF ou de origem falhou
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111
+    SessionLimitReached:
+      description: Limite de 3 sessoes ativas atingido
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.example.invalid/problems/session_limit_reached
+            title: Limite de 3 sessoes ativas atingido
+            status: 409
+            code: SESSION_LIMIT_REACHED
+            detail: Limite de 3 sessoes ativas atingido
+            instance: /example
+            correlation_id: 11111111-1111-4111-8111-111111111111
+    ConflictOrDuplicateConfirmation:
+      description: Conflito de idempotencia/estado (Problem) ou confirmacao de possivel duplicidade exigida (DuplicateConfirmationProblem).
+      headers:
+        X-Correlation-ID:
+          $ref: '#/components/headers/CorrelationId'
+      content:
+        application/problem+json:
+          schema:
+            oneOf:
+            - $ref: '#/components/schemas/Problem'
+            - $ref: '#/components/schemas/DuplicateConfirmationProblem'
+          examples:
+            idempotency_key_reused:
+              value:
+                type: https://api.example.invalid/problems/idempotency_key_reused
+                title: Idempotency-Key reutilizada com payload diferente
+                status: 409
+                code: IDEMPOTENCY_KEY_REUSED
+                detail: Idempotency-Key reutilizada com payload diferente
+                instance: /example
+                correlation_id: 11111111-1111-4111-8111-111111111111
+            duplicate_confirmation_required:
+              value:
+                type: https://api.example.invalid/problems/duplicate_confirmation_required
+                title: Possivel plano duplicado
+                status: 409
+                code: DUPLICATE_CONFIRMATION_REQUIRED
+                detail: Confirme a criacao reenviando duplicate_confirmation_token.
+                instance: /plans
+                correlation_id: 11111111-1111-4111-8111-111111111111
+                duplicate_confirmation:
+                  confirmation_token: dup_0123456789abcdef0123456789abcdef
+                  candidates:
+                  - plan_id: 22222222-2222-4222-8222-222222222222
+                    medication_name: Comprimido
+                    dose_text: 1 comprimido

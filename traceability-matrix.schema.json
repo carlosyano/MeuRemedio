@@ -92,7 +92,7 @@
       "propertyNames": {
         "pattern": "^RNF-\\d{3}$"
       },
-      "maxProperties": 15
+      "maxProperties": 16
     },
     "acceptance_criteria": {
       "type": "object",
@@ -246,7 +246,7 @@
     "business_rules": {
       "type": "object",
       "minProperties": 15,
-      "maxProperties": 15,
+      "maxProperties": 19,
       "propertyNames": {
         "pattern": "^RN-\\d{3}$"
       }
@@ -262,7 +262,7 @@
     "flows": {
       "type": "object",
       "minProperties": 4,
-      "maxProperties": 4,
+      "maxProperties": 5,
       "propertyNames": {
         "pattern": "^FL-\\d{3}$"
       }
@@ -286,7 +286,7 @@
     "decisions": {
       "type": "object",
       "minProperties": 10,
-      "maxProperties": 10,
+      "maxProperties": 25,
       "propertyNames": {
         "pattern": "^DEC-\\d{3}$"
       }

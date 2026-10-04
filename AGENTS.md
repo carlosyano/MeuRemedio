@@ -2,12 +2,12 @@
 
 ## Política operacional para agentes de desenvolvimento, testes e integração contínua
 
-**Versão:** 1.2  
+**Versão:** 1.3  
 **Status:** Baseline operacional aprovada  
-**Baseline contratual:** OpenAPI 02.33.1  
-**Baseline funcional:** Especificação Funcional 02.32  
-**Baseline arquitetural:** ADR-001 v1.4  
-**Última atualização:** 21/09/2026
+**Baseline contratual:** OpenAPI 02.33.2  
+**Baseline funcional:** Especificação Funcional 02.33  
+**Baseline arquitetural:** ADR-001 v1.5  
+**Última atualização:** 04/10/2026
 
 ---
 
@@ -31,9 +31,9 @@ São requisitos obrigatórios:
 
 A prevalência deverá ser determinada de acordo com o assunto tratado.
 
-### 2.1 OpenAPI 02.33.1
+### 2.1 OpenAPI 02.33.2
 
-A OpenAPI 02.33.1 deverá prevalecer para:
+A OpenAPI 02.33.2 deverá prevalecer para:
 
 - rotas;
 - métodos HTTP;
@@ -45,9 +45,9 @@ A OpenAPI 02.33.1 deverá prevalecer para:
 - códigos HTTP;
 - contratos de erro.
 
-### 2.2 Especificação Funcional 02.32
+### 2.2 Especificação Funcional 02.33
 
-A Especificação Funcional 02.32 deverá prevalecer para:
+A Especificação Funcional 02.33 deverá prevalecer para:
 
 - regras de negócio;
 - requisitos funcionais, identificados por RF;
@@ -58,9 +58,9 @@ A Especificação Funcional 02.32 deverá prevalecer para:
 - testes sentinela, identificados por TS;
 - mensagens funcionais.
 
-### 2.3 ADR-001 v1.4
+### 2.3 ADR-001 v1.5
 
-A ADR-001 v1.4 deverá prevalecer para:
+A ADR-001 v1.5 deverá prevalecer para:
 
 - arquitetura;
 - stack tecnológica;
@@ -85,10 +85,10 @@ Quando houver conflito entre documentos, deverá ser aplicada a seguinte regra:
 Para a superfície HTTP, deverá ser utilizado exclusivamente o seguinte contrato:
 
 ```text
-MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
 ```
 
-Reproduções históricas da OpenAPI 02.32 não deverão ser utilizadas como fonte normativa para:
+Reproduções históricas da OpenAPI (02.32, 02.33 e 02.33.1) não deverão ser utilizadas como fonte normativa para:
 
 - implementação;
 - geração de código;
@@ -228,6 +228,14 @@ Toda exceção deverá registrar, quando aplicável e sem exposição de dados p
 A automação de CI/CD deverá utilizar GitHub Actions, salvo decisão arquitetural formal em sentido diverso.
 
 Tecnologias adicionais não deverão ser introduzidas sem justificativa técnica documentada e, quando alterarem a baseline, sem decisão arquitetural formal.
+
+### 5.8 Toolchain e ambientes
+
+- Node.js 24 (LTS) fixado em `.nvmrc`, com reavaliação do Node 26 após sua promoção a LTS (ADR-001 v1.5, OA-010);
+- npm com `package-lock.json` versionado e `npm ci` na pipeline;
+- PostgreSQL 17 no RDS e nos testes (`postgres:17` via Testcontainers);
+- versões das bibliotecas da stack fixadas por lockfile e registradas em `docs/architecture/TOOLCHAIN.md` no início da fundação técnica;
+- o fuso IANA depende da versão de tzdata da plataforma, que deverá ser fixada e coberta pelo TS-024.
 
 ---
 
@@ -415,6 +423,12 @@ O conjunto mínimo bloqueador da fundação técnica deverá conter:
 - TS-038;
 - TS-040.
 
+Adicionalmente, o QG-004 exige TS-016 e TS-017 e o QG-009 exige TS-008 e TS-023 já na fundação técnica. O conjunto efetivo bloqueador da fundação é, portanto:
+
+- TS-001, TS-008, TS-015, TS-016, TS-017, TS-023, TS-024, TS-038 e TS-040.
+
+Os cenários e as fixtures destes testes estão em `docs/specifications/P0_SENTINEL_TESTS.md`.
+
 Os demais testes sentinela deverão tornar-se bloqueadores à medida que o respectivo domínio ou requisito for incluído no escopo da entrega.
 
 Nenhum requisito deverá ser considerado concluído sem a cobertura dos testes sentinela associados.
@@ -425,7 +439,7 @@ Os testes sentinela não deverão ser removidos, ignorados ou marcados como inst
 
 ## 12. Concorrência
 
-Na OpenAPI 02.33.1, a operação abaixo deverá utilizar concorrência otimista:
+Na OpenAPI 02.33.2, a operação abaixo deverá utilizar concorrência otimista:
 
 ```http
 PUT /plans/{plan_id}
@@ -563,7 +577,7 @@ A implementação deverá assegurar:
 - TLS 1.3 em trânsito;
 - criptografia em repouso;
 - `correlation_id` nas respostas e registros aplicáveis;
-- proteção CSRF nas mutações autenticadas;
+- proteção CSRF nas mutações autenticadas (cookie `mr_csrf` com `X-CSRF-Token` e validação de `Origin`, conforme ADR-001 v1.5 OA-008 e OpenAPI 02.33.2);
 - ownership validado no servidor;
 - menor privilégio;
 - gestão segura de segredos;
@@ -1139,7 +1153,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
       - run: npm run security
+
+  ownership:
+    name: QG-009 Ownership
+    needs: integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:ownership
 
   dependencies:
     name: QG-006 Dependencies
@@ -1201,6 +1233,7 @@ jobs:
     name: QG-011 Traceability
     needs:
       - contract
+      - ownership
       - e2e
       - accessibility
       - mutation
@@ -1215,7 +1248,7 @@ jobs:
       - run: npm run traceability:check
 ```
 
-O workflow de referência não substitui as configurações de proteção de branch e CODEOWNERS necessárias ao QG-012.
+O workflow de referência não substitui as configurações de proteção de branch e CODEOWNERS necessárias ao QG-012. O QG-012 é verificado pela proteção de branch e pelo CODEOWNERS, e não por job de workflow. A validação de rastreabilidade documental (`python validate_all.py`) executa em workflow próprio (`traceability-validation.yml`) e também é check obrigatório.
 
 O workflow apresentado possui caráter ilustrativo. A implementação poderá utilizar matrizes, paralelismo, workflows reutilizáveis ou outras otimizações, desde que preserve:
 
@@ -1311,7 +1344,7 @@ Alterações nas áreas abaixo deverão exigir aprovação humana dos responsáv
 
 Agentes de IA poderão propor alterações nessas áreas, mas não poderão aprová-las nem incorporá-las à baseline de forma autônoma.
 
-Cada área protegida deverá possuir responsável formal definido no arquivo CODEOWNERS do repositório. A ausência de responsável designado deverá ser tratada como não conformidade operacional e deverá bloquear a aprovação da alteração.
+Cada área protegida deverá possuir responsável formal definido no arquivo CODEOWNERS do repositório. Enquanto houver um único mantenedor, o responsável interino é `@carlosyano`, a ser substituído por responsáveis designados para Segurança e Privacidade, Arquitetura e QA. A ausência de responsável designado deverá ser tratada como não conformidade operacional e deverá bloquear a aprovação da alteração.
 
 ### 19.9 Scripts de referência
 
@@ -1323,6 +1356,7 @@ npm run lint
 npm run test:unit
 npm run test:integration
 npm run test:contract
+npm run test:ownership
 npm run test:e2e
 npm run test:a11y
 npm run security
@@ -1405,7 +1439,7 @@ Quando aplicável, a pipeline deverá validar a existência e a referência da A
 
 Esta baseline possui a seguinte classificação:
 
-- maturidade: Produção;
+- maturidade: Desenvolvimento (produção bloqueada até o encerramento de GX-001 a GX-006);
 - modelo contratual: Contract-First;
 - modelo de desenvolvimento: Test-First;
 - modelo operacional: IA-First;

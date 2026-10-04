@@ -1,0 +1,26 @@
+# CODEOWNERS - MeuRemedio (AGENTS.md §19.8)
+# Responsavel INTERINO unico ate a designacao formal de Seguranca e Privacidade, Arquitetura e QA.
+# Substituir por equipes/pessoas designadas e manter uma linha por area protegida.
+*                                   @carlosyano
+
+# Fontes normativas
+/MeuRemedio_OpenAPI_*.yaml          @carlosyano
+/MeuRemedio_Especificacao_*.docx    @carlosyano
+/ADR-*.docx                         @carlosyano
+/AGENTS.md                          @carlosyano
+/PROJECT_CONTEXT.md                 @carlosyano
+/traceability-*                     @carlosyano
+/validate_all.py                    @carlosyano
+/docs/specifications/               @carlosyano
+/docs/architecture/                 @carlosyano
+/docs/operations/                   @carlosyano
+
+# Areas sensiveis (caminhos previstos para a fundacao tecnica)
+/packages/contract/                 @carlosyano
+/apps/api/src/modules/identity/     @carlosyano
+/apps/api/src/modules/privacy/      @carlosyano
+/apps/api/src/modules/audit/        @carlosyano
+/apps/**/migrations/                @carlosyano
+/infra/                             @carlosyano
+/.github/workflows/                 @carlosyano
+/.github/CODEOWNERS                 @carlosyano
