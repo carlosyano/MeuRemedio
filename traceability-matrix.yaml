@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-matrix_version: 2.1.1
+matrix_version: 2.1.2
 status: baseline-development-and-testing
 generated_from:
   functional_specification: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -2975,6 +2975,16 @@ known_gaps:
   severity: informational
   description: O catálogo entities sobrescreve a linha da entidade pela última linha do dicionário de campos (ENT-001, 005
     a 011); estrutura preservada por compatibilidade com o schema vigente.
+- id: GAP-008
+  severity: informational
+  description: 'createResponse declara 410 na OpenAPI sem base normativa: a Especificação só usa 410 em ERR-008 (token expirado)
+    e ERR-012 (PDF expirado). Decisão humana pendente: remover o 410 do contrato ou definir a regra (por exemplo, ocorrência
+    de plano excluído). O TS-040 (R05) trata o caso como exceção registrada.'
+- id: GAP-009
+  severity: informational
+  description: 'X-Correlation-ID não é documentado em respostas com corpo de getHealth (200 e 503) e dos 202 de resendVerification
+    e requestPasswordReset, nem nas respostas 204 sem corpo. O TS-040 (R12) exige o cabeçalho em respostas com corpo, com
+    estas exceções registradas. Decisão pendente: exigir o cabeçalho em todas as respostas (nova versão da OpenAPI).'
 trace_links:
 - from: RF-001
   to: CA-001
@@ -4240,7 +4250,10 @@ errors:
     http_status: 409
     user_message: Esta ocorrência já recebeu uma resposta.
     operationIds:
+    - cancelExport
+    - confirmPasswordReset
     - createResponse
+    - verifyAccount
     negative_test_artifact: tests/api/errors/err-007.spec.ts
     status: planned
     provenance:
@@ -4488,6 +4501,9 @@ resolved_findings:
 - id: R-APPROVAL-20261004
   resolution: DEC-011 a DEC-025, ADR OA-008 a OA-011, PP-001 v1 (provisório) e proteção da main (opção C) aprovados em 04/10/2026
     pelo mantenedor carlosyano, em caráter interino.
+- id: R-ERR007
+  resolution: ERR-007 (STATE_CONFLICT) passou a mapear cancelExport, confirmPasswordReset e verifyAccount, que declaram 409
+    no contrato; defeito revelado pelo TS-040 (R05).
 catalog_completeness:
   requirements:
     authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
