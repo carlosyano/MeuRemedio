@@ -1,34 +1,34 @@
 schema_version: 1.0.0
-matrix_version: 2.0.0
+matrix_version: 2.1.0
 status: baseline-development-and-testing
 generated_from:
-  functional_specification: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
-  functional_specification_version: '02.32'
-  openapi: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
-  openapi_version: 02.33.1
-  architecture: ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx
-  architecture_version: '1.4'
+  functional_specification: MeuRemedio_Especificacao_Funcional_02.33.docx
+  functional_specification_version: '02.33'
+  openapi: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
+  openapi_version: 02.33.2
+  architecture: ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
+  architecture_version: '1.5'
   agents_policy: AGENTS.md
-  agents_policy_version: '1.2'
+  agents_policy_version: '1.3'
   source_integrity:
     algorithm: sha256
     artifacts:
       functional_specification:
-        file: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
-        sha256: 39000725070d6279c896bb39d841c365e6a780a60350c0d12de507bb588fb989
+        file: MeuRemedio_Especificacao_Funcional_02.33.docx
+        sha256: 80ee8bc2a39837aa7b86376e2ce3c5b7defef34b3e71f3cd6142730589ef52a1
       openapi:
-        file: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
-        sha256: dde4471d3d57929b858ca6f7a01b03496273945b8cf2affeddfec8e2abb61f1e
+        file: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
+        sha256: d337c1cf522d51d6eeb5006b1866940e5eae6d20842ae1d2d6020756f9c3643d
       architecture:
-        file: ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx
-        sha256: d1459150cebebe8e90bfba6741f24c859b156b62d943e9f1e93fe643478bccd3
+        file: ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
+        sha256: 400c727866010c0a8955b1b5720d478a9c1f0fcda528c32fcac32c5ed9384978
       agents_policy:
         file: AGENTS.md
-        sha256: 6913560d99da4c449880c0410dd3c44ba8c01b0fd45cb8434cead37f9f6aa0ed
+        sha256: 5ae8ba67c71dec637296c7d806ded6a95c9365a83dc7dd6aa261e224df846d32
 governance:
-  http_source_of_truth: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
-  functional_source_of_truth: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
-  architecture_source_of_truth: ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx
+  http_source_of_truth: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
+  functional_source_of_truth: MeuRemedio_Especificacao_Funcional_02.33.docx
+  architecture_source_of_truth: ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
   production_authorization: blocked-until-GX-001-through-GX-006-closed
   required_gates:
   - QG-001
@@ -45,13 +45,14 @@ governance:
   - QG-012
 requirements:
   RF-001:
-    title: RN-001..005
+    title: Criar e verificar conta; consultar e atualizar o nome do perfil.
     rn:
     - RN-001
     - RN-002
     - RN-003
     - RN-004
     - RN-005
+    - RN-017
     entities:
     - ENT-001
     - ENT-002
@@ -63,6 +64,8 @@ requirements:
     acceptance_criteria:
     - CA-001
     - CA-002
+    - CA-015
+    - CA-018
     sentinel_tests:
     - TS-009
     - TS-018
@@ -71,6 +74,7 @@ requirements:
     - TS-033
     - TS-036
     - TS-038
+    - TS-041
     operationIds:
     - createAccount
     - getCurrentAccount
@@ -86,7 +90,7 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-002:
@@ -95,6 +99,7 @@ requirements:
     - RN-003
     - RN-004
     - RN-005
+    - RN-017
     entities:
     - ENT-001
     - ENT-003
@@ -106,6 +111,7 @@ requirements:
     acceptance_criteria:
     - CA-003
     - CA-004
+    - CA-018
     sentinel_tests:
     - TS-009
     - TS-018
@@ -113,6 +119,8 @@ requirements:
     - TS-033
     - TS-036
     - TS-038
+    - TS-044
+    - TS-041
     operationIds:
     - confirmPasswordReset
     - createSession
@@ -128,14 +136,15 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-003:
-    title: RN-006,013
+    title: Criar, editar, listar e excluir logicamente planos.
     rn:
     - RN-006
     - RN-013
+    - RN-016
     entities:
     - ENT-005
     - ENT-006
@@ -147,6 +156,8 @@ requirements:
     acceptance_criteria:
     - CA-005
     - CA-006
+    - CA-017
+    - CA-018
     sentinel_tests:
     - TS-003
     - TS-004
@@ -156,6 +167,8 @@ requirements:
     - TS-027
     - TS-037
     - TS-038
+    - TS-043
+    - TS-041
     operationIds:
     - createPlan
     - deletePlan
@@ -171,7 +184,7 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-004:
@@ -180,6 +193,7 @@ requirements:
     - RN-007
     - RN-009
     - RN-013
+    - RN-018
     entities:
     - ENT-005
     - ENT-006
@@ -212,7 +226,7 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-005:
@@ -221,6 +235,7 @@ requirements:
     - RN-007
     - RN-009
     - RN-014
+    - RN-018
     entities:
     - ENT-007
     - ENT-009
@@ -252,11 +267,11 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-006:
-    title: RN-008,009
+    title: Registrar TAKEN ou NOT_TAKEN uma única vez.
     rn:
     - RN-008
     - RN-009
@@ -271,6 +286,7 @@ requirements:
     acceptance_criteria:
     - CA-007
     - CA-013
+    - CA-018
     sentinel_tests:
     - TS-001
     - TS-007
@@ -278,6 +294,7 @@ requirements:
     - TS-015
     - TS-025
     - TS-038
+    - TS-041
     operationIds:
     - createResponse
     test_levels:
@@ -289,7 +306,7 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-007:
@@ -319,27 +336,32 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-008:
-    title: Gerar e baixar PDF declaratório privado.
+    title: Gerar, consultar, cancelar (enquanto REQUESTED ou PROCESSING) e baixar PDF declaratório privado.
     rn:
     - RN-011
     entities:
     - ENT-010
     - ENT-012
-    flows: []
+    flows:
+    - FL-005
     user_stories:
     - US-007
     acceptance_criteria:
     - CA-010
     - CA-011
+    - CA-016
+    - CA-018
     sentinel_tests:
     - TS-011
     - TS-020
     - TS-023
     - TS-038
+    - TS-042
+    - TS-041
     operationIds:
     - cancelExport
     - createExport
@@ -354,7 +376,7 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-009:
@@ -364,10 +386,13 @@ requirements:
     - ENT-001
     flows: []
     user_stories: []
-    acceptance_criteria: []
+    acceptance_criteria:
+    - CA-018
     sentinel_tests:
     - TS-022
+    - TS-041
     operationIds:
+    - getAccessibilityPreferences
     - updateAccessibilityPreferences
     test_levels:
     - contract
@@ -378,11 +403,11 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-010:
-    title: RN-012
+    title: Solicitar exclusão da conta e coordenar expurgo.
     rn:
     - RN-012
     entities:
@@ -394,12 +419,14 @@ requirements:
     - US-008
     acceptance_criteria:
     - CA-014
+    - CA-018
     sentinel_tests:
     - TS-026
     - TS-028
     - TS-029
     - TS-034
     - TS-038
+    - TS-041
     operationIds:
     - getPrivacy
     - requestAccountDeletion
@@ -412,11 +439,12 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-011:
-    title: Receber solicitações externas de direitos por canal aprovado.
+    title: Receber solicitações externas de direitos por canal aprovado, em procedimento operacional sem endpoint HTTP além
+      de getPrivacy.
     rn:
     - RN-012
     entities:
@@ -436,11 +464,11 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
   RF-012:
-    title: Registrar e tratar incidentes de segurança.
+    title: Registrar e tratar incidentes de segurança em procedimento operacional, sem endpoint HTTP.
     rn: []
     entities:
     - ENT-015
@@ -458,7 +486,7 @@ requirements:
     - QG-004
     - QG-011
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seções 6 a 8
       mapping_type: explicit-source-and-openapi
 non_functional_requirements:
@@ -469,7 +497,7 @@ non_functional_requirements:
     gates:
     - QG-008
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
@@ -480,39 +508,40 @@ non_functional_requirements:
     gates:
     - QG-005
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
   RNF-003:
-    title: RBAC e ownership server-side em 100% das rotas privadas.
+    title: RBAC (papel único TITULAR na API) e ownership server-side em 100% das rotas privadas; acesso operacional por IAM
+      e scripts auditados, fora da API.
     tests:
     - TS-008
     - TS-023
     gates:
     - QG-009
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
   RNF-004:
-    title: p95 interativo <=2 s sob PerformanceProfile aprovado.
+    title: p95 interativo <=2 s sob PerformanceProfile PP-001 v1 aprovado.
     tests:
     - TS-039
     gates: []
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
   RNF-005:
-    title: p95 de exportação <=30 s sob PerformanceProfile aprovado.
+    title: p95 de exportação <=30 s sob PerformanceProfile PP-001 v1 aprovado.
     tests:
     - TS-039
     gates: []
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
@@ -523,7 +552,7 @@ non_functional_requirements:
     gates:
     - QG-005
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
@@ -537,7 +566,7 @@ non_functional_requirements:
     gates:
     - QG-004
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
@@ -549,7 +578,7 @@ non_functional_requirements:
     gates:
     - QG-005
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
@@ -560,19 +589,19 @@ non_functional_requirements:
     - QG-005
     - QG-006
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
   RNF-010:
-    title: Datas UTC ISO 8601; dinheiro decimal exato; UTF-8; paginação 20, máximo 100.
+    title: Datas UTC ISO 8601; UTF-8; paginação 20, máximo 100.
     tests:
     - TS-024
     - TS-039
     gates:
     - QG-001
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
@@ -583,7 +612,7 @@ non_functional_requirements:
     gates:
     - QG-004
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
@@ -594,7 +623,7 @@ non_functional_requirements:
     gates:
     - QG-005
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
@@ -604,7 +633,7 @@ non_functional_requirements:
     gates:
     - QG-006
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
@@ -615,18 +644,31 @@ non_functional_requirements:
     gates:
     - QG-001
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
   RNF-015:
-    title: Relógios sincronizados; desvio acima do limite configurado bloqueia decisões temporais críticas.
+    title: Relógios sincronizados; desvio acima de CLOCK_SKEW_MAX_MS (padrão 5 s) bloqueia decisões temporais críticas e marca
+      getHealth como DEGRADED.
     tests:
     - TS-024
     gates:
     - QG-004
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
+      source_table_index: 7
+      mapping_type: explicit-catalog-row
+  RNF-016:
+    title: 'Mutações autenticadas protegidas contra CSRF: cookie mr_csrf + cabeçalho X-CSRF-Token (double-submit vinculado
+      à sessão) e validação de Origin; falha retorna 403 CSRF_VALIDATION_FAILED.'
+    tests:
+    - TS-041
+    gates:
+    - QG-005
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 6.2: Requisitos não funcionais consolidados'
       source_table_index: 7
       mapping_type: explicit-catalog-row
@@ -639,7 +681,7 @@ acceptance_criteria:
     - RF-001
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-002:
@@ -650,7 +692,7 @@ acceptance_criteria:
     - RF-001
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-003:
@@ -662,7 +704,7 @@ acceptance_criteria:
     - RF-002
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-004:
@@ -674,7 +716,7 @@ acceptance_criteria:
     - RF-002
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-005:
@@ -685,7 +727,7 @@ acceptance_criteria:
     - RF-003
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-006:
@@ -696,7 +738,7 @@ acceptance_criteria:
     - RF-003
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-007:
@@ -707,7 +749,7 @@ acceptance_criteria:
     - RF-006
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-008:
@@ -718,7 +760,7 @@ acceptance_criteria:
     - RF-005
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-009:
@@ -729,7 +771,7 @@ acceptance_criteria:
     - RF-007
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-010:
@@ -740,7 +782,7 @@ acceptance_criteria:
     - RF-008
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-011:
@@ -751,7 +793,7 @@ acceptance_criteria:
     - RF-008
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-012:
@@ -761,7 +803,7 @@ acceptance_criteria:
     non_functional_requirements:
     - RNF-003
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-013:
@@ -772,7 +814,7 @@ acceptance_criteria:
     - RF-006
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
   CA-014:
@@ -784,7 +826,69 @@ acceptance_criteria:
     - RF-010
     non_functional_requirements: []
     mapping_provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-015:
+    title: Atualizar o nome do perfil mantendo o fuso imutável
+    operationIds:
+    - getCurrentAccount
+    - updateCurrentAccount
+    functional_requirements:
+    - RF-001
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-016:
+    title: Cancelar exportação em REQUESTED ou PROCESSING
+    operationIds:
+    - cancelExport
+    functional_requirements:
+    - RF-008
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-017:
+    title: Exigir confirmação de plano possivelmente duplicado
+    operationIds:
+    - createPlan
+    functional_requirements:
+    - RF-003
+    non_functional_requirements: []
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 7: Critérios de Aceitação'
+      mapping_type: explicit-source
+  CA-018:
+    title: Rejeitar mutação sem token CSRF ou com origem não permitida
+    operationIds:
+    - cancelExport
+    - createExport
+    - createPlan
+    - createResponse
+    - deleteCurrentSession
+    - deletePlan
+    - requestAccountDeletion
+    - revokeAllSessions
+    - updateAccessibilityPreferences
+    - updateCurrentAccount
+    - updatePlan
+    functional_requirements:
+    - RF-001
+    - RF-002
+    - RF-003
+    - RF-006
+    - RF-008
+    - RF-009
+    - RF-010
+    non_functional_requirements:
+    - RNF-016
+    mapping_provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 7: Critérios de Aceitação'
       mapping_type: explicit-source
 sentinel_tests:
@@ -799,14 +903,14 @@ sentinel_tests:
     - id: TS-001-PRIMARY
       path: tests/integration/ts-001.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-002:
     title: Falha de e-mail
@@ -819,14 +923,14 @@ sentinel_tests:
     - id: TS-002-PRIMARY
       path: tests/integration/ts-002.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-003:
     title: Reexecução do gerador
@@ -840,14 +944,14 @@ sentinel_tests:
     - id: TS-003-PRIMARY
       path: tests/integration/ts-003.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-004:
     title: Edição de plano
@@ -860,14 +964,14 @@ sentinel_tests:
     - id: TS-004-PRIMARY
       path: tests/integration/ts-004.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-005:
     title: Exclusão lógica
@@ -880,14 +984,14 @@ sentinel_tests:
     - id: TS-005-PRIMARY
       path: tests/integration/ts-005.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-006:
     title: Prazo sem canais
@@ -900,14 +1004,14 @@ sentinel_tests:
     - id: TS-006-PRIMARY
       path: tests/integration/ts-006.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-007:
     title: Resposta tardia
@@ -920,14 +1024,14 @@ sentinel_tests:
     - id: TS-007-PRIMARY
       path: tests/integration/ts-007.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-008:
     title: Acesso horizontal
@@ -940,14 +1044,14 @@ sentinel_tests:
     - id: TS-008-PRIMARY
       path: tests/e2e/ts-008.spec.ts
       level: e2e
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-009:
     title: Token usado ou expirado
@@ -962,14 +1066,14 @@ sentinel_tests:
     - id: TS-009-PRIMARY
       path: tests/integration/ts-009.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-010:
     title: Servidor indisponível
@@ -980,14 +1084,14 @@ sentinel_tests:
     - id: TS-010-PRIMARY
       path: tests/e2e/ts-010.spec.ts
       level: e2e
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-011:
     title: PDF expirado
@@ -1000,14 +1104,14 @@ sentinel_tests:
     - id: TS-011-PRIMARY
       path: tests/e2e/ts-011.spec.ts
       level: e2e
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-012:
     title: CRM somente formato
@@ -1018,14 +1122,14 @@ sentinel_tests:
     - id: TS-012-PRIMARY
       path: tests/security/ts-012.spec.ts
       level: security
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-013:
     title: Resposta versus prazo
@@ -1039,14 +1143,14 @@ sentinel_tests:
     - id: TS-013-PRIMARY
       path: tests/integration/ts-013.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-014:
     title: Gerador versus edição
@@ -1060,14 +1164,14 @@ sentinel_tests:
     - id: TS-014-PRIMARY
       path: tests/integration/ts-014.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-015:
     title: Idempotência divergente
@@ -1081,14 +1185,14 @@ sentinel_tests:
     - id: TS-015-PRIMARY
       path: tests/integration/ts-015.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-016:
     title: Dispatcher ou broker indisponível
@@ -1101,14 +1205,14 @@ sentinel_tests:
     - id: TS-016-PRIMARY
       path: tests/integration/ts-016.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-017:
     title: Retomada de worker
@@ -1121,14 +1225,14 @@ sentinel_tests:
     - id: TS-017-PRIMARY
       path: tests/integration/ts-017.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-018:
     title: Quarta sessão
@@ -1142,14 +1246,14 @@ sentinel_tests:
     - id: TS-018-PRIMARY
       path: tests/integration/ts-018.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-019:
     title: Link sem sessão
@@ -1161,14 +1265,14 @@ sentinel_tests:
     - id: TS-019-PRIMARY
       path: tests/e2e/ts-019.spec.ts
       level: e2e
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-020:
     title: Snapshot PDF
@@ -1182,14 +1286,14 @@ sentinel_tests:
     - id: TS-020-PRIMARY
       path: tests/e2e/ts-020.spec.ts
       level: e2e
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-021:
     title: Reenvio de verificação
@@ -1203,14 +1307,14 @@ sentinel_tests:
     - id: TS-021-PRIMARY
       path: tests/integration/ts-021.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-022:
     title: Acessibilidade
@@ -1223,14 +1327,14 @@ sentinel_tests:
     - id: TS-022-PRIMARY
       path: tests/e2e/ts-022.spec.ts
       level: e2e
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-023:
     title: BOLA e IDOR
@@ -1244,14 +1348,14 @@ sentinel_tests:
     - id: TS-023-PRIMARY
       path: tests/e2e/ts-023.spec.ts
       level: e2e
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-024:
     title: DST
@@ -1263,14 +1367,14 @@ sentinel_tests:
     - id: TS-024-PRIMARY
       path: tests/integration/ts-024.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-025:
     title: Constraints
@@ -1282,14 +1386,14 @@ sentinel_tests:
     - id: TS-025-PRIMARY
       path: tests/integration/ts-025.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-026:
     title: Exclusão de conta
@@ -1302,14 +1406,14 @@ sentinel_tests:
     - id: TS-026-PRIMARY
       path: tests/e2e/ts-026.spec.ts
       level: e2e
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-027:
     title: Edição no instante
@@ -1322,14 +1426,14 @@ sentinel_tests:
     - id: TS-027-PRIMARY
       path: tests/integration/ts-027.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-028:
     title: Conta pendente antiga
@@ -1342,14 +1446,14 @@ sentinel_tests:
     - id: TS-028-PRIMARY
       path: tests/integration/ts-028.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-029:
     title: Restore e tombstone
@@ -1362,14 +1466,14 @@ sentinel_tests:
     - id: TS-029-PRIMARY
       path: tests/integration/ts-029.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-030:
     title: Incidente de segurança
@@ -1381,14 +1485,14 @@ sentinel_tests:
     - id: TS-030-PRIMARY
       path: tests/security/ts-030.spec.ts
       level: security
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-031:
     title: Rotação de chave
@@ -1399,14 +1503,14 @@ sentinel_tests:
     - id: TS-031-PRIMARY
       path: tests/security/ts-031.spec.ts
       level: security
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-032:
     title: Direito externo
@@ -1418,14 +1522,14 @@ sentinel_tests:
     - id: TS-032-PRIMARY
       path: tests/security/ts-032.spec.ts
       level: security
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-033:
     title: Bloqueio de login
@@ -1439,14 +1543,14 @@ sentinel_tests:
     - id: TS-033-PRIMARY
       path: tests/security/ts-033.spec.ts
       level: security
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-034:
     title: Evento atrasado
@@ -1460,14 +1564,14 @@ sentinel_tests:
     - id: TS-034-PRIMARY
       path: tests/integration/ts-034.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-035:
     title: Entrega incerta
@@ -1480,14 +1584,14 @@ sentinel_tests:
     - id: TS-035-PRIMARY
       path: tests/integration/ts-035.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-036:
     title: Senha comprometida
@@ -1501,14 +1605,14 @@ sentinel_tests:
     - id: TS-036-PRIMARY
       path: tests/security/ts-036.spec.ts
       level: security
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-037:
     title: Plano excluído
@@ -1523,14 +1627,14 @@ sentinel_tests:
     - id: TS-037-PRIMARY
       path: tests/integration/ts-037.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-038:
     title: Matriz de idempotência
@@ -1553,14 +1657,14 @@ sentinel_tests:
     - id: TS-038-PRIMARY
       path: tests/integration/ts-038.spec.ts
       level: integration
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-039:
     title: Desempenho
@@ -1571,14 +1675,14 @@ sentinel_tests:
     - id: TS-039-PRIMARY
       path: tests/performance/ts-039.spec.ts
       level: performance
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
   TS-040:
     title: Contrato OpenAPI
@@ -1589,14 +1693,110 @@ sentinel_tests:
     - id: TS-040-PRIMARY
       path: tests/contract/ts-040.spec.ts
       level: contract
-      owner: TBD-CODEOWNER
+      owner: '@carlosyano'
       status: planned
       evidence: null
       last_execution: null
     mapping_provenance:
       requirements: explicit-specification-or-traceability-matrix
       operations: explicit-openapi-x-traceability-when-present
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-041:
+    title: CSRF nas mutações autenticadas
+    requirements:
+    - RF-001
+    - RF-002
+    - RF-003
+    - RF-006
+    - RF-008
+    - RF-009
+    - RF-010
+    operationIds:
+    - cancelExport
+    - createExport
+    - createPlan
+    - createResponse
+    - deleteCurrentSession
+    - deletePlan
+    - requestAccountDeletion
+    - revokeAllSessions
+    - updateAccessibilityPreferences
+    - updateCurrentAccount
+    - updatePlan
+    priority: scope
+    test_artifacts:
+    - id: TS-041-PRIMARY
+      path: tests/security/ts-041.spec.ts
+      level: security
+      owner: '@carlosyano'
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-042:
+    title: Cancelamento de exportação
+    requirements:
+    - RF-008
+    operationIds:
+    - cancelExport
+    priority: scope
+    test_artifacts:
+    - id: TS-042-PRIMARY
+      path: tests/integration/ts-042.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-043:
+    title: Confirmação de duplicidade de plano
+    requirements:
+    - RF-003
+    operationIds:
+    - createPlan
+    priority: scope
+    test_artifacts:
+    - id: TS-043-PRIMARY
+      path: tests/integration/ts-043.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 11: Testes Sentinela'
+  TS-044:
+    title: Revogação global de sessões
+    requirements:
+    - RF-002
+    operationIds:
+    - revokeAllSessions
+    priority: scope
+    test_artifacts:
+    - id: TS-044-PRIMARY
+      path: tests/integration/ts-044.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: planned
+      evidence: null
+      last_execution: null
+    mapping_provenance:
+      requirements: explicit-specification-or-traceability-matrix
+      operations: explicit-openapi-x-traceability-when-present
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 11: Testes Sentinela'
 operations:
   createAccount:
@@ -1628,7 +1828,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1accounts/post'
   verifyAccount:
     method: POST
@@ -1659,7 +1859,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1accounts~1verify/post'
   resendVerification:
     method: POST
@@ -1687,7 +1887,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1accounts~1verification-resends/post'
   requestPasswordReset:
     method: POST
@@ -1713,7 +1913,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1password-reset-requests/post'
   confirmPasswordReset:
     method: POST
@@ -1744,7 +1944,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1password-resets/post'
   createSession:
     method: POST
@@ -1775,10 +1975,11 @@ operations:
     - '401'
     - '423'
     - '429'
+    - '409'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1sessions/post'
   deleteCurrentSession:
     method: DELETE
@@ -1787,22 +1988,29 @@ operations:
     security: sessionCookie
     traceability:
     - RF-002
+    - CA-018
+    - TS-041
     requirements:
     - RF-002
-    acceptance_criteria: []
-    sentinel_tests: []
+    acceptance_criteria:
+    - CA-018
+    sentinel_tests:
+    - TS-041
     security_requirements:
     - TLS 1.3
     - UTF-8
     - application/problem+json
     - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '204'
     - '401'
+    - '403'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1sessions~1current/delete'
     cross_cutting_controls:
     - CA-012
@@ -1822,8 +2030,10 @@ operations:
     path: /preferences/accessibility
     summary: Consultar preferencias de acessibilidade
     security: sessionCookie
-    traceability: []
-    requirements: []
+    traceability:
+    - RF-009
+    requirements:
+    - RF-009
     acceptance_criteria: []
     sentinel_tests: []
     security_requirements:
@@ -1834,10 +2044,11 @@ operations:
     response_statuses:
     - '200'
     - '401'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1preferences~1accessibility/get'
     cross_cutting_controls:
     - CA-012
@@ -1860,24 +2071,31 @@ operations:
     traceability:
     - RF-009
     - TS-022
+    - CA-018
+    - TS-041
     requirements:
     - RF-009
-    acceptance_criteria: []
+    acceptance_criteria:
+    - CA-018
     sentinel_tests:
     - TS-022
+    - TS-041
     security_requirements:
     - TLS 1.3
     - UTF-8
     - application/problem+json
     - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '200'
     - '400'
     - '401'
+    - '403'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1preferences~1accessibility/put'
     cross_cutting_controls:
     - CA-012
@@ -1914,10 +2132,11 @@ operations:
     - '200'
     - '400'
     - '401'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1plans/get'
     cross_cutting_controls:
     - CA-012
@@ -1943,19 +2162,28 @@ operations:
     - TS-003
     - TS-015
     - TS-038
+    - CA-018
+    - TS-041
+    - CA-017
+    - TS-043
     requirements:
     - RF-003
     acceptance_criteria:
     - CA-005
+    - CA-018
+    - CA-017
     sentinel_tests:
     - TS-003
     - TS-015
     - TS-038
+    - TS-041
+    - TS-043
     security_requirements:
     - TLS 1.3
     - UTF-8
     - application/problem+json
     - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '201'
     - '400'
@@ -1963,10 +2191,11 @@ operations:
     - '409'
     - '422'
     - '429'
+    - '403'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1plans/post'
     cross_cutting_controls:
     - CA-012
@@ -2005,10 +2234,11 @@ operations:
     - '200'
     - '401'
     - '404'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1plans~1{plan_id}/get'
     cross_cutting_controls:
     - CA-012
@@ -2035,20 +2265,25 @@ operations:
     - TS-014
     - TS-027
     - TS-038
+    - CA-018
+    - TS-041
     requirements:
     - RF-003
     acceptance_criteria:
     - CA-006
+    - CA-018
     sentinel_tests:
     - TS-004
     - TS-014
     - TS-027
     - TS-038
+    - TS-041
     security_requirements:
     - TLS 1.3
     - UTF-8
     - application/problem+json
     - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '200'
     - '400'
@@ -2056,10 +2291,12 @@ operations:
     - '404'
     - '409'
     - '422'
+    - '403'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1plans~1{plan_id}/put'
     cross_cutting_controls:
     - CA-012
@@ -2083,25 +2320,32 @@ operations:
     - RF-003
     - TS-005
     - TS-037
+    - CA-018
+    - TS-041
     requirements:
     - RF-003
-    acceptance_criteria: []
+    acceptance_criteria:
+    - CA-018
     sentinel_tests:
     - TS-005
     - TS-037
+    - TS-041
     security_requirements:
     - TLS 1.3
     - UTF-8
     - application/problem+json
     - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '204'
     - '401'
     - '404'
+    - '403'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1plans~1{plan_id}/delete'
     cross_cutting_controls:
     - CA-012
@@ -2138,10 +2382,11 @@ operations:
     - '200'
     - '400'
     - '401'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1occurrences/get'
     cross_cutting_controls:
     - CA-012
@@ -2169,21 +2414,26 @@ operations:
     - TS-007
     - TS-013
     - TS-038
+    - CA-018
+    - TS-041
     requirements:
     - RF-006
     acceptance_criteria:
     - CA-007
     - CA-013
+    - CA-018
     sentinel_tests:
     - TS-001
     - TS-007
     - TS-013
     - TS-038
+    - TS-041
     security_requirements:
     - TLS 1.3
     - UTF-8
     - application/problem+json
     - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '201'
     - '400'
@@ -2191,10 +2441,12 @@ operations:
     - '404'
     - '409'
     - '410'
+    - '403'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1occurrences~1{occurrence_id}~1responses/post'
     cross_cutting_controls:
     - CA-012
@@ -2231,10 +2483,11 @@ operations:
     - '200'
     - '400'
     - '401'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1history/get'
     cross_cutting_controls:
     - CA-012
@@ -2259,18 +2512,23 @@ operations:
     - CA-010
     - TS-020
     - TS-038
+    - CA-018
+    - TS-041
     requirements:
     - RF-008
     acceptance_criteria:
     - CA-010
+    - CA-018
     sentinel_tests:
     - TS-020
     - TS-038
+    - TS-041
     security_requirements:
     - TLS 1.3
     - UTF-8
     - application/problem+json
     - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '202'
     - '400'
@@ -2278,10 +2536,11 @@ operations:
     - '409'
     - '422'
     - '429'
+    - '403'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1exports/post'
     cross_cutting_controls:
     - CA-012
@@ -2316,10 +2575,11 @@ operations:
     - '200'
     - '401'
     - '404'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1exports~1{export_id}/get'
     cross_cutting_controls:
     - CA-012
@@ -2341,24 +2601,35 @@ operations:
     security: sessionCookie
     traceability:
     - RF-008
+    - CA-018
+    - TS-041
+    - CA-016
+    - TS-042
     requirements:
     - RF-008
-    acceptance_criteria: []
-    sentinel_tests: []
-    security_requirements: &id001
+    acceptance_criteria:
+    - CA-018
+    - CA-016
+    sentinel_tests:
+    - TS-041
+    - TS-042
+    security_requirements:
     - TLS 1.3
     - UTF-8
     - application/problem+json
     - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '204'
     - '401'
     - '404'
     - '409'
+    - '403'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1exports~1{export_id}/delete'
     cross_cutting_controls:
     - CA-012
@@ -2402,10 +2673,11 @@ operations:
     - '401'
     - '404'
     - '410'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1exports~1{export_id}~1file/get'
     cross_cutting_controls:
     - CA-012
@@ -2441,10 +2713,11 @@ operations:
     response_statuses:
     - '200'
     - '401'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1privacy/get'
     cross_cutting_controls:
     - CA-012
@@ -2470,28 +2743,34 @@ operations:
     - TS-026
     - TS-029
     - TS-038
+    - CA-018
+    - TS-041
     requirements:
     - RF-010
     acceptance_criteria:
     - CA-014
+    - CA-018
     sentinel_tests:
     - TS-026
     - TS-029
     - TS-038
+    - TS-041
     security_requirements:
     - TLS 1.3
     - UTF-8
     - application/problem+json
     - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '202'
     - '401'
     - '409'
     - '429'
+    - '403'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1account-deletions/post'
     cross_cutting_controls:
     - CA-012
@@ -2527,7 +2806,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1health/get'
   getCurrentAccount:
     method: GET
@@ -2536,18 +2815,25 @@ operations:
     security: sessionCookie
     traceability:
     - RF-001
+    - CA-015
     requirements:
     - RF-001
-    acceptance_criteria: []
+    acceptance_criteria:
+    - CA-015
     sentinel_tests: []
-    security_requirements: *id001
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
     response_statuses:
     - '200'
     - '401'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1accounts~1me/get'
     cross_cutting_controls:
     - CA-012
@@ -2569,19 +2855,32 @@ operations:
     security: sessionCookie
     traceability:
     - RF-001
+    - CA-018
+    - TS-041
+    - CA-015
     requirements:
     - RF-001
-    acceptance_criteria: []
-    sentinel_tests: []
-    security_requirements: *id001
+    acceptance_criteria:
+    - CA-018
+    - CA-015
+    sentinel_tests:
+    - TS-041
+    security_requirements:
+    - TLS 1.3
+    - UTF-8
+    - application/problem+json
+    - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '200'
     - '400'
     - '401'
+    - '403'
+    - '429'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1accounts~1me/put'
     cross_cutting_controls:
     - CA-012
@@ -2603,24 +2902,32 @@ operations:
     security: sessionCookie
     traceability:
     - RF-002
+    - CA-018
+    - TS-041
+    - TS-044
     requirements:
     - RF-002
-    acceptance_criteria: []
-    sentinel_tests: []
+    acceptance_criteria:
+    - CA-018
+    sentinel_tests:
+    - TS-041
+    - TS-044
     security_requirements:
     - TLS 1.3
     - UTF-8
     - application/problem+json
     - correlation_id
+    - CSRF X-CSRF-Token + Origin
     response_statuses:
     - '204'
     - '401'
     - '409'
     - '429'
+    - '403'
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
       source_pointer: '#/paths/~1sessions~1revocations/post'
     cross_cutting_controls:
     - CA-012
@@ -2655,723 +2962,735 @@ known_gaps:
 - id: GAP-002
   severity: informational
   description: CA-012 é transversal a todas as rotas privadas e é validado por TS-008 e TS-023, sem operationId exclusivo.
-- id: GAP-003
+- id: GAP-004
   severity: informational
-  description: A Especificação Funcional 02.32 contém anexo histórico da OpenAPI 02.32; a superfície HTTP normativa é a OpenAPI
-    02.33.1.
+  description: RF-011 e RF-012 são procedimentos operacionais sem endpoint HTTP além de getPrivacy (DEC-022); o procedimento
+    está em docs/operations/RIGHTS_AND_INCIDENTS.md.
+- id: GAP-005
+  severity: informational
+  description: 'TS-038: replay de revokeAllSessions e requestAccountDeletion após a revogação da própria sessão retorna 401
+    antes da consulta ao registro de idempotência; decisão humana pendente (docs/specifications/P0_SENTINEL_TESTS.md).'
+- id: GAP-006
+  severity: informational
+  description: Retenção de audit_events (GX-003) e conteúdo final de incident_records (GX-006) pendentes; DEC-011 a DEC-025
+    e ADR OA-008 a OA-011 aguardam aprovação humana.
+- id: GAP-007
+  severity: informational
+  description: O catálogo entities sobrescreve a linha da entidade pela última linha do dicionário de campos (ENT-001, 005
+    a 011); estrutura preservada por compatibilidade com o schema vigente.
 trace_links:
 - from: RF-001
   to: CA-001
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-001
   to: CA-002
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-001
   to: CA-003
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-001
   to: CA-004
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-001
   to: TS-009
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-001
   to: TS-018
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-001
   to: TS-021
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-001
   to: TS-028
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-001
   to: TS-033
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-001
   to: TS-036
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-001
   to: TS-038
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-001
   to: createAccount
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/createAccount/x-traceability
     mapping_type: explicit-openapi
 - from: RF-001
   to: getCurrentAccount
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/getCurrentAccount/x-traceability
     mapping_type: explicit-openapi
 - from: RF-001
   to: resendVerification
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/resendVerification/x-traceability
     mapping_type: explicit-openapi
 - from: RF-001
   to: updateCurrentAccount
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/updateCurrentAccount/x-traceability
     mapping_type: explicit-openapi
 - from: RF-001
   to: verifyAccount
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/verifyAccount/x-traceability
     mapping_type: explicit-openapi
 - from: RF-002
   to: CA-003
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-002
   to: CA-004
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-002
   to: TS-009
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-002
   to: TS-018
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-002
   to: TS-021
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-002
   to: TS-033
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-002
   to: TS-036
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-002
   to: TS-038
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-002
   to: confirmPasswordReset
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/confirmPasswordReset/x-traceability
     mapping_type: explicit-openapi
 - from: RF-002
   to: createSession
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/createSession/x-traceability
     mapping_type: explicit-openapi
 - from: RF-002
   to: deleteCurrentSession
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/deleteCurrentSession/x-traceability
     mapping_type: explicit-openapi
 - from: RF-002
   to: requestPasswordReset
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/requestPasswordReset/x-traceability
     mapping_type: explicit-openapi
 - from: RF-002
   to: revokeAllSessions
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/revokeAllSessions/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
   to: CA-005
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-003
   to: CA-006
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-003
   to: TS-003
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-003
   to: TS-004
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-003
   to: TS-005
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-003
   to: TS-014
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-003
   to: TS-015
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-003
   to: TS-027
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-003
   to: TS-037
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-003
   to: TS-038
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-003
   to: createPlan
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/createPlan/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
   to: deletePlan
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/deletePlan/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
   to: getPlan
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/getPlan/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
   to: listPlans
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/listPlans/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
   to: updatePlan
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/updatePlan/x-traceability
     mapping_type: explicit-openapi
 - from: RF-004
   to: CA-008
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-004
   to: TS-002
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-004
   to: TS-003
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-004
   to: TS-006
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-004
   to: TS-013
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-004
   to: TS-014
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-004
   to: TS-016
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-004
   to: TS-017
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-004
   to: TS-024
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-004
   to: TS-034
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-004
   to: TS-035
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-004
   to: listOccurrences
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/listOccurrences/x-traceability
     mapping_type: explicit-openapi
 - from: RF-005
   to: CA-008
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-005
   to: CA-014
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-005
   to: TS-002
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-005
   to: TS-006
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-005
   to: TS-016
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-005
   to: TS-017
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-005
   to: TS-019
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-005
   to: TS-034
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-005
   to: TS-035
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-005
   to: listOccurrences
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/listOccurrences/x-traceability
     mapping_type: explicit-openapi
 - from: RF-006
   to: CA-007
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-006
   to: CA-013
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-006
   to: TS-001
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-006
   to: TS-007
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-006
   to: TS-013
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-006
   to: TS-015
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-006
   to: TS-025
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-006
   to: TS-038
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-006
   to: createResponse
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/createResponse/x-traceability
     mapping_type: explicit-openapi
 - from: RF-007
   to: CA-009
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-007
   to: TS-008
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-007
   to: TS-023
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-007
   to: getHistory
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/getHistory/x-traceability
     mapping_type: explicit-openapi
 - from: RF-008
   to: CA-010
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-008
   to: CA-011
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-008
   to: TS-011
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-008
   to: TS-020
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-008
   to: TS-023
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-008
   to: TS-038
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-008
   to: cancelExport
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/cancelExport/x-traceability
     mapping_type: explicit-openapi
 - from: RF-008
   to: createExport
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/createExport/x-traceability
     mapping_type: explicit-openapi
 - from: RF-008
   to: downloadExport
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/downloadExport/x-traceability
     mapping_type: explicit-openapi
 - from: RF-008
   to: getExport
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/getExport/x-traceability
     mapping_type: explicit-openapi
 - from: RF-009
   to: TS-022
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-009
   to: updateAccessibilityPreferences
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/updateAccessibilityPreferences/x-traceability
     mapping_type: explicit-openapi
 - from: RF-010
   to: CA-014
   relationship: validated_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 7 e 8
     mapping_type: explicit-source
 - from: RF-010
   to: TS-026
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-010
   to: TS-028
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-010
   to: TS-029
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-010
   to: TS-034
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-010
   to: TS-038
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-010
   to: getPrivacy
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/getPrivacy/x-traceability
     mapping_type: explicit-openapi
 - from: RF-010
   to: requestAccountDeletion
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/requestAccountDeletion/x-traceability
     mapping_type: explicit-openapi
 - from: RF-011
   to: TS-032
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: RF-011
   to: getPrivacy
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
     location: operation/getPrivacy/x-traceability
     mapping_type: explicit-openapi
 - from: RF-012
   to: TS-030
   relationship: tested_by
   provenance:
-    source: MeuRemedio_Especificacao_Funcional_02.32.docx
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
     location: Seções 8 e 11
     mapping_type: explicit-or-consolidated-source
 - from: deleteCurrentSession
@@ -3654,6 +3973,153 @@ trace_links:
     source: AGENTS.md
     location: QG-009
     mapping_type: cross-cutting-policy
+- from: RF-001
+  to: CA-015
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-001
+  to: CA-018
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-001
+  to: TS-041
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-002
+  to: CA-018
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-002
+  to: TS-044
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-002
+  to: TS-041
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-003
+  to: CA-017
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-003
+  to: CA-018
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-003
+  to: TS-043
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-003
+  to: TS-041
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-006
+  to: CA-018
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-006
+  to: TS-041
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-008
+  to: CA-016
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-008
+  to: CA-018
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-008
+  to: TS-042
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-008
+  to: TS-041
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-009
+  to: CA-018
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-009
+  to: TS-041
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
+- from: RF-009
+  to: getAccessibilityPreferences
+  relationship: implemented_by
+  provenance:
+    source: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
+    location: operation/getAccessibilityPreferences/x-traceability
+    mapping_type: explicit-openapi
+- from: RF-010
+  to: CA-018
+  relationship: validated_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 7 e 8
+    mapping_type: explicit-source
+- from: RF-010
+  to: TS-041
+  relationship: tested_by
+  provenance:
+    source: MeuRemedio_Especificacao_Funcional_02.33.docx
+    location: Seções 8 e 11
+    mapping_type: explicit-or-consolidated-source
 errors:
   ERR-001:
     code: VALIDATION_FAILED
@@ -3677,7 +4143,7 @@ errors:
     negative_test_artifact: tests/api/errors/err-001.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-002:
@@ -3709,7 +4175,7 @@ errors:
     negative_test_artifact: tests/api/errors/err-002.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-003:
@@ -3727,7 +4193,7 @@ errors:
     negative_test_artifact: tests/api/errors/err-003.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-004:
@@ -3739,7 +4205,7 @@ errors:
     negative_test_artifact: tests/api/errors/err-004.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-005:
@@ -3751,7 +4217,7 @@ errors:
     negative_test_artifact: tests/api/errors/err-005.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-006:
@@ -3769,7 +4235,7 @@ errors:
     negative_test_artifact: tests/api/errors/err-006.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-007:
@@ -3781,7 +4247,7 @@ errors:
     negative_test_artifact: tests/api/errors/err-007.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-008:
@@ -3794,7 +4260,7 @@ errors:
     negative_test_artifact: tests/api/errors/err-008.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-009:
@@ -3808,7 +4274,7 @@ errors:
     negative_test_artifact: tests/api/errors/err-009.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-010:
@@ -3816,20 +4282,36 @@ errors:
     http_status: 429
     user_message: Muitas tentativas. Aguarde o tempo informado e tente novamente.
     operationIds:
+    - cancelExport
     - confirmPasswordReset
     - createAccount
     - createExport
     - createPlan
+    - createResponse
     - createSession
+    - deleteCurrentSession
+    - deletePlan
+    - downloadExport
+    - getAccessibilityPreferences
+    - getCurrentAccount
+    - getExport
+    - getHistory
+    - getPlan
+    - getPrivacy
+    - listOccurrences
+    - listPlans
     - requestAccountDeletion
     - requestPasswordReset
     - resendVerification
     - revokeAllSessions
+    - updateAccessibilityPreferences
+    - updateCurrentAccount
+    - updatePlan
     - verifyAccount
     negative_test_artifact: tests/api/errors/err-010.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-011:
@@ -3844,7 +4326,7 @@ errors:
     negative_test_artifact: tests/api/errors/err-011.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
   ERR-012:
@@ -3856,68 +4338,114 @@ errors:
     negative_test_artifact: tests/api/errors/err-012.spec.ts
     status: planned
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-013:
+    code: SESSION_LIMIT_REACHED
+    http_status: 409
+    user_message: Você já tem 3 sessões ativas. Encerre uma sessão para entrar.
+    operationIds:
+    - createSession
+    negative_test_artifact: tests/api/errors/err-013.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-014:
+    code: DUPLICATE_CONFIRMATION_REQUIRED
+    http_status: 409
+    user_message: Já existe um plano parecido. Confirme se deseja criar outro.
+    operationIds:
+    - createPlan
+    negative_test_artifact: tests/api/errors/err-014.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      source_section: 'Seção 8: Matriz de Erros/Exceções'
+      mapping_type: explicit-source-and-http-contract
+  ERR-015:
+    code: CSRF_VALIDATION_FAILED
+    http_status: 403
+    user_message: Não foi possível validar a solicitação. Recarregue a página e tente novamente.
+    operationIds:
+    - cancelExport
+    - createExport
+    - createPlan
+    - createResponse
+    - deleteCurrentSession
+    - deletePlan
+    - requestAccountDeletion
+    - revokeAllSessions
+    - updateAccessibilityPreferences
+    - updateCurrentAccount
+    - updatePlan
+    negative_test_artifact: tests/api/errors/err-015.spec.ts
+    status: planned
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
       mapping_type: explicit-source-and-http-contract
 production_gates:
   GX-001:
     title: Controlador, operadores e base legal por finalidade
     status: open
-    owner: TBD
+    owner: '@carlosyano'
     evidence: null
     blocks: production
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seção 10
   GX-002:
     title: Aviso de privacidade, termos, canal e direitos
     status: open
-    owner: TBD
+    owner: '@carlosyano'
     evidence: null
     blocks: production
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seção 10
   GX-003:
     title: Retenção, backups, idempotência e tombstone
     status: open
-    owner: TBD
+    owner: '@carlosyano'
     evidence: null
     blocks: production
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seção 10
   GX-004:
     title: Avaliação de impacto, transferências e contratos
     status: open
-    owner: TBD
+    owner: '@carlosyano'
     evidence: null
     blocks: production
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seção 10
   GX-005:
     title: RPO, RTO e operação
     status: open
-    owner: TBD
+    owner: '@carlosyano'
     evidence: null
     blocks: production
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seção 10
   GX-006:
     title: Incidentes e fornecedores
     status: open
-    owner: TBD
+    owner: '@carlosyano'
     evidence: null
     blocks: production
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: Seção 10
 validator:
   schema: traceability-matrix.schema.json
   executable: traceability-check.py
-  ci_command: python traceability-check.py traceability-matrix.yaml MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
+  ci_command: python traceability-check.py traceability-matrix.yaml MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
   fail_on:
   - schema-error
   - source-hash-mismatch
@@ -3945,9 +4473,21 @@ resolved_findings:
   resolution: Production-blocking text corrected to GX-001 through GX-006.
 - id: GAP-CATALOGS
   resolution: RN, ENT, FL, TL, US, DEC and Q catalogs added with exact source provenance.
+- id: GAP-003
+  resolution: Especificação Funcional 02.33 alinhada à OpenAPI 02.33.2; anexo histórico removido e seção 13 gerada do contrato.
+- id: R-SESSION
+  resolution: ERR-013 SESSION_LIMIT_REACHED e resposta 409 documentada em createSession.
+- id: R-DUPLICATE
+  resolution: ERR-014, DuplicateConfirmationProblem e duplicate_confirmation_token documentados em createPlan.
+- id: R-CSRF
+  resolution: RNF-016, CA-018, TS-041, ERR-015 e esquema csrfToken na OpenAPI.
+- id: R-TITLES
+  resolution: Títulos de RF-001, RF-003, RF-006 e RF-010 corrigidos para o texto do requisito.
+- id: R-429
+  resolution: 429 documentado em todas as operações exceto getHealth (RNF-006).
 catalog_completeness:
   requirements:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - RF-001
     - RF-002
@@ -3976,7 +4516,7 @@ catalog_completeness:
     - RF-012
     status: complete
   non_functional_requirements:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - RNF-001
     - RNF-002
@@ -3993,6 +4533,7 @@ catalog_completeness:
     - RNF-013
     - RNF-014
     - RNF-015
+    - RNF-016
     actual_ids:
     - RNF-001
     - RNF-002
@@ -4009,9 +4550,10 @@ catalog_completeness:
     - RNF-013
     - RNF-014
     - RNF-015
+    - RNF-016
     status: complete
   acceptance_criteria:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - CA-001
     - CA-002
@@ -4027,6 +4569,10 @@ catalog_completeness:
     - CA-012
     - CA-013
     - CA-014
+    - CA-015
+    - CA-016
+    - CA-017
+    - CA-018
     actual_ids:
     - CA-001
     - CA-002
@@ -4042,9 +4588,13 @@ catalog_completeness:
     - CA-012
     - CA-013
     - CA-014
+    - CA-015
+    - CA-016
+    - CA-017
+    - CA-018
     status: complete
   errors:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - ERR-001
     - ERR-002
@@ -4058,6 +4608,9 @@ catalog_completeness:
     - ERR-010
     - ERR-011
     - ERR-012
+    - ERR-013
+    - ERR-014
+    - ERR-015
     actual_ids:
     - ERR-001
     - ERR-002
@@ -4071,9 +4624,12 @@ catalog_completeness:
     - ERR-010
     - ERR-011
     - ERR-012
+    - ERR-013
+    - ERR-014
+    - ERR-015
     status: complete
   sentinel_tests:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - TS-001
     - TS-002
@@ -4115,6 +4671,10 @@ catalog_completeness:
     - TS-038
     - TS-039
     - TS-040
+    - TS-041
+    - TS-042
+    - TS-043
+    - TS-044
     actual_ids:
     - TS-001
     - TS-002
@@ -4156,9 +4716,13 @@ catalog_completeness:
     - TS-038
     - TS-039
     - TS-040
+    - TS-041
+    - TS-042
+    - TS-043
+    - TS-044
     status: complete
   production_gates:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - GX-001
     - GX-002
@@ -4175,7 +4739,7 @@ catalog_completeness:
     - GX-006
     status: complete
   business_rules:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - RN-001
     - RN-002
@@ -4192,6 +4756,10 @@ catalog_completeness:
     - RN-013
     - RN-014
     - RN-015
+    - RN-016
+    - RN-017
+    - RN-018
+    - RN-019
     actual_ids:
     - RN-001
     - RN-002
@@ -4208,9 +4776,13 @@ catalog_completeness:
     - RN-013
     - RN-014
     - RN-015
+    - RN-016
+    - RN-017
+    - RN-018
+    - RN-019
     status: complete
   entities:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - ENT-001
     - ENT-002
@@ -4249,20 +4821,22 @@ catalog_completeness:
     - ENT-017
     status: complete
   flows:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - FL-001
     - FL-002
     - FL-003
     - FL-004
+    - FL-005
     actual_ids:
     - FL-001
     - FL-002
     - FL-003
     - FL-004
+    - FL-005
     status: complete
   screen_states:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - TL-001
     - TL-002
@@ -4283,7 +4857,7 @@ catalog_completeness:
     - TL-008
     status: complete
   user_stories:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - US-001
     - US-002
@@ -4304,7 +4878,7 @@ catalog_completeness:
     - US-008
     status: complete
   decisions:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - DEC-001
     - DEC-002
@@ -4316,6 +4890,21 @@ catalog_completeness:
     - DEC-008
     - DEC-009
     - DEC-010
+    - DEC-011
+    - DEC-012
+    - DEC-013
+    - DEC-014
+    - DEC-015
+    - DEC-016
+    - DEC-017
+    - DEC-018
+    - DEC-019
+    - DEC-020
+    - DEC-021
+    - DEC-022
+    - DEC-023
+    - DEC-024
+    - DEC-025
     actual_ids:
     - DEC-001
     - DEC-002
@@ -4327,9 +4916,24 @@ catalog_completeness:
     - DEC-008
     - DEC-009
     - DEC-010
+    - DEC-011
+    - DEC-012
+    - DEC-013
+    - DEC-014
+    - DEC-015
+    - DEC-016
+    - DEC-017
+    - DEC-018
+    - DEC-019
+    - DEC-020
+    - DEC-021
+    - DEC-022
+    - DEC-023
+    - DEC-024
+    - DEC-025
     status: complete
   approved_questions:
-    authoritative_source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+    authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
     expected_ids:
     - Q-001
     - Q-002
@@ -4344,9 +4948,10 @@ catalog_completeness:
 business_rules:
   RN-001:
     termo_regra: Natureza declaratória
-    defini_o_normativa: O sistema NÃO DEVE prescrever, validar medicamento, interação, médico ou CRM, nem recomendar tratamento.
+    defini_o_normativa: O sistema NÃO DEVE prescrever, validar medicamento, interação, médico ou CRM (sem consulta a registro
+      profissional; do CRM informado valida-se apenas o formato UF-dígitos), nem recomendar tratamento.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 1
       mapping_type: explicit-catalog-row
@@ -4354,7 +4959,7 @@ business_rules:
     termo_regra: Titularidade
     defini_o_normativa: Cada conta DEVE ser individual; o usuário só pode acessar seus próprios registros.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 2
       mapping_type: explicit-catalog-row
@@ -4362,23 +4967,25 @@ business_rules:
     termo_regra: Conta
     defini_o_normativa: Conta nova inicia PENDING_VERIFICATION e não autentica antes da verificação.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 3
       mapping_type: explicit-catalog-row
   RN-004:
     termo_regra: Sessão
-    defini_o_normativa: Sessão expira após 30 minutos de inatividade e 24 horas de duração absoluta; máximo de 3 sessões ativas.
+    defini_o_normativa: Sessão expira após 30 minutos de inatividade e 24 horas de duração absoluta; máximo de 3 sessões ativas;
+      a 4ª sessão é rejeitada com 409 SESSION_LIMIT_REACHED.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 4
       mapping_type: explicit-catalog-row
   RN-005:
     termo_regra: Bloqueio
-    defini_o_normativa: Após 5 falhas em 15 minutos, bloquear novas tentativas por 15 minutos.
+    defini_o_normativa: Após 5 falhas em 15 minutos, bloquear novas tentativas por 15 minutos. O contador usa o hash do e-mail
+      normalizado, inclusive de e-mails inexistentes, e a resposta é sempre 423 com Retry-After.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 5
       mapping_type: explicit-catalog-row
@@ -4386,7 +4993,7 @@ business_rules:
     termo_regra: Plano
     defini_o_normativa: Cada plano ACTIVE possui de 1 a 10 horários civis únicos.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 6
       mapping_type: explicit-catalog-row
@@ -4394,7 +5001,7 @@ business_rules:
     termo_regra: Ocorrência
     defini_o_normativa: Deve existir no máximo uma ocorrência por plano, horário e data civil local.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 7
       mapping_type: explicit-catalog-row
@@ -4402,7 +5009,7 @@ business_rules:
     termo_regra: Resposta
     defini_o_normativa: Somente a primeira resposta concorrente é aceita; resposta aceita é imutável.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 8
       mapping_type: explicit-catalog-row
@@ -4411,7 +5018,7 @@ business_rules:
     defini_o_normativa: Sem resposta até 60 minutos após scheduled_at, a ocorrência passa a NO_RESPONSE; resposta tardia continua
       permitida.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 9
       mapping_type: explicit-catalog-row
@@ -4420,7 +5027,7 @@ business_rules:
     defini_o_normativa: Consulta cobre período civil inclusivo de até 12 meses, implementado como intervalo semiaberto no
       fuso da conta.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 10
       mapping_type: explicit-catalog-row
@@ -4428,7 +5035,7 @@ business_rules:
     termo_regra: PDF
     defini_o_normativa: PDF é privado, pesquisável, baseado em snapshot e expira após 24 horas.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 11
       mapping_type: explicit-catalog-row
@@ -4436,7 +5043,7 @@ business_rules:
     termo_regra: Exclusão
     defini_o_normativa: Solicitação bloqueia acesso de imediato; expurgo ocorre em até 30 dias [APROVADO Q-001].
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 12
       mapping_type: explicit-catalog-row
@@ -4444,7 +5051,7 @@ business_rules:
     termo_regra: Tempo
     defini_o_normativa: Instantes são persistidos em UTC; datas civis usam account_timezone IANA, imutável no MVP.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 13
       mapping_type: explicit-catalog-row
@@ -4452,7 +5059,7 @@ business_rules:
     termo_regra: E-mail
     defini_o_normativa: SENT significa aceito tecnicamente pelo provedor, não entregue ou lido.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 14
       mapping_type: explicit-catalog-row
@@ -4460,9 +5067,48 @@ business_rules:
     termo_regra: Página offline
     defini_o_normativa: A aplicação NÃO DEVE declarar sucesso nem criar fila offline sem confirmação do servidor.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
       row_index: 15
+      mapping_type: explicit-catalog-row
+  RN-016:
+    termo_regra: Duplicidade de plano
+    defini_o_normativa: 'Na criação, plano ACTIVE do mesmo titular com medication_name e dose_text iguais após normalização
+      e período sobreposto exige confirmação: 409 DUPLICATE_CONFIRMATION_REQUIRED com token de uso único e TTL de 10 minutos.
+      Aplica-se somente à criação.'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 3
+      row_index: 16
+      mapping_type: explicit-catalog-row
+  RN-017:
+    termo_regra: Credenciais e tokens
+    defini_o_normativa: Senha de 10 a 72 caracteres com minúscula, maiúscula e dígito, fora da lista local de senhas comprometidas
+      e sem consulta remota; hash Argon2id. Token de verificação vale 24 h e o de redefinição 60 min, ambos de uso único;
+      novo token invalida o anterior.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 3
+      row_index: 17
+      mapping_type: explicit-catalog-row
+  RN-018:
+    termo_regra: Agenda e lembretes
+    defini_o_normativa: Ocorrências são geradas ao criar ou editar o plano (via Outbox) e por job horário que mantém o horizonte
+      de 30 dias; o job de prazo executa a cada minuto. Há no máximo 1 e-mail de lembrete por ocorrência, enviado em scheduled_at,
+      sem nome do medicamento, dose ou link com token. O lembrete web consulta listOccurrences a cada 60 s.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 3
+      row_index: 18
+      mapping_type: explicit-catalog-row
+  RN-019:
+    termo_regra: Tombstone
+    defini_o_normativa: Tombstone contém user_id e HMAC-SHA-256 do e-mail normalizado com pepper em KMS, retido por 180 dias;
+      serve à reconciliação de restore e não impede novo cadastro com o mesmo e-mail.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 3
+      row_index: 19
       mapping_type: explicit-catalog-row
 entities:
   ENT-001:
@@ -4477,7 +5123,7 @@ entities:
     lgpd: operacional
     valida_o: imutável no MVP
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 5
       row_index: 3
       mapping_type: explicit-catalog-row
@@ -4485,7 +5131,7 @@ entities:
     entidade: VerificationToken
     finalidade: Token hash de verificação, emissão, expiração e uso.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 4
       row_index: 2
       mapping_type: explicit-catalog-row
@@ -4493,7 +5139,7 @@ entities:
     entidade: PasswordResetToken
     finalidade: Token hash de redefinição, emissão, expiração e uso.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 4
       row_index: 3
       mapping_type: explicit-catalog-row
@@ -4501,7 +5147,7 @@ entities:
     entidade: Session
     finalidade: Sessão hash, atividade, expirações, revogação e versão.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 4
       row_index: 4
       mapping_type: explicit-catalog-row
@@ -4517,7 +5163,7 @@ entities:
     lgpd: operacional
     valida_o: incrementar uma vez por edição
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 5
       row_index: 4
       mapping_type: explicit-catalog-row
@@ -4533,7 +5179,7 @@ entities:
     lgpd: saúde sensível
     valida_o: 1 a 10 por plano
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 5
       row_index: 5
       mapping_type: explicit-catalog-row
@@ -4549,7 +5195,7 @@ entities:
     lgpd: saúde sensível
     valida_o: transições fechadas
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 5
       row_index: 7
       mapping_type: explicit-catalog-row
@@ -4565,7 +5211,7 @@ entities:
     lgpd: saúde sensível
     valida_o: proibido quando type=TAKEN
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 5
       row_index: 9
       mapping_type: explicit-catalog-row
@@ -4581,7 +5227,7 @@ entities:
     lgpd: operacional
     valida_o: SENT não significa entrega
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 5
       row_index: 10
       mapping_type: explicit-catalog-row
@@ -4597,7 +5243,7 @@ entities:
     lgpd: operacional
     valida_o: obrigatório em COMPLETED
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 5
       row_index: 11
       mapping_type: explicit-catalog-row
@@ -4613,7 +5259,7 @@ entities:
     lgpd: operacional
     valida_o: payload divergente retorna conflito
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 5
       row_index: 12
       mapping_type: explicit-catalog-row
@@ -4621,7 +5267,7 @@ entities:
     entidade: OutboxEvent
     finalidade: Evento transacional para processamento assíncrono.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 4
       row_index: 12
       mapping_type: explicit-catalog-row
@@ -4629,7 +5275,7 @@ entities:
     entidade: AuditEvent
     finalidade: Trilha imutável e minimizada de ações críticas.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 4
       row_index: 13
       mapping_type: explicit-catalog-row
@@ -4637,7 +5283,7 @@ entities:
     entidade: PurgeTombstone
     finalidade: Impressão irreversível para impedir restauração indevida.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 4
       row_index: 14
       mapping_type: explicit-catalog-row
@@ -4645,7 +5291,7 @@ entities:
     entidade: IncidentRecord
     finalidade: Registro segregado de incidente de segurança.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 4
       row_index: 15
       mapping_type: explicit-catalog-row
@@ -4653,7 +5299,7 @@ entities:
     entidade: ExternalRightsRequest
     finalidade: Protocolo de solicitação externa de direito.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 4
       row_index: 16
       mapping_type: explicit-catalog-row
@@ -4661,7 +5307,7 @@ entities:
     entidade: PerformanceProfile
     finalidade: Perfil versionado e reproduzível de desempenho.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 4
       row_index: 17
       mapping_type: explicit-catalog-row
@@ -4672,7 +5318,7 @@ flows:
     pr_ximo_estado: REGISTRO_REMOVIDO
     efeito: manter somente tombstone minimizado
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 9
       row_index: 3
       mapping_type: explicit-catalog-row
@@ -4682,7 +5328,7 @@ flows:
     pr_ximo_estado: DELETED
     efeito: cancelar futuras PROGRAMMED e preservar snapshots
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 9
       row_index: 4
       mapping_type: explicit-catalog-row
@@ -4692,7 +5338,7 @@ flows:
     pr_ximo_estado: TAKEN/NOT_TAKEN
     efeito: preservar marco de atraso
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 9
       row_index: 7
       mapping_type: explicit-catalog-row
@@ -4702,16 +5348,26 @@ flows:
     pr_ximo_estado: FAILED
     efeito: código DELIVERY_UNCONFIRMED
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 9
       row_index: 10
+      mapping_type: explicit-catalog-row
+  FL-005:
+    estado_atual: COMPLETED export
+    evento_condi_o: expires_at atingido
+    pr_ximo_estado: EXPIRED
+    efeito: remover arquivo; download retorna 410 RESOURCE_EXPIRED
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 9
+      row_index: 15
       mapping_type: explicit-catalog-row
 screen_states:
   TL-001:
     tela: Cadastro
     estados_obrigat_rios: inicial; preenchimento; validação; enviando; sucesso; erro; rate limit.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 8
       row_index: 1
       mapping_type: explicit-catalog-row
@@ -4719,7 +5375,7 @@ screen_states:
     tela: Login
     estados_obrigat_rios: inicial; autenticando; bloqueado; credencial inválida; limite de sessões; indisponível.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 8
       row_index: 2
       mapping_type: explicit-catalog-row
@@ -4727,7 +5383,7 @@ screen_states:
     tela: Planos
     estados_obrigat_rios: carregando; lista vazia; lista; erro; sem permissão; conflito de versão.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 8
       row_index: 3
       mapping_type: explicit-catalog-row
@@ -4735,7 +5391,7 @@ screen_states:
     tela: Editor de plano
     estados_obrigat_rios: novo; editando; validação; confirmação de possível duplicidade; salvando; sucesso; conflito; timeout.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 8
       row_index: 4
       mapping_type: explicit-catalog-row
@@ -4743,7 +5399,7 @@ screen_states:
     tela: Ocorrências
     estados_obrigat_rios: carregando; vazio; acionável; respondendo; sucesso; conflito; desconectado.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 8
       row_index: 5
       mapping_type: explicit-catalog-row
@@ -4751,7 +5407,7 @@ screen_states:
     tela: Histórico
     estados_obrigat_rios: filtros; carregando; vazio; resultados; período inválido; erro.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 8
       row_index: 6
       mapping_type: explicit-catalog-row
@@ -4759,7 +5415,7 @@ screen_states:
     tela: Exportação
     estados_obrigat_rios: solicitando; processando; concluída; falha; expirada; sem permissão.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 8
       row_index: 7
       mapping_type: explicit-catalog-row
@@ -4767,7 +5423,7 @@ screen_states:
     tela: Privacidade
     estados_obrigat_rios: carregando; dados; confirmação destrutiva; reautenticação; exclusão agendada; erro.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 8
       row_index: 8
       mapping_type: explicit-catalog-row
@@ -4776,7 +5432,7 @@ user_stories:
     hist_ria: Como titular, quero criar e verificar minha conta para acessar o serviço.
     v_nculo: RF-001
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 10
       row_index: 1
       mapping_type: explicit-catalog-row
@@ -4784,7 +5440,7 @@ user_stories:
     hist_ria: Como titular, quero autenticar e gerenciar sessões para proteger meu acesso.
     v_nculo: RF-002
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 10
       row_index: 2
       mapping_type: explicit-catalog-row
@@ -4792,7 +5448,7 @@ user_stories:
     hist_ria: Como titular, quero cadastrar e manter planos para declarar minha rotina.
     v_nculo: RF-003
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 10
       row_index: 3
       mapping_type: explicit-catalog-row
@@ -4800,7 +5456,7 @@ user_stories:
     hist_ria: Como sistema, quero gerar ocorrências sem duplicidade para materializar a rotina.
     v_nculo: RF-004
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 10
       row_index: 4
       mapping_type: explicit-catalog-row
@@ -4808,7 +5464,7 @@ user_stories:
     hist_ria: Como titular, quero receber lembretes para visualizar ocorrências acionáveis.
     v_nculo: RF-005
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 10
       row_index: 5
       mapping_type: explicit-catalog-row
@@ -4816,7 +5472,7 @@ user_stories:
     hist_ria: Como titular, quero registrar TAKEN ou NOT_TAKEN para manter meu histórico.
     v_nculo: RF-006
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 10
       row_index: 6
       mapping_type: explicit-catalog-row
@@ -4824,7 +5480,7 @@ user_stories:
     hist_ria: Como titular, quero consultar e exportar meu histórico para acompanhamento declaratório.
     v_nculo: RF-007/RF-008
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 10
       row_index: 7
       mapping_type: explicit-catalog-row
@@ -4832,7 +5488,7 @@ user_stories:
     hist_ria: Como titular, quero excluir minha conta para interromper o tratamento dos meus dados.
     v_nculo: RF-010
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 10
       row_index: 8
       mapping_type: explicit-catalog-row
@@ -4842,7 +5498,7 @@ decisions:
     problema_causa: Cabeçalho interno 02.20 conflitava com versão 02.30.
     decis_o_adotada: Uniformizar para 02.32 e declarar prevalência.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 1
       mapping_type: explicit-catalog-row
@@ -4851,7 +5507,7 @@ decisions:
     problema_causa: Faixas antigas RNF01-24 e ST01-32 ficaram obsoletas após complementos.
     decis_o_adotada: Baseline consolidada usa RNF-001 a RNF-015 e TS-001 a TS-040.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 2
       mapping_type: explicit-catalog-row
@@ -4860,7 +5516,7 @@ decisions:
     problema_causa: Critérios eram AC, mas o framework exige CA.
     decis_o_adotada: Mapear AC01-AC14 para CA-001 a CA-014 sem alterar semântica.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 3
       mapping_type: explicit-catalog-row
@@ -4869,7 +5525,7 @@ decisions:
     problema_causa: Lista ativa do plano excluído não tinha regra única em todo o texto.
     decis_o_adotada: Planos DELETED ficam ocultos da operação e preservados apenas por snapshots históricos.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 4
       mapping_type: explicit-catalog-row
@@ -4878,7 +5534,7 @@ decisions:
     problema_causa: Entrega incerta de e-mail não tinha estado inicial uniforme.
     decis_o_adotada: Adotar DELIVERY_UNKNOWN e conciliação sem reenvio cego.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 5
       mapping_type: explicit-catalog-row
@@ -4887,7 +5543,7 @@ decisions:
     problema_causa: Paginação padrão conflitava entre 20 e 50.
     decis_o_adotada: Adotar 20 itens por padrão e máximo 100, conforme baseline mestre.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 6
       mapping_type: explicit-catalog-row
@@ -4896,7 +5552,7 @@ decisions:
     problema_causa: TLS/AES estavam descritos de forma genérica.
     decis_o_adotada: Exigir TLS 1.3 em trânsito e AES-256 ou controle gerenciado equivalente em repouso.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 7
       mapping_type: explicit-catalog-row
@@ -4905,7 +5561,7 @@ decisions:
     problema_causa: Dado de medicamento e resposta requer proteção conservadora.
     decis_o_adotada: Classificar como dado pessoal sensível de saúde.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 8
       mapping_type: explicit-catalog-row
@@ -4914,7 +5570,7 @@ decisions:
     problema_causa: Operações mutáveis não tinham matriz única.
     decis_o_adotada: Idempotency-Key obrigatória para criar conta/plano, editar plano, responder, exportar e excluir conta.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 9
       mapping_type: explicit-catalog-row
@@ -4923,9 +5579,159 @@ decisions:
     problema_causa: Produção poderia parecer liberada apesar de gates.
     decis_o_adotada: Status BASELINE DEV-FINAL até aprovações Q/GX.
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 10
+      mapping_type: explicit-catalog-row
+  DEC-011:
+    criticidade: Alta
+    problema_causa: Limite de 3 sessões (CA-003) exigia 409 sem código de erro nem resposta documentada no contrato.
+    decis_o_adotada: Criar ERR-013 SESSION_LIMIT_REACHED (409) e documentar a resposta em createSession.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 11
+      mapping_type: explicit-catalog-row
+  DEC-012:
+    criticidade: Alta
+    problema_causa: Confirmação de possível duplicidade de plano não tinha critério, schema de resposta nem forma de confirmação;
+      o contrato citava 409 BUSINESS_RULE_VIOLATION, mas ERR-009 mapeia 422.
+    decis_o_adotada: 'Criar ERR-014 DUPLICATE_CONFIRMATION_REQUIRED (409) com DuplicateConfirmationProblem; critério: mesmo
+      titular, plano ACTIVE, nome e dose normalizados iguais e períodos sobrepostos; token de uso único, TTL 10 min, reenviado
+      em duplicate_confirmation_token com nova Idempotency-Key; aplica-se só à criação.'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 12
+      mapping_type: explicit-catalog-row
+  DEC-013:
+    criticidade: Alta
+    problema_causa: A ADR e o AGENTS exigem CSRF, mas o contrato não definia mecanismo, cabeçalho nem cookies.
+    decis_o_adotada: Adotar double-submit vinculado à sessão (cookie mr_csrf + X-CSRF-Token) e validação de Origin; cookie
+      mr_session HttpOnly, Secure, SameSite=Lax; falha retorna ERR-015 CSRF_VALIDATION_FAILED (403) nas 11 mutações autenticadas.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 13
+      mapping_type: explicit-catalog-row
+  DEC-014:
+    criticidade: Alta
+    problema_causa: A Especificação 02.32 descrevia 24 operações e DELETE /sessions, divergindo da OpenAPI 02.33.x (27 operações).
+    decis_o_adotada: 'Alinhar a Especificação à OpenAPI 02.33.2: revokeAllSessions (POST /sessions/revocations), /accounts/me,
+      cancelExport, estado CANCELED de exportação (FL-005) e nova seção 13 gerada a partir do contrato.'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 14
+      mapping_type: explicit-catalog-row
+  DEC-015:
+    criticidade: Alta
+    problema_causa: 'Credenciais e tokens sem parâmetros: validade do token de redefinição, algoritmo de hash e fonte da lista
+      de senhas comprometidas (TS-036).'
+    decis_o_adotada: 'Adotar RN-017: Argon2id; verificação 24 h e redefinição 60 min, uso único; lista local versionada de
+      senhas comprometidas, sem consulta remota; rejeição com 400 VALIDATION_FAILED e field_errors[].code=PASSWORD_COMPROMISED.'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 15
+      mapping_type: explicit-catalog-row
+  DEC-016:
+    criticidade: Alta
+    problema_causa: Bloqueio de login (RN-005) sem definição de chave nem tratamento de e-mails inexistentes.
+    decis_o_adotada: Contador por HMAC do e-mail normalizado, inclusive inexistentes; resposta sempre 423 com Retry-After;
+      limite por IP via rate limit (RNF-006).
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 16
+      mapping_type: explicit-catalog-row
+  DEC-017:
+    criticidade: Média
+    problema_causa: Geração de ocorrências, job de prazo e lembretes sem gatilhos e sem conteúdo do e-mail minimizado.
+    decis_o_adotada: 'Adotar RN-018: geração ao criar/editar plano (Outbox) e job horário; job de prazo a cada minuto; 1 e-mail
+      por ocorrência em scheduled_at, sem nome, dose ou link com token; lembrete web por consulta de 60 s.'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 17
+      mapping_type: explicit-catalog-row
+  DEC-018:
+    criticidade: Média
+    problema_causa: Conteúdo e finalidade do tombstone indefinidos (TS-029).
+    decis_o_adotada: 'Adotar RN-019: user_id + HMAC-SHA-256 do e-mail com pepper em KMS, 180 dias, usado na reconciliação
+      de restore; não impede novo cadastro.'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 18
+      mapping_type: explicit-catalog-row
+  DEC-019:
+    criticidade: Média
+    problema_causa: Rate limit multi-instância (RNF-006) sem mecanismo e sem broker/cache no MVP.
+    decis_o_adotada: Contadores em tabela PostgreSQL UNLOGGED com janela por chave; WAF opcional na borda; getHealth isento;
+      429 documentado em todas as operações exceto getHealth.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 19
+      mapping_type: explicit-catalog-row
+  DEC-020:
+    criticidade: Média
+    problema_causa: RNF-015 não fixava o limite de desvio de relógio.
+    decis_o_adotada: CLOCK_SKEW_MAX_MS padrão 5000; acima disso getHealth retorna DEGRADED e decisões temporais críticas são
+      bloqueadas.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 20
+      mapping_type: explicit-catalog-row
+  DEC-021:
+    criticidade: Média
+    problema_causa: PerformanceProfile (ENT-017) sem conteúdo; RNF-004, RNF-005 e TS-039 dependiam dele.
+    decis_o_adotada: Definir PP-001 v1 em docs/specifications/performance-profile.v1.yaml, pendente de aprovação de Produto
+      e Arquitetura.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 21
+      mapping_type: explicit-catalog-row
+  DEC-022:
+    criticidade: Média
+    problema_causa: RF-011 e RF-012 não possuíam operação nem perfil administrativo; RBAC do RNF-003 só previa o titular.
+    decis_o_adotada: Tratar RF-011/RF-012 como procedimentos operacionais sem endpoint HTTP (docs/operations/RIGHTS_AND_INCIDENTS.md);
+      papel único TITULAR na API; acesso operacional por IAM e scripts auditados.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 22
+      mapping_type: explicit-catalog-row
+  DEC-023:
+    criticidade: Baixa
+    problema_causa: Exemplos usavam America/Sao_Paulo, que não tem horário de verão desde 2019; TS-024 não tinha fixtures.
+    decis_o_adotada: Exigir fixtures America/New_York, Europe/Lisbon, America/Santiago e Australia/Lord_Howe; account_timezone
+      aceita IANA canônico da versão de tzdata fixada.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 23
+      mapping_type: explicit-catalog-row
+  DEC-024:
+    criticidade: Baixa
+    problema_causa: RN-001 proibia validar CRM, mas o contrato valida o formato UF-dígitos e TS-012 cita CRM.
+    decis_o_adotada: 'Esclarecer RN-001: sem consulta a registro profissional; apenas o formato do CRM é validado.'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 24
+      mapping_type: explicit-catalog-row
+  DEC-025:
+    criticidade: Baixa
+    problema_causa: RNF-010 citava dinheiro decimal exato, inexistente no produto.
+    decis_o_adotada: Remover o termo de RNF-010.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 25
       mapping_type: explicit-catalog-row
 approved_questions:
   Q-001:
@@ -4936,7 +5742,7 @@ approved_questions:
     justificativa: A reduz ambiguidade e preserva as premissas já usadas.
     status: APROVADO
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 14
       row_index: 1
       mapping_type: explicit-catalog-row
@@ -4948,7 +5754,7 @@ approved_questions:
     justificativa: A é compatível com um MVP, desde que o risco seja aceito.
     status: APROVADO
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 14
       row_index: 2
       mapping_type: explicit-catalog-row
@@ -4960,7 +5766,7 @@ approved_questions:
     justificativa: A permite desenvolver sem antecipar decisão jurídica.
     status: APROVADO
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 14
       row_index: 3
       mapping_type: explicit-catalog-row
@@ -4972,54 +5778,59 @@ approved_questions:
     justificativa: A preserva o escopo do MVP e mantém rastreabilidade.
     status: APROVADO
     provenance:
-      source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 14
       row_index: 4
       mapping_type: explicit-catalog-row
 source_catalogs:
   requirements_source:
     RF-001:
-      rn: RN-001..005
+      rn: RN-001..005,017
       ent: ENT-001..003
       fl: FL-001
       us: US-001
-      ca: CA-001..004
-      ts: TS-009,018,021,028,033,036
+      ca: CA-001..004,015
+      ts: TS-009,018,021,028,033,036,041
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 12
         row_index: 1
         mapping_type: explicit-catalog-row
     RF-002:
-      requisito: Autenticar, encerrar sessão, recuperar senha e limitar sessões.
+      rn: RN-003..005,017
+      ent: ENT-001,003,004
+      fl: FL-001
+      us: US-002
+      ca: CA-003,004,018
+      ts: TS-009,018,033,036,041,044
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
-        table_index: 6
-        row_index: 2
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 12
+        row_index: 7
         mapping_type: explicit-catalog-row
     RF-003:
-      rn: RN-006,013
+      rn: RN-006,013,016
       ent: ENT-005..007
       fl: FL-002
       us: US-003
-      ca: CA-005..006
-      ts: TS-003..005,014,015,027,037,038
+      ca: CA-005..006,017
+      ts: TS-003..005,014,015,027,037,038,041,043
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 12
         row_index: 2
         mapping_type: explicit-catalog-row
     RF-004:
       requisito: Gerar ocorrências por horizonte móvel de 30 dias.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 6
         row_index: 4
         mapping_type: explicit-catalog-row
     RF-005:
       requisito: Exibir lembrete web em página ativa e enviar e-mail minimizado.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 6
         row_index: 5
         mapping_type: explicit-catalog-row
@@ -5029,32 +5840,37 @@ source_catalogs:
       fl: FL-003
       us: US-006
       ca: CA-007
-      ts: TS-001,007,013,025
+      ts: TS-001,007,013,025,041
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 12
         row_index: 4
         mapping_type: explicit-catalog-row
     RF-007:
       requisito: Consultar histórico por período civil de até 12 meses.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 6
         row_index: 7
         mapping_type: explicit-catalog-row
     RF-008:
-      requisito: Gerar e baixar PDF declaratório privado.
+      requisito: Gerar, consultar, cancelar (enquanto REQUESTED ou PROCESSING) e baixar PDF declaratório privado.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 6
         row_index: 8
         mapping_type: explicit-catalog-row
     RF-009:
-      requisito: Persistir preferências de acessibilidade.
+      rn: '-'
+      ent: ENT-001
+      fl: '-'
+      us: '-'
+      ca: CA-018
+      ts: TS-022,041
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
-        table_index: 6
-        row_index: 9
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 12
+        row_index: 8
         mapping_type: explicit-catalog-row
     RF-010:
       rn: RN-012
@@ -5062,23 +5878,24 @@ source_catalogs:
       fl: FL-001
       us: US-008
       ca: CA-014
-      ts: TS-026,029
+      ts: TS-026,029,041
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 12
         row_index: 6
         mapping_type: explicit-catalog-row
     RF-011:
-      requisito: Receber solicitações externas de direitos por canal aprovado.
+      requisito: Receber solicitações externas de direitos por canal aprovado, em procedimento operacional sem endpoint HTTP
+        além de getPrivacy.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 6
         row_index: 11
         mapping_type: explicit-catalog-row
     RF-012:
-      requisito: Registrar e tratar incidentes de segurança.
+      requisito: Registrar e tratar incidentes de segurança em procedimento operacional, sem endpoint HTTP.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 6
         row_index: 12
         mapping_type: explicit-catalog-row
@@ -5086,107 +5903,117 @@ source_catalogs:
     RNF-001:
       requisito_mensur_vel: WCAG 2.2 AA nas telas essenciais; teclado, foco, semântica e zoom 200% em 320 CSS px.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 1
         mapping_type: explicit-catalog-row
     RNF-002:
       requisito_mensur_vel: TLS 1.3 em trânsito; criptografia em repouso AES-256 ou serviço gerenciado equivalente.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 2
         mapping_type: explicit-catalog-row
     RNF-003:
-      requisito_mensur_vel: RBAC e ownership server-side em 100% das rotas privadas.
+      requisito_mensur_vel: RBAC (papel único TITULAR na API) e ownership server-side em 100% das rotas privadas; acesso operacional
+        por IAM e scripts auditados, fora da API.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 3
         mapping_type: explicit-catalog-row
     RNF-004:
-      requisito_mensur_vel: p95 interativo <=2 s sob PerformanceProfile aprovado.
+      requisito_mensur_vel: p95 interativo <=2 s sob PerformanceProfile PP-001 v1 aprovado.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 4
         mapping_type: explicit-catalog-row
     RNF-005:
-      requisito_mensur_vel: p95 de exportação <=30 s sob PerformanceProfile aprovado.
+      requisito_mensur_vel: p95 de exportação <=30 s sob PerformanceProfile PP-001 v1 aprovado.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 5
         mapping_type: explicit-catalog-row
     RNF-006:
       requisito_mensur_vel: 'Rate limit: 100 req/min por usuário autenticado e 20 req/min por IP em rotas públicas.'
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 6
         mapping_type: explicit-catalog-row
     RNF-007:
       requisito_mensur_vel: Timeout externo padrão de 30 s; retries 1 s, 2 s e 4 s apenas para operações idempotentes.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 7
         mapping_type: explicit-catalog-row
     RNF-008:
       requisito_mensur_vel: Logs estruturados sem senha, token, e-mail completo ou conteúdo de saúde.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 8
         mapping_type: explicit-catalog-row
     RNF-009:
       requisito_mensur_vel: SAST, SCA, DAST e secret scan; nenhum achado crítico/alto aberto.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 9
         mapping_type: explicit-catalog-row
     RNF-010:
-      requisito_mensur_vel: Datas UTC ISO 8601; dinheiro decimal exato; UTF-8; paginação 20, máximo 100.
+      requisito_mensur_vel: Datas UTC ISO 8601; UTF-8; paginação 20, máximo 100.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 10
         mapping_type: explicit-catalog-row
     RNF-011:
       requisito_mensur_vel: Backups criptografados; restore reconciliado com tombstones.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 11
         mapping_type: explicit-catalog-row
     RNF-012:
       requisito_mensur_vel: Chaves em serviço dedicado, rotação e menor privilégio.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 12
         mapping_type: explicit-catalog-row
     RNF-013:
       requisito_mensur_vel: SBOM e bloqueio de vulnerabilidades críticas/altas.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 13
         mapping_type: explicit-catalog-row
     RNF-014:
       requisito_mensur_vel: OpenAPI validado contra implementação e testes de contrato.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 14
         mapping_type: explicit-catalog-row
     RNF-015:
-      requisito_mensur_vel: Relógios sincronizados; desvio acima do limite configurado bloqueia decisões temporais críticas.
+      requisito_mensur_vel: Relógios sincronizados; desvio acima de CLOCK_SKEW_MAX_MS (padrão 5 s) bloqueia decisões temporais
+        críticas e marca getHealth como DEGRADED.
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 7
         row_index: 15
+        mapping_type: explicit-catalog-row
+    RNF-016:
+      requisito_mensur_vel: 'Mutações autenticadas protegidas contra CSRF: cookie mr_csrf + cabeçalho X-CSRF-Token (double-submit
+        vinculado à sessão) e validação de Origin; falha retorna 403 CSRF_VALIDATION_FAILED.'
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 7
+        row_index: 16
         mapping_type: explicit-catalog-row
   acceptance_criteria_source:
     CA-001:
@@ -5195,7 +6022,7 @@ source_catalogs:
       dados_concretos: ana.silva@example.com; America/Sao_Paulo
       sa_da_exata: 201; status=PENDING_VERIFICATION
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 1
         mapping_type: explicit-catalog-row
@@ -5204,16 +6031,16 @@ source_catalogs:
       dados_concretos: token_hash válido
       sa_da_exata: 204; User.status=ACTIVE
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 2
         mapping_type: explicit-catalog-row
     CA-003:
       gherkin_condensado: Dada conta ACTIVE e 2 sessões | Quando login válido | Então criar a 3ª sessão; na 4ª, rejeitar.
       dados_concretos: 2 sessões ativas
-      sa_da_exata: 201 na 3ª; 409 na 4ª
+      sa_da_exata: 201 na 3ª; 409 SESSION_LIMIT_REACHED na 4ª
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 3
         mapping_type: explicit-catalog-row
@@ -5222,7 +6049,7 @@ source_catalogs:
       dados_concretos: 5 falhas
       sa_da_exata: 423 ACCOUNT_TEMPORARILY_LOCKED
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 4
         mapping_type: explicit-catalog-row
@@ -5232,17 +6059,17 @@ source_catalogs:
       dados_concretos: Comprimido; 08:00,20:00
       sa_da_exata: 201; 2 horários únicos
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 5
         mapping_type: explicit-catalog-row
     CA-006:
-      gherkin_condensado: Dada row_version=7 | Quando editar com expected=7 | Então salvar e retornar versão 8; expected=6
-        conflita.
-      dados_concretos: expected=7/6
+      gherkin_condensado: Dada row_version=7 (ETag "7") │ Quando editar com If-Match "7" │ Então salvar e retornar versão
+        8 (ETag "8"); If-Match "6" conflita.
+      dados_concretos: If-Match="7" / If-Match="6"
       sa_da_exata: 200 versão 8 / 409 VERSION_CONFLICT
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 6
         mapping_type: explicit-catalog-row
@@ -5252,7 +6079,7 @@ source_catalogs:
       dados_concretos: duas requisições simultâneas
       sa_da_exata: um 201 e um 409 STATE_CONFLICT
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 7
         mapping_type: explicit-catalog-row
@@ -5261,7 +6088,7 @@ source_catalogs:
       dados_concretos: scheduled_at=10:00; agora=11:00
       sa_da_exata: status=NO_RESPONSE
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 8
         mapping_type: explicit-catalog-row
@@ -5271,7 +6098,7 @@ source_catalogs:
       dados_concretos: start=2026-01-01; end=2026-01-31
       sa_da_exata: 200; intervalo local semiaberto
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 9
         mapping_type: explicit-catalog-row
@@ -5281,7 +6108,7 @@ source_catalogs:
       dados_concretos: período de 30 dias
       sa_da_exata: 202; depois COMPLETED
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 10
         mapping_type: explicit-catalog-row
@@ -5290,7 +6117,7 @@ source_catalogs:
       dados_concretos: agora>=expires_at
       sa_da_exata: 410 RESOURCE_EXPIRED
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 11
         mapping_type: explicit-catalog-row
@@ -5299,7 +6126,7 @@ source_catalogs:
       dados_concretos: user A acessa id de B
       sa_da_exata: 404 RESOURCE_NOT_FOUND
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 12
         mapping_type: explicit-catalog-row
@@ -5309,7 +6136,7 @@ source_catalogs:
       dados_concretos: mesma chave e payload
       sa_da_exata: mesmo status e corpo lógico
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 13
         mapping_type: explicit-catalog-row
@@ -5318,9 +6145,49 @@ source_catalogs:
       dados_concretos: User=DELETION_SCHEDULED
       sa_da_exata: nenhum efeito externo
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 11
         row_index: 14
+        mapping_type: explicit-catalog-row
+    CA-015:
+      gherkin_condensado: Dada conta ACTIVE autenticada │ Quando atualizar o nome pelo perfil │ Então alterar somente name;
+        account_timezone permanece imutável.
+      dados_concretos: name=Ana Souza; envio de account_timezone
+      sa_da_exata: 200 com name atualizado / 400 VALIDATION_FAILED
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 11
+        row_index: 15
+        mapping_type: explicit-catalog-row
+    CA-016:
+      gherkin_condensado: Dada exportação REQUESTED ou PROCESSING │ Quando cancelar │ Então status CANCELED sem arquivo disponível;
+        em estado terminal rejeitar.
+      dados_concretos: export REQUESTED; export COMPLETED
+      sa_da_exata: 204 / 409 STATE_CONFLICT
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 11
+        row_index: 16
+        mapping_type: explicit-catalog-row
+    CA-017:
+      gherkin_condensado: Dado plano ACTIVE Comprimido 1 comprimido 08:00 │ Quando criar plano equivalente sem token │ Então
+        não criar e exigir confirmação; com token e nova Idempotency-Key criar.
+      dados_concretos: mesmo nome, dose e período
+      sa_da_exata: 409 DUPLICATE_CONFIRMATION_REQUIRED / 201
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 11
+        row_index: 17
+        mapping_type: explicit-catalog-row
+    CA-018:
+      gherkin_condensado: Dada sessão válida │ Quando enviar mutação sem X-CSRF-Token válido ou com Origin não permitida │
+        Então rejeitar sem efeito.
+      dados_concretos: sem token; Origin https://evil.example
+      sa_da_exata: 403 CSRF_VALIDATION_FAILED
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 11
+        row_index: 18
         mapping_type: explicit-catalog-row
   errors_source:
     ERR-001:
@@ -5329,7 +6196,7 @@ source_catalogs:
       mensagem_ao_usu_rio: Revise os campos destacados e tente novamente.
       estado_resultante: estado preservado
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 1
         mapping_type: explicit-catalog-row
@@ -5339,7 +6206,7 @@ source_catalogs:
       mensagem_ao_usu_rio: Sua sessão terminou. Entre novamente.
       estado_resultante: sessão inválida
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 2
         mapping_type: explicit-catalog-row
@@ -5349,7 +6216,7 @@ source_catalogs:
       mensagem_ao_usu_rio: O item solicitado não foi encontrado.
       estado_resultante: sem alteração
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 3
         mapping_type: explicit-catalog-row
@@ -5359,7 +6226,7 @@ source_catalogs:
       mensagem_ao_usu_rio: Não foi possível entrar agora. Tente novamente após o período informado.
       estado_resultante: conta bloqueada
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 4
         mapping_type: explicit-catalog-row
@@ -5369,7 +6236,7 @@ source_catalogs:
       mensagem_ao_usu_rio: Este plano foi alterado em outra sessão. Recarregue antes de tentar novamente.
       estado_resultante: nenhum overwrite
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 5
         mapping_type: explicit-catalog-row
@@ -5379,7 +6246,7 @@ source_catalogs:
       mensagem_ao_usu_rio: A solicitação repetida contém dados diferentes.
       estado_resultante: sem novo efeito
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 6
         mapping_type: explicit-catalog-row
@@ -5389,7 +6256,7 @@ source_catalogs:
       mensagem_ao_usu_rio: Esta ocorrência já recebeu uma resposta.
       estado_resultante: primeira resposta preservada
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 7
         mapping_type: explicit-catalog-row
@@ -5399,7 +6266,7 @@ source_catalogs:
       mensagem_ao_usu_rio: Este link não pode mais ser usado. Solicite um novo.
       estado_resultante: sem efeito
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 8
         mapping_type: explicit-catalog-row
@@ -5409,7 +6276,7 @@ source_catalogs:
       mensagem_ao_usu_rio: A operação não atende às regras informadas.
       estado_resultante: sem alteração
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 9
         mapping_type: explicit-catalog-row
@@ -5419,7 +6286,7 @@ source_catalogs:
       mensagem_ao_usu_rio: Muitas tentativas. Aguarde o tempo informado e tente novamente.
       estado_resultante: sem alteração
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 10
         mapping_type: explicit-catalog-row
@@ -5429,7 +6296,7 @@ source_catalogs:
       mensagem_ao_usu_rio: O serviço está temporariamente indisponível. Tente novamente.
       estado_resultante: não declarar sucesso
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 11
         mapping_type: explicit-catalog-row
@@ -5439,16 +6306,46 @@ source_catalogs:
       mensagem_ao_usu_rio: Este arquivo expirou. Solicite uma nova exportação.
       estado_resultante: download negado
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 13
         row_index: 12
+        mapping_type: explicit-catalog-row
+    ERR-013:
+      c_digo: SESSION_LIMIT_REACHED
+      http: '409'
+      mensagem_ao_usu_rio: Você já tem 3 sessões ativas. Encerre uma sessão para entrar.
+      estado_resultante: sem nova sessão
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 13
+        row_index: 13
+        mapping_type: explicit-catalog-row
+    ERR-014:
+      c_digo: DUPLICATE_CONFIRMATION_REQUIRED
+      http: '409'
+      mensagem_ao_usu_rio: Já existe um plano parecido. Confirme se deseja criar outro.
+      estado_resultante: plano não criado
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 13
+        row_index: 14
+        mapping_type: explicit-catalog-row
+    ERR-015:
+      c_digo: CSRF_VALIDATION_FAILED
+      http: '403'
+      mensagem_ao_usu_rio: Não foi possível validar a solicitação. Recarregue a página e tente novamente.
+      estado_resultante: sem alteração
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 13
+        row_index: 15
         mapping_type: explicit-catalog-row
   sentinel_tests_source:
     TS-001:
       cen_rio: Concorrência TAKEN x NOT_TAKEN
       resultado_esperado_proibido: uma resposta 201; outra 409; uma linha Response
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 1
         mapping_type: explicit-catalog-row
@@ -5456,7 +6353,7 @@ source_catalogs:
       cen_rio: Falha de e-mail
       resultado_esperado_proibido: ocorrência não muda; EmailReminder FAILED auditado
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 2
         mapping_type: explicit-catalog-row
@@ -5464,7 +6361,7 @@ source_catalogs:
       cen_rio: Reexecução do gerador
       resultado_esperado_proibido: nenhuma duplicata civil
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 3
         mapping_type: explicit-catalog-row
@@ -5472,7 +6369,7 @@ source_catalogs:
       cen_rio: Edição de plano
       resultado_esperado_proibido: preserva iniciadas; cancela apenas futuras PROGRAMMED
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 4
         mapping_type: explicit-catalog-row
@@ -5480,7 +6377,7 @@ source_catalogs:
       cen_rio: Exclusão lógica
       resultado_esperado_proibido: oculta plano; preserva histórico
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 5
         mapping_type: explicit-catalog-row
@@ -5488,7 +6385,7 @@ source_catalogs:
       cen_rio: Prazo sem canais
       resultado_esperado_proibido: NO_RESPONSE ocorre mesmo sem e-mail/web
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 6
         mapping_type: explicit-catalog-row
@@ -5496,7 +6393,7 @@ source_catalogs:
       cen_rio: Resposta tardia
       resultado_esperado_proibido: is_late=true e marco preservado
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 7
         mapping_type: explicit-catalog-row
@@ -5504,7 +6401,7 @@ source_catalogs:
       cen_rio: Acesso horizontal
       resultado_esperado_proibido: titular A recebe 404 no recurso de B
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 8
         mapping_type: explicit-catalog-row
@@ -5512,7 +6409,7 @@ source_catalogs:
       cen_rio: Token usado/expirado
       resultado_esperado_proibido: nenhum novo efeito
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 9
         mapping_type: explicit-catalog-row
@@ -5520,7 +6417,7 @@ source_catalogs:
       cen_rio: Servidor indisponível
       resultado_esperado_proibido: UI não declara sucesso nem enfileira offline
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 10
         mapping_type: explicit-catalog-row
@@ -5528,7 +6425,7 @@ source_catalogs:
       cen_rio: PDF expirado
       resultado_esperado_proibido: download retorna 410
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 11
         mapping_type: explicit-catalog-row
@@ -5536,7 +6433,7 @@ source_catalogs:
       cen_rio: CRM
       resultado_esperado_proibido: somente valida formato, sem consulta externa
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 12
         mapping_type: explicit-catalog-row
@@ -5544,7 +6441,7 @@ source_catalogs:
       cen_rio: Resposta versus prazo
       resultado_esperado_proibido: estado final consistente e único
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 13
         mapping_type: explicit-catalog-row
@@ -5552,7 +6449,7 @@ source_catalogs:
       cen_rio: Gerador versus edição
       resultado_esperado_proibido: nenhum futuro inválido
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 14
         mapping_type: explicit-catalog-row
@@ -5560,7 +6457,7 @@ source_catalogs:
       cen_rio: Idempotência divergente
       resultado_esperado_proibido: 409 ERR-006
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 15
         mapping_type: explicit-catalog-row
@@ -5568,7 +6465,7 @@ source_catalogs:
       cen_rio: Broker indisponível
       resultado_esperado_proibido: outbox permanece após commit
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 16
         mapping_type: explicit-catalog-row
@@ -5576,15 +6473,15 @@ source_catalogs:
       cen_rio: Retomada worker
       resultado_esperado_proibido: sem efeito funcional duplicado
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 17
         mapping_type: explicit-catalog-row
     TS-018:
       cen_rio: Quarta sessão
-      resultado_esperado_proibido: rejeitada; expirações aplicadas
+      resultado_esperado_proibido: rejeitada com 409 SESSION_LIMIT_REACHED; expirações aplicadas
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 18
         mapping_type: explicit-catalog-row
@@ -5592,7 +6489,7 @@ source_catalogs:
       cen_rio: Link sem sessão
       resultado_esperado_proibido: não enumera ocorrência
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 19
         mapping_type: explicit-catalog-row
@@ -5600,7 +6497,7 @@ source_catalogs:
       cen_rio: Snapshot PDF
       resultado_esperado_proibido: edição posterior não altera PDF
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 20
         mapping_type: explicit-catalog-row
@@ -5608,7 +6505,7 @@ source_catalogs:
       cen_rio: Reenvio verificação
       resultado_esperado_proibido: invalida token anterior
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 21
         mapping_type: explicit-catalog-row
@@ -5616,7 +6513,7 @@ source_catalogs:
       cen_rio: Acessibilidade
       resultado_esperado_proibido: teclado, foco, zoom e leitura linear aprovados
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 22
         mapping_type: explicit-catalog-row
@@ -5624,15 +6521,16 @@ source_catalogs:
       cen_rio: BOLA/IDOR
       resultado_esperado_proibido: todas as rotas privadas cobertas
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 23
         mapping_type: explicit-catalog-row
     TS-024:
       cen_rio: DST
-      resultado_esperado_proibido: horários inexistentes/ambíguos seguem regra
+      resultado_esperado_proibido: horários inexistentes/ambíguos seguem regra; fixtures America/New_York, Europe/Lisbon,
+        America/Santiago e Australia/Lord_Howe; America/Sao_Paulo sem DST
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 24
         mapping_type: explicit-catalog-row
@@ -5640,7 +6538,7 @@ source_catalogs:
       cen_rio: Constraints
       resultado_esperado_proibido: estados inválidos rejeitados
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 25
         mapping_type: explicit-catalog-row
@@ -5648,7 +6546,7 @@ source_catalogs:
       cen_rio: Exclusão de conta
       resultado_esperado_proibido: acesso bloqueado, artefatos removidos
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 26
         mapping_type: explicit-catalog-row
@@ -5656,7 +6554,7 @@ source_catalogs:
       cen_rio: Edição no instante
       resultado_esperado_proibido: scheduled_at<=action_at preservada
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 27
         mapping_type: explicit-catalog-row
@@ -5664,7 +6562,7 @@ source_catalogs:
       cen_rio: Conta pendente antiga
       resultado_esperado_proibido: removida sem órfãos
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 28
         mapping_type: explicit-catalog-row
@@ -5672,7 +6570,7 @@ source_catalogs:
       cen_rio: Restore
       resultado_esperado_proibido: tombstone impede recriação
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 29
         mapping_type: explicit-catalog-row
@@ -5680,7 +6578,7 @@ source_catalogs:
       cen_rio: Incidente
       resultado_esperado_proibido: registro, contenção, decisão e relatório
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 30
         mapping_type: explicit-catalog-row
@@ -5688,7 +6586,7 @@ source_catalogs:
       cen_rio: Rotação de chave
       resultado_esperado_proibido: leitura autorizada mantida
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 31
         mapping_type: explicit-catalog-row
@@ -5696,7 +6594,7 @@ source_catalogs:
       cen_rio: Direito externo
       resultado_esperado_proibido: protocolo sem exposição em logs
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 32
         mapping_type: explicit-catalog-row
@@ -5704,7 +6602,7 @@ source_catalogs:
       cen_rio: Bloqueio login
       resultado_esperado_proibido: 423 estável após 5 falhas
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 33
         mapping_type: explicit-catalog-row
@@ -5712,7 +6610,7 @@ source_catalogs:
       cen_rio: Evento atrasado
       resultado_esperado_proibido: nenhum e-mail após resposta/exclusão
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 34
         mapping_type: explicit-catalog-row
@@ -5720,7 +6618,7 @@ source_catalogs:
       cen_rio: Entrega incerta
       resultado_esperado_proibido: DELIVERY_UNKNOWN sem reenvio cego
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 35
         mapping_type: explicit-catalog-row
@@ -5728,7 +6626,7 @@ source_catalogs:
       cen_rio: Senha comprometida
       resultado_esperado_proibido: rejeitada sem log/chamada remota
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 36
         mapping_type: explicit-catalog-row
@@ -5736,7 +6634,7 @@ source_catalogs:
       cen_rio: Plano excluído
       resultado_esperado_proibido: invisível operacionalmente, presente em snapshot
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 37
         mapping_type: explicit-catalog-row
@@ -5744,7 +6642,7 @@ source_catalogs:
       cen_rio: Matriz idempotência
       resultado_esperado_proibido: replay igual e conflito divergente
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 38
         mapping_type: explicit-catalog-row
@@ -5752,7 +6650,7 @@ source_catalogs:
       cen_rio: Desempenho
       resultado_esperado_proibido: evidência sem perfil é inválida
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 39
         mapping_type: explicit-catalog-row
@@ -5760,9 +6658,44 @@ source_catalogs:
       cen_rio: Contrato
       resultado_esperado_proibido: OpenAPI, implementação e testes não divergem
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 16
         row_index: 40
+        mapping_type: explicit-catalog-row
+    TS-041:
+      cen_rio: CSRF nas mutações autenticadas
+      resultado_esperado_proibido: 403 CSRF_VALIDATION_FAILED nas 11 mutações privadas sem token válido ou com Origin externa;
+        nenhum efeito
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 16
+        row_index: 41
+        mapping_type: explicit-catalog-row
+    TS-042:
+      cen_rio: Cancelamento de exportação
+      resultado_esperado_proibido: REQUESTED/PROCESSING vira CANCELED; estado terminal retorna 409; sem arquivo
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 16
+        row_index: 42
+        mapping_type: explicit-catalog-row
+    TS-043:
+      cen_rio: Confirmação de duplicidade de plano
+      resultado_esperado_proibido: 409 sem criar; token de uso único, TTL 10 min e vinculado ao payload; confirmação cria
+        1 plano
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 16
+        row_index: 43
+        mapping_type: explicit-catalog-row
+    TS-044:
+      cen_rio: Revogação global de sessões
+      resultado_esperado_proibido: exige reautenticação e Idempotency-Key; senha incorreta retorna 401 sem revogar; todas
+        as sessões revogadas
+      provenance:
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
+        table_index: 16
+        row_index: 44
         mapping_type: explicit-catalog-row
   production_gates_source:
     GX-001:
@@ -5770,7 +6703,7 @@ source_catalogs:
       evid_ncia_obrigat_ria: registro de operações e parecer aprovado
       bloqueia: produção
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 15
         row_index: 1
         mapping_type: explicit-catalog-row
@@ -5779,7 +6712,7 @@ source_catalogs:
       evid_ncia_obrigat_ria: textos versionados e aceite rastreável
       bloqueia: produção
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 15
         row_index: 2
         mapping_type: explicit-catalog-row
@@ -5788,7 +6721,7 @@ source_catalogs:
       evid_ncia_obrigat_ria: tabela aprovada e teste de expurgo/restore
       bloqueia: produção
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 15
         row_index: 3
         mapping_type: explicit-catalog-row
@@ -5797,7 +6730,7 @@ source_catalogs:
       evid_ncia_obrigat_ria: relatório e contratos aprovados
       bloqueia: produção
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 15
         row_index: 4
         mapping_type: explicit-catalog-row
@@ -5806,7 +6739,7 @@ source_catalogs:
       evid_ncia_obrigat_ria: aprovação formal, alertas e runbooks
       bloqueia: produção
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 15
         row_index: 5
         mapping_type: explicit-catalog-row
@@ -5815,7 +6748,7 @@ source_catalogs:
       evid_ncia_obrigat_ria: exercício, contatos, preservação de evidências
       bloqueia: produção
       provenance:
-        source: MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx
+        source: MeuRemedio_Especificacao_Funcional_02.33.docx
         table_index: 15
         row_index: 6
         mapping_type: explicit-catalog-row

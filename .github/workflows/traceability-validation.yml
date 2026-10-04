@@ -8,9 +8,9 @@ on:
       - "traceability-check.py"
       - "validate_all.py"
       - "requirements-validation.txt"
-      - "MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml"
-      - "MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx"
-      - "ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx"
+      - "MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml"
+      - "MeuRemedio_Especificacao_Funcional_02.33.docx"
+      - "ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx"
       - "AGENTS.md"
       - ".github/workflows/traceability-validation.yml"
   push:
@@ -22,9 +22,9 @@ on:
       - "traceability-check.py"
       - "validate_all.py"
       - "requirements-validation.txt"
-      - "MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml"
-      - "MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx"
-      - "ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx"
+      - "MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml"
+      - "MeuRemedio_Especificacao_Funcional_02.33.docx"
+      - "ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx"
       - "AGENTS.md"
       - ".github/workflows/traceability-validation.yml"
   workflow_dispatch:
@@ -65,9 +65,9 @@ jobs:
             "traceability-matrix.schema.json"
             "traceability-check.py"
             "validate_all.py"
-            "MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml"
-            "MeuRemedio_Especificacao_Funcional_02.32_CORRIGIDA.docx"
-            "ADR-001_Arquitetura_Base_MeuRemedio_v1.4_CONSOLIDADA_CORRIGIDA.docx"
+            "MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml"
+            "MeuRemedio_Especificacao_Funcional_02.33.docx"
+            "ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx"
             "AGENTS.md"
           )
           for file in "${required_files[@]}"; do

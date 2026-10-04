@@ -1,0 +1,42 @@
+# PerformanceProfile PP-001 v1 (ENT-017) - PROPOSTA pendente de aprovacao de Produto e Arquitetura.
+# Sem aprovacao, evidencias de desempenho sao invalidas (TS-039).
+profile_key: PP-001
+version: 1
+status: proposed
+objectives:
+  RNF-004: p95 interativo <= 2 s
+  RNF-005: p95 de exportacao <= 30 s
+dataset:
+  active_accounts: 5000
+  plans_per_account: 5
+  schedule_times_per_plan: 3
+  occurrence_horizon_days: 30
+  history_months_per_account: 12
+  seed: 20260921          # gerador deterministico; somente dados sinteticos
+load:
+  concurrent_sessions: 50
+  steady_state_minutes: 15
+  ramp_up_minutes: 3
+  think_time_seconds: 2
+  mix_percent:
+    listOccurrences: 35
+    createResponse: 20
+    listPlans: 10
+    getHistory: 10
+    createPlan_or_updatePlan: 8
+    createSession: 7
+    getExport: 5
+    createExport: 5
+  concurrent_exports: 5
+  export_scope: historico de 12 meses de 1 titular (~5.500 ocorrencias)
+environment:
+  api: 2 vCPU / 4 GB (1 tarefa)
+  worker: 2 vCPU / 4 GB (1 tarefa; Chromium isolado)
+  database: PostgreSQL 17, 2 vCPU / 4 GB, armazenamento SSD gp3
+  region: sa-east-1
+  clock_skew_max_ms: 5000
+acceptance:
+  error_rate_max_percent: 0.1
+  rate_limit_exemptions: [load-generator-ip]
+  report: percentis p50/p95/p99 por operationId e consumo de CPU/memoria
+change_control: qualquer alteracao exige nova versao (version+1), novo hash e aprovacao; ENT-017 armazena definicao e SHA-256.
