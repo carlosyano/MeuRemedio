@@ -107,6 +107,8 @@ Os valores foram calculados com `zoneinfo` e o tzdata do ambiente de referência
 
 **Esperado:** exatamente 1 ocorrência por (plano, data, horário) mesmo no dia de repetição de hora; `local_time` preserva o horário pedido (`02:30`); histórico e deadlines coerentes.
 
+**Estado (PR 2):** a parte pura (resolução de data, hora e fuso em instante UTC, e o prazo de 60 minutos) está em `tests/unit/civil-time.spec.ts`, com as fixtures acima, o dia inteiro de cada transição contra um oráculo minuto a minuto e as propriedades abaixo. O gerador de ocorrências e a unicidade no PostgreSQL seguem pendentes em `tests/integration/ts-024.spec.ts`.
+
 **Propriedades (fast-check, 2024–2030, os 5 fusos acima):** nunca gera duas ocorrências para o mesmo (plano, data, horário); `scheduled_at` é monotônico por dia; o resultado independe do fuso do servidor; reexecutar o gerador não altera linhas.
 
 ---

@@ -1,3 +1,4 @@
-// Placeholder da fundacao tecnica: sem regra de negocio.
-// O conteudo deste pacote nasce de testes (Test-First) em PRs proprios.
+export * from './civil-time.js';
+
+// Placeholder da fundacao tecnica mantido ate o pacote ter mais conteudo.
 export const packageName = '@meuremedio/domain' as const;

@@ -28,6 +28,7 @@
     "@stoplight/spectral-rulesets": "1.23.0",
     "@types/node": "24.19.1",
     "eslint": "10.12.0",
+    "fast-check": "4.10.2",
     "prettier": "3.9.9",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.0",
