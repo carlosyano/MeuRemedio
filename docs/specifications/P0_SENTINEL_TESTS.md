@@ -82,7 +82,7 @@
 
 **Observações:** `createAccount` usa escopo `public`. Em `updatePlan`, o `If-Match` integra o hash da requisição.
 
-**Questão aberta (decisão humana):** em `requestAccountDeletion` e `revokeAllSessions` o efeito revoga a própria sessão; um replay após timeout do cliente retornará `401` antes de consultar o snapshot. Decidir se o replay deve consultar o registro de idempotência antes da autenticação nessas duas operações. Até a decisão, o TS-038 cobre os passos 1 a 5 apenas com chamadas feitas antes da revogação.
+**Decisão (aprovada em 04/10/2026 pelo mantenedor, interino):** em `requestAccountDeletion` e `revokeAllSessions` o efeito revoga a própria sessão; o replay da mesma chamada **retorna `401`**, pois a autenticação precede a consulta ao registro de idempotência. O cliente trata um `401` posterior à confirmação da ação como resultado já alcançado. O TS-038 cobre os passos 1 a 5 com chamadas feitas antes da revogação e acrescenta o passo 6: replay após a revogação retorna `401` sem novo efeito.
 
 ---
 

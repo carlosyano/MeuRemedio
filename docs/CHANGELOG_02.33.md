@@ -1,6 +1,6 @@
 # Registro de alterações — revisão 02.33 (04/10/2026)
 
-Resultado da análise de completude do `PROJECT_CONTEXT.md` e das fontes normativas. **Todas as decisões novas são propostas e dependem de aprovação humana** (AGENTS.md §19.8 e §20.1).
+Resultado da análise de completude do `PROJECT_CONTEXT.md` e das fontes normativas. **Aprovação humana registrada em 04/10/2026** pelo mantenedor (carlosyano), em caráter interino (AGENTS.md §19.8 e §20.1). Ver a seção "Aprovação" ao final.
 
 ## Versões
 
@@ -44,19 +44,28 @@ Resultado da análise de completude do `PROJECT_CONTEXT.md` e das fontes normati
 - `validate_all.py`: caminho fixo da OpenAPI atualizado para 02.33.2.
 - PROJECT_CONTEXT: P0 ampliado, GX, decisões pendentes, bash além de PowerShell, opções de proteção da `main`.
 
-## Não resolvido (exige decisão ou etapa posterior)
+## Aprovação (04/10/2026)
 
-1. Aprovação humana de DEC-011 a DEC-025 e de OA-008 a OA-011.
-2. **TS-038:** replay de `revokeAllSessions` e `requestAccountDeletion` após a revogação da própria sessão (retorna 401 antes da idempotência).
-3. Proteção da `main` (opções A, B ou C em PROJECT_CONTEXT §8.1).
-4. Responsáveis reais: `@carlosyano` é interino em `CODEOWNERS`, nos GX e nos artefatos de teste.
-5. Retenção de `audit_events` (GX-003); aprovação do PP-001.
-6. Schema Drizzle e migrações: primeira entrega da fundação Test-First (validadas em PostgreSQL real).
-7. Matriz: `entities` sobrescreve a linha da entidade pelo último campo do dicionário (GAP-007); preservado por compatibilidade com o schema.
-8. `.github/workflows/traceability-validation.yml`: atualizar se listar nomes de artefatos.
+Aprovador: Carlos Yano (`@carlosyano`), mantenedor, em caráter interino. Aprovadas conforme a recomendação:
 
-## Verificação executada
+1. DEC-011 a DEC-025 (Especificação 02.33) e ADR OA-008 a OA-011.
+2. TS-038: manter `401` no replay de `revokeAllSessions` e `requestAccountDeletion` após a revogação da própria sessão.
+3. Proteção da `main`: opção C, como exceção formal (pull request e check obrigatórios por disciplina; sem push direto; agentes de IA sem permissão de merge).
+4. Responsáveis: `@carlosyano` interino para desenvolver; jurista ou DPO a designar antes de dados reais ou produção.
+5. PerformanceProfile PP-001 v1: aprovado como provisório; recalibrar após os spikes de infraestrutura.
+6. Retenção de `audit_events`: padrão provisório de 180 dias configuráveis; definitivo em GX-003.
+
+Efeitos: matriz 2.1.1 (hashes da Especificação e da ADR atualizados; GAP-005 resolvido; GAP-006 reduzido). OpenAPI 02.33.2 e AGENTS.md 1.3 inalterados.
+
+## Ainda em aberto
+
+1. Parecer jurídico e de privacidade (GX-001 a GX-006) e designação do responsável definitivo.
+2. Retenção definitiva de `audit_events` (GX-003) e conteúdo final de `incident_records` (GX-006).
+3. Schema Drizzle e migrações: primeira entrega da fundação Test-First.
+4. Matriz: `entities` sobrescreve a linha da entidade pelo último campo do dicionário (GAP-007); preservado por compatibilidade com o schema.
+
+## Verificação executada (revisão 02.33)
 
 - OpenAPI 02.33.2: validador OpenAPI 3.1 sem erros e Spectral (`spectral:oas`) sem erros nem avisos.
 - Especificação e ADR: validação estrutural do `.docx` aprovada.
-- `validate_all.py` e `traceability-check.py` (versões do projeto): **PASS**, com hashes das quatro fontes conferidos, 27 operações e catálogos consistentes. O schema JSON da matriz não estava disponível: a etapa de schema rodou contra um schema permissivo. **Reexecute `python validate_all.py` com o schema real.**
+- `validate_all.py` e `traceability-check.py`: PASS no ambiente local (schema real) e no CI do GitHub.

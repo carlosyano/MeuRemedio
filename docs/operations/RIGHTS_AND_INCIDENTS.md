@@ -1,6 +1,6 @@
 # MeuRemedio — Procedimentos Operacionais: Direitos do Titular (RF-011) e Incidentes (RF-012)
 
-> **Status:** PROPOSTA (DEC-022), apoio à Especificação Funcional 02.33. Procedimentos **sem endpoint HTTP**: a OpenAPI só expõe `getPrivacy`, que informa o canal externo e os prazos de retenção. Prazos legais, base legal e textos finais dependem de GX-001, GX-002 e GX-006 e de parecer jurídico.
+> **Status:** APROVADA em 04/10/2026 pelo mantenedor, em caráter interino (DEC-022), apoio à Especificação Funcional 02.33. Procedimentos **sem endpoint HTTP**: a OpenAPI só expõe `getPrivacy`, que informa o canal externo e os prazos de retenção. Prazos legais, base legal e textos finais dependem de GX-001, GX-002 e GX-006 e de parecer jurídico.
 
 ## 1. Princípios
 
