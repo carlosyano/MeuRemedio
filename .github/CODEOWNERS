@@ -24,3 +24,12 @@
 /infra/                             @carlosyano
 /.github/workflows/                 @carlosyano
 /.github/CODEOWNERS                 @carlosyano
+
+# Toolchain e dependencias
+/package.json                       @carlosyano
+/package-lock.json                  @carlosyano
+/.nvmrc                             @carlosyano
+/.npmrc                             @carlosyano
+/tsconfig*.json                     @carlosyano
+/eslint.config.mjs                  @carlosyano
+/tools/                             @carlosyano
