@@ -1,0 +1,36 @@
+{
+  "name": "meuremedio",
+  "version": "0.0.0",
+  "private": true,
+  "description": "MeuRemedio - monorepo (fundacao tecnica Test-First)",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b && tsc -p tests/tsconfig.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:unit": "vitest run",
+    "openapi:lint": "node tools/scripts/openapi-lint.mjs",
+    "traceability:check": "python validate_all.py",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test:unit && npm run openapi:lint"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@stoplight/spectral-core": "1.24.0",
+    "@stoplight/spectral-parsers": "1.0.5",
+    "@stoplight/spectral-rulesets": "1.23.0",
+    "@types/node": "24.19.1",
+    "eslint": "10.12.0",
+    "prettier": "3.9.9",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.0",
+    "vitest": "5.0.3"
+  }
+}

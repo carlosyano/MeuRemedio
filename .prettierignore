@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+validation-report
+package-lock.json
+traceability-matrix.schema.json
+*.md
+*.yaml
+*.yml
+*.docx

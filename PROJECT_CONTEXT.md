@@ -207,7 +207,7 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 |---|---|
 | Baseline documental 02.33 / 02.33.2 / v1.5 / AGENTS 1.3 | Revisada e **aprovada em 04/10/2026** pelo mantenedor (interino); parecer jurídico e de privacidade pendente |
 | Matriz 2.1.1 e schema | Validadas (`PASS`) com o schema real e no CI |
-| Fundação do monorepo | Não iniciada |
+| Fundação do monorepo | Em andamento: estrutura, toolchain e CI definidos no PR 1 (sem regra de negócio) |
 | Implementação funcional | Não iniciada |
 | Testes sentinela | Planejados; cenários dos bloqueadores detalhados |
 | Evidências de segurança dinâmica e de desempenho | Não produzidas |
