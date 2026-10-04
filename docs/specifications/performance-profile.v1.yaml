@@ -1,8 +1,10 @@
-# PerformanceProfile PP-001 v1 (ENT-017) - PROPOSTA pendente de aprovacao de Produto e Arquitetura.
-# Sem aprovacao, evidencias de desempenho sao invalidas (TS-039).
+# PerformanceProfile PP-001 v1 (ENT-017) - APROVADO como provisorio em 2026-10-04 pelo mantenedor (interino).
+# Recalibrar com numeros reais apos os spikes de infraestrutura; a recalibracao gera nova versao (TS-039).
 profile_key: PP-001
 version: 1
-status: proposed
+status: approved_provisional
+approved_at: "2026-10-04"
+approved_by: "Carlos Yano (mantenedor, interino)"
 objectives:
   RNF-004: p95 interativo <= 2 s
   RNF-005: p95 de exportacao <= 30 s

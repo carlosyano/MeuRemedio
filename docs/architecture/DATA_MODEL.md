@@ -1,6 +1,6 @@
 # MeuRemedio — Modelo de Dados Físico e Dicionário Completo
 
-> **Status:** PROPOSTA técnica alinhada à Especificação Funcional 02.33 (Anexo C) e à ADR-001 v1.5. Dados em PostgreSQL 17. Os schemas Drizzle e as migrações SQL serão derivados deste documento na fundação Test-First e validados contra PostgreSQL real (Testcontainers). Este arquivo não é fonte normativa independente: em conflito, prevalecem a OpenAPI (HTTP), a Especificação (comportamento) e a ADR (arquitetura).
+> **Status:** APROVADO em 04/10/2026 pelo mantenedor (interino); alinhado à Especificação Funcional 02.33 (Anexo C) e à ADR-001 v1.5. Dados em PostgreSQL 17. Os schemas Drizzle e as migrações SQL serão derivados deste documento na fundação Test-First e validados contra PostgreSQL real (Testcontainers). Este arquivo não é fonte normativa independente: em conflito, prevalecem a OpenAPI (HTTP), a Especificação (comportamento) e a ADR (arquitetura).
 
 ## 1. Convenções
 
@@ -337,7 +337,7 @@ Trilha imutável e minimizada de ações críticas.
 
 **Constraints e índices:**
 - Append-only: REVOKE UPDATE, DELETE + trigger de bloqueio
-- Retenção: prazo definido em GX-003 (pendente)
+- Retenção: padrão provisório de 180 dias, configurável (aprovado em 04/10/2026); prazo definitivo em GX-003 (parecer jurídico pendente)
 
 ### ENT-014 — `purge_tombstones`
 
@@ -423,4 +423,4 @@ Perfil versionado e reproduzível de desempenho.
 
 - Cada campo possui as 11 propriedades exigidas pela Especificação §5.1 (campo, tipo, obrigatoriedade, tamanho, formato, padrão, unicidade, FK, LGPD, validação e entidade).
 - Os campos expostos pela API devem ser equivalentes aos schemas da OpenAPI 02.33.2, comprovado por testes de contrato (RNF-014, TS-040).
-- Pendências explícitas: retenção de `audit_events` (GX-003) e conteúdo final de `incident_records` (GX-006).
+- Pendências explícitas: retenção definitiva de `audit_events` (GX-003; padrão provisório de 180 dias configuráveis) e conteúdo final de `incident_records` (GX-006).

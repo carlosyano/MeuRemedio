@@ -2,9 +2,9 @@
 
 | Campo | Valor |
 |---|---|
-| Versão do documento | 1.1 |
-| Última atualização | 04/10/2026 |
-| Baseline descrita | Especificação 02.33 · OpenAPI 02.33.2 · ADR-001 v1.5 · AGENTS.md 1.3 · Matriz 2.1.0 |
+| Versão do documento | 1.2 |
+| Última atualização | 04/10/2026 (aprovação das decisões da revisão 02.33) |
+| Baseline descrita | Especificação 02.33 · OpenAPI 02.33.2 · ADR-001 v1.5 · AGENTS.md 1.3 · Matriz 2.1.1 |
 | Commit da baseline | _preencher no merge do PR que aplica esta revisão_ |
 
 ## 1. Finalidade
@@ -22,7 +22,7 @@ Este documento fornece contexto operacional para continuidade do projeto **MeuRe
 | Branch principal | `main` |
 | Fase atual | Baseline documental revisada (02.33); fundação técnica ainda não iniciada |
 | Modelo de engenharia | Contract-First, Test-First e IA-First com aprovação humana |
-| Matriz de rastreabilidade | versão `2.1.0` |
+| Matriz de rastreabilidade | versão `2.1.1` |
 | Autorização de produção | Não concedida |
 | Idioma | Código, identificadores, commits e contratos em inglês; documentação e textos de interface em português do Brasil |
 
@@ -73,7 +73,7 @@ A ordem acima é **por assunto**, não uma hierarquia entre documentos.
 |---|---|
 | `docs/architecture/DATA_MODEL.md` | modelo físico e dicionário completo (17 entidades, 182 campos) |
 | `docs/specifications/P0_SENTINEL_TESTS.md` | cenários e fixtures dos testes bloqueadores da fundação |
-| `docs/specifications/performance-profile.v1.yaml` | PerformanceProfile PP-001 v1 (proposta) |
+| `docs/specifications/performance-profile.v1.yaml` | PerformanceProfile PP-001 v1 (aprovado como provisório em 04/10/2026) |
 | `docs/operations/RIGHTS_AND_INCIDENTS.md` | procedimentos de RF-011 e RF-012 |
 | `.github/CODEOWNERS` | responsáveis por área protegida (interino) |
 
@@ -108,7 +108,7 @@ Arquivos `.txt` usados como cópia de conteúdo não são fontes normativas e n�
 
 ## 6. Baseline de rastreabilidade
 
-A matriz `traceability-matrix.yaml`, versão `2.1.0`, contém:
+A matriz `traceability-matrix.yaml`, versão `2.1.1`, contém:
 
 | Catálogo | Quantidade |
 |---|---:|
@@ -168,7 +168,7 @@ Workflow: `.github/workflows/traceability-validation.yml` · nome: `Validate tra
 
 > **Atenção:** se o workflow lista os nomes dos artefatos obrigatórios, atualize-o para os nomes da seção 5.
 
-### 8.1 Proteção da `main` (decisão pendente)
+### 8.1 Proteção da `main` (decisão: opção C, aprovada em 04/10/2026)
 
 O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de force push **não é aplicado a repositório privado no plano atual**. Com um único mantenedor, a regra de "uma aprovação" também é inviável, pois o autor não aprova o próprio PR. Opções:
 
@@ -178,14 +178,14 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 | B. Tornar o repositório público | ruleset aplicável; exige revisão de conteúdo antes |
 | C. Interina: PR obrigatório e check obrigatório sem contagem de aprovações; merge apenas pelo mantenedor; agentes de IA sem permissão de merge | reduz o risco com um mantenedor; registrar como exceção formal |
 
-Enquanto não houver decisão, o responsável humano verifica manualmente o check antes de qualquer merge.
+**Decisão de 04/10/2026:** adotada a opção C, como exceção formal enquanto houver um único mantenedor: toda mudança entra por pull request com o check verde; não há push direto na `main`; agentes de IA não têm permissão de merge; o mantenedor confere o check antes de cada merge. Reavaliar (opção A) quando houver um segundo desenvolvedor.
 
 ## 9. Stack, arquitetura e toolchain
 
 - **Frontend:** Next.js, React, TypeScript strict, Tailwind CSS, shadcn/ui, Radix UI, React Hook Form, Zod, TanStack Query.
-- **Backend:** NestJS, TypeScript strict, adaptador Fastify quando compatível com o contrato e os requisitos (critério proposto: o spike S1 passar os testes de contrato com Fastify).
+- **Backend:** NestJS, TypeScript strict, adaptador Fastify quando compatível com o contrato e os requisitos (critério: o spike S1 passar os testes de contrato com Fastify).
 - **Dados e assíncrono:** PostgreSQL 17, Drizzle ORM, migrações SQL explícitas, pg-boss, Outbox transacional.
-- **Toolchain (ADR OA-010, proposto):** Node.js 24 LTS em `.nvmrc`, npm com `package-lock.json` e `npm ci`; versões das bibliotecas fixadas por lockfile e registradas em `docs/architecture/TOOLCHAIN.md` no início da fundação.
+- **Toolchain (ADR OA-010, aprovado em 04/10/2026):** Node.js 24 LTS em `.nvmrc`, npm com `package-lock.json` e `npm ci`; versões das bibliotecas fixadas por lockfile e registradas em `docs/architecture/TOOLCHAIN.md` no início da fundação.
 - **Infraestrutura-alvo:** AWS (RDS, S3, SES, KMS, Secrets Manager, CloudWatch), Terraform, `sa-east-1`, ECS Fargate, GitHub Actions com OIDC.
 - **Arquitetura lógica:** monólito modular; web, API e worker separáveis; módulos `identity`, `plans`, `occurrences`, `responses`, `reminders`, `history`, `exports`, `privacy`, `audit` e `platform`; nenhuma regra de negócio normativa duplicada no frontend.
 
@@ -205,8 +205,8 @@ Enquanto não houver decisão, o responsável humano verifica manualmente o chec
 
 | Área | Estado |
 |---|---|
-| Baseline documental 02.33 / 02.33.2 / v1.5 / AGENTS 1.3 | Revisada; **aprovação humana pendente** |
-| Matriz 2.1.0 e schema | Gerada; reexecutar `validate_all.py` ao aplicar |
+| Baseline documental 02.33 / 02.33.2 / v1.5 / AGENTS 1.3 | Revisada e **aprovada em 04/10/2026** pelo mantenedor (interino); parecer jurídico e de privacidade pendente |
+| Matriz 2.1.1 e schema | Validadas (`PASS`) com o schema real e no CI |
 | Fundação do monorepo | Não iniciada |
 | Implementação funcional | Não iniciada |
 | Testes sentinela | Planejados; cenários dos bloqueadores detalhados |
@@ -216,7 +216,7 @@ Enquanto não houver decisão, o responsável humano verifica manualmente o chec
 
 ## 12. Próximo marco
 
-**Antes de implementar:** aprovar ou ajustar as decisões da seção 14.
+Decisões da seção 14 aprovadas em 04/10/2026.
 
 **Fundação técnica Test-First**, na ordem:
 
@@ -236,18 +236,20 @@ O agente deve: ler `AGENTS.md`; ler este documento; executar `python validate_al
 
 O agente não deve: inventar requisitos, critérios, testes ou endpoints; alterar a superfície HTTP para facilitar a implementação; tratar a matriz como prova de teste executado; marcar testes como aprovados sem evidência; alterar hashes para mascarar mudança não revisada; incluir dados reais de saúde ou credenciais; ou declarar prontidão para produção com GX-001 a GX-006 abertos.
 
-## 14. Decisões pendentes de aprovação humana
+## 14. Registro de aprovação humana (04/10/2026)
 
-| Item | O que aprovar |
+Aprovador: Carlos Yano (`@carlosyano`), mantenedor, **em caráter interino**. A aprovação cobre o desenvolvimento e **não substitui** o parecer jurídico e de privacidade exigido para dados reais e produção.
+
+| Item | Decisão |
 |---|---|
-| DEC-011 a DEC-025 (Especificação 02.33) | sessões, duplicidade de plano, CSRF, credenciais, bloqueio, agenda e lembretes, tombstone, rate limit, relógio, PP-001, RF-011/012, DST, CRM, RNF-010 |
-| ADR OA-008 a OA-011 | CSRF/cookies, Argon2id e rate limit, toolchain e infraestrutura, modelo físico |
-| TS-038 (questão aberta) | replay de `revokeAllSessions` e `requestAccountDeletion` após a sessão ser revogada |
-| Proteção da `main` | opção A, B ou C da seção 8.1 |
-| Responsáveis | GX-001 a GX-006 (hoje interinos) e áreas do `CODEOWNERS` |
-| `PerformanceProfile` | aprovar PP-001 v1 ou definir outro |
-| Retenção de `audit_events` | definir em GX-003 |
-| Convenção de idioma (seção 2) | código e contratos em inglês; documentação e interface em português do Brasil |
+| DEC-011 a DEC-025 (Especificação 02.33) | Aprovadas |
+| ADR OA-008 a OA-011 | Aprovadas |
+| TS-038 | Manter `401` no replay de `revokeAllSessions` e `requestAccountDeletion` após a revogação da própria sessão |
+| Proteção da `main` | Opção C (seção 8.1) |
+| Responsáveis (GX e `CODEOWNERS`) | `@carlosyano` interino para desenvolver; designar jurista ou DPO antes de dados reais ou produção |
+| `PerformanceProfile` | PP-001 v1 aprovado como provisório; recalibrar após os spikes de infraestrutura |
+| Retenção de `audit_events` | Padrão provisório de 180 dias configuráveis; definitivo em GX-003 |
+| Convenção de idioma (seção 2) | Aprovada |
 
 ### 14.1 Governança de alterações
 
@@ -259,10 +261,11 @@ O agente não deve: inventar requisitos, critérios, testes ou endpoints; altera
 
 - reatribuir `@carlosyano` (interino) aos responsáveis reais em `CODEOWNERS` e nos GX;
 - materializar os arquivos de teste planejados e registrar evidências e datas na matriz;
-- aprovar o `PerformanceProfile`;
+- recalibrar o `PerformanceProfile` após os spikes de infraestrutura;
 - implementar os quality gates QG-001 a QG-012 na pipeline;
 - encerrar GX-001 a GX-006 antes de produção;
-- decidir a proteção efetiva da `main` (seção 8.1).
+- designar jurista ou DPO e substituir o responsável interino antes de dados reais ou produção;
+- reavaliar a proteção da `main` quando houver um segundo desenvolvedor (seção 8.1).
 
 ## 16. Checklist de retomada
 
@@ -292,7 +295,7 @@ Execute `python validate_all.py` e confirme PASS.
 
 Adote Contract-First, Test-First e IA-First com aprovação humana. Não invente requisitos, endpoints ou decisões. Preserve RF, RNF, RN, CA, ERR, TS e operationId. Diante de conflito normativo, interrompa a alteração e solicite decisão humana.
 
-Estado inicial: baseline documental 02.33 revisada (decisões DEC-011 a DEC-025 e OA-008 a OA-011 pendentes de aprovação); matriz 2.1.0; implementação e testes executáveis não iniciados; produção bloqueada por GX-001 a GX-006.
+Estado inicial: baseline documental 02.33 aprovada em 04/10/2026 pelo mantenedor (interino), com parecer jurídico e de privacidade pendente; matriz 2.1.1; implementação e testes executáveis não iniciados; produção bloqueada por GX-001 a GX-006.
 
 Primeira tarefa: analisar o repositório e propor o plano Test-First da fundação técnica, sem implementar funcionalidade antes dos testes correspondentes.
 ```
@@ -302,6 +305,6 @@ Primeira tarefa: analisar o repositório e propor o plano Test-First da fundaç�
 - `python validate_all.py` retorna `PASS`;
 - o workflow de rastreabilidade retorna sucesso e publica o relatório;
 - as fontes normativas e seus hashes estão alinhados;
-- as decisões da seção 14 foram aprovadas ou ajustadas por responsável humano.
+- as decisões da seção 14 foram aprovadas por responsável humano (concluído em 04/10/2026, em caráter interino).
 
 Isso não conclui a fundação técnica, os testes executáveis nem a prontidão de produção.

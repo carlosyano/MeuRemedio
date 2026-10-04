@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-matrix_version: 2.1.0
+matrix_version: 2.1.1
 status: baseline-development-and-testing
 generated_from:
   functional_specification: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -15,13 +15,13 @@ generated_from:
     artifacts:
       functional_specification:
         file: MeuRemedio_Especificacao_Funcional_02.33.docx
-        sha256: 80ee8bc2a39837aa7b86376e2ce3c5b7defef34b3e71f3cd6142730589ef52a1
+        sha256: 11af77693fd65eb1cfb3aacfadc3ca3a681e8be9d5e46aab4a2f58953b7d6ef0
       openapi:
         file: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
         sha256: d337c1cf522d51d6eeb5006b1866940e5eae6d20842ae1d2d6020756f9c3643d
       architecture:
         file: ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
-        sha256: 400c727866010c0a8955b1b5720d478a9c1f0fcda528c32fcac32c5ed9384978
+        sha256: 9892fc7c8020be6532b70b448bff330ee9974637451437e34094217e50d1fd8f
       agents_policy:
         file: AGENTS.md
         sha256: 5ae8ba67c71dec637296c7d806ded6a95c9365a83dc7dd6aa261e224df846d32
@@ -2958,7 +2958,7 @@ validation_rules:
 known_gaps:
 - id: GAP-001
   severity: informational
-  description: RF-012 é funcional e operacional, mas não possui endpoint público específico na OpenAPI 02.33.1.
+  description: RF-012 é funcional e operacional, mas não possui endpoint público específico na OpenAPI 02.33.2.
 - id: GAP-002
   severity: informational
   description: CA-012 é transversal a todas as rotas privadas e é validado por TS-008 e TS-023, sem operationId exclusivo.
@@ -2966,14 +2966,11 @@ known_gaps:
   severity: informational
   description: RF-011 e RF-012 são procedimentos operacionais sem endpoint HTTP além de getPrivacy (DEC-022); o procedimento
     está em docs/operations/RIGHTS_AND_INCIDENTS.md.
-- id: GAP-005
-  severity: informational
-  description: 'TS-038: replay de revokeAllSessions e requestAccountDeletion após a revogação da própria sessão retorna 401
-    antes da consulta ao registro de idempotência; decisão humana pendente (docs/specifications/P0_SENTINEL_TESTS.md).'
 - id: GAP-006
   severity: informational
-  description: Retenção de audit_events (GX-003) e conteúdo final de incident_records (GX-006) pendentes; DEC-011 a DEC-025
-    e ADR OA-008 a OA-011 aguardam aprovação humana.
+  description: Parecer jurídico e de privacidade (GX-001 a GX-006), retenção definitiva de audit_events (GX-003; padrão provisório
+    de 180 dias) e conteúdo final de incident_records (GX-006) pendentes. DEC-011 a DEC-025 e ADR OA-008 a OA-011 aprovadas
+    em 04/10/2026 pelo mantenedor (interino).
 - id: GAP-007
   severity: informational
   description: O catálogo entities sobrescreve a linha da entidade pela última linha do dicionário de campos (ENT-001, 005
@@ -4485,6 +4482,12 @@ resolved_findings:
   resolution: Títulos de RF-001, RF-003, RF-006 e RF-010 corrigidos para o texto do requisito.
 - id: R-429
   resolution: 429 documentado em todas as operações exceto getHealth (RNF-006).
+- id: R-TS038
+  resolution: 'Decisão de 04/10/2026: o replay de revokeAllSessions e requestAccountDeletion após a revogação da própria sessão
+    retorna 401 (docs/specifications/P0_SENTINEL_TESTS.md).'
+- id: R-APPROVAL-20261004
+  resolution: DEC-011 a DEC-025, ADR OA-008 a OA-011, PP-001 v1 (provisório) e proteção da main (opção C) aprovados em 04/10/2026
+    pelo mantenedor carlosyano, em caráter interino.
 catalog_completeness:
   requirements:
     authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -5688,8 +5691,8 @@ decisions:
   DEC-021:
     criticidade: Média
     problema_causa: PerformanceProfile (ENT-017) sem conteúdo; RNF-004, RNF-005 e TS-039 dependiam dele.
-    decis_o_adotada: Definir PP-001 v1 em docs/specifications/performance-profile.v1.yaml, pendente de aprovação de Produto
-      e Arquitetura.
+    decis_o_adotada: Definir PP-001 v1 em docs/specifications/performance-profile.v1.yaml, aprovado como provisório em 04/10/2026
+      pelo mantenedor (interino), a recalibrar após os spikes de infraestrutura.
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
