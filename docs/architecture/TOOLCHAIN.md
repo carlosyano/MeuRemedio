@@ -22,6 +22,7 @@
 | @eslint/js | 10.0.1 | Regras base |
 | prettier | 3.9.9 | Formatação (código e JSON; Markdown, YAML e `.docx` ficam fora) |
 | vitest | 5.0.3 | QG-003 e QG-004 |
+| yaml | 2.9.1 | Leitura da OpenAPI e da matriz nos testes de contrato (TS-040) |
 | fast-check | 4.10.2 | Testes de propriedade (TS-024 e demais); dependência única: pure-rand |
 | @types/node | 24.19.1 | Tipos do Node 24 |
 | @stoplight/spectral-core, -parsers, -rulesets | 1.24.0, 1.0.5, 1.23.0 | QG-001 (lint da OpenAPI) via `tools/scripts/openapi-lint.mjs` |
@@ -39,11 +40,12 @@
 | `npm run typecheck` | QG-002 | Implementado |
 | `npm run lint` | QG-002 | Implementado |
 | `npm run format:check` | QG-002 | Implementado |
-| `npm run test:unit` | QG-003 | Implementado (apenas teste de infraestrutura) |
+| `npm run test:unit` | QG-003 | Implementado (infraestrutura e domínio: TS-024 parte pura) |
+| `npm run test:contract` | QG-001 (parcial) | Implementado (TS-040 estático; oasdiff, Schemathesis e rotas da API pendentes) |
 | `npm run openapi:lint` | QG-001 (parcial) | Implementado (Spectral) |
 | `npm run traceability:check` | QG-011 | Implementado (`python validate_all.py`) |
-| `npm run verify` | — | Executa os cinco primeiros em sequência |
-| `test:integration`, `test:contract`, `test:ownership`, `test:e2e`, `test:a11y`, `test:mutation`, `security`, `sbom`, `openapi:diff` | QG-001, 004 a 010 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (oasdiff, Schemathesis, Playwright, Stryker, CodeQL, Semgrep, Gitleaks, Trivy) |
+| `npm run verify` | — | Executa typecheck, lint, format:check, test:unit, test:contract e openapi:lint em sequência |
+| `test:integration`, `test:ownership`, `test:e2e`, `test:a11y`, `test:mutation`, `security`, `sbom`, `openapi:diff` | QG-001, 004 a 010 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (oasdiff, Schemathesis, Playwright, Stryker, CodeQL, Semgrep, Gitleaks, Trivy) |
 
 ## 4. Política de atualização
 

@@ -145,4 +145,8 @@ Os valores foram calculados com `zoneinfo` e o tzdata do ambiente de referência
 6. `createSession`: `Set-Cookie` com `mr_session` (`HttpOnly; Secure; SameSite=Lax`) e `mr_csrf` (`Secure; SameSite=Lax`).
 7. Toda referência `x-traceability` existe na matriz; o SHA-256 do contrato confere com a matriz.
 
-**Estado inicial (Test-First):** as verificações 1, 2 e 7 passam já na fundação; 3 a 6 permanecem vermelhas até a API existir.
+**Estado (PR 3):** as verificações estáticas estão implementadas em `tests/contract/ts-040.spec.ts` (regras R01 a R17: `operationId` e referências; enum de `Problem.code` x erros da matriz; mapeamento erro x operação nos dois sentidos; 429; `Idempotency-Key`; CSRF; rotas públicas e BOLA; `application/problem+json`; `X-Correlation-ID`; `ETag` e `If-Match`; cookies documentados; rastreabilidade; nome e SHA-256 da OpenAPI) e provadas por `tests/contract/ts-040.negative.spec.ts` (cada regra reprova uma mutação do contrato). O lint Spectral roda em `npm run openapi:lint`.
+
+**Pendentes (dependem de ferramenta externa ou da API):** verificação 2 (`oasdiff`), 3 (rotas da aplicação x OpenAPI), 4 (Schemathesis) e a emissão real dos cookies (6).
+
+**Lacunas registradas na matriz:** GAP-008 (`createResponse` declara 410 sem base normativa) e GAP-009 (`X-Correlation-ID` ausente em respostas com corpo de `getHealth` e dos 202 de `resendVerification` e `requestPasswordReset`). Ambas aguardam decisão humana e estão tratadas como exceções explícitas nas regras R05 e R12.
