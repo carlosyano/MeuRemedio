@@ -8,6 +8,7 @@
     "node": ">=24.0.0 <25"
   },
   "workspaces": [
+    "apps/api",
     "packages/*"
   ],
   "scripts": {
@@ -20,7 +21,8 @@
     "openapi:lint": "node tools/scripts/openapi-lint.mjs",
     "traceability:check": "python validate_all.py",
     "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test:unit && npm run test:contract && npm run openapi:lint",
-    "test:contract": "vitest run --project contract"
+    "test:contract": "vitest run --project contract",
+    "test:integration": "vitest run --project integration"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -28,6 +30,7 @@
     "@stoplight/spectral-parsers": "1.0.5",
     "@stoplight/spectral-rulesets": "1.23.0",
     "@types/node": "24.19.1",
+    "@types/pg": "8.23.1",
     "eslint": "10.12.0",
     "fast-check": "4.10.2",
     "prettier": "3.9.9",
@@ -35,5 +38,8 @@
     "typescript-eslint": "8.71.0",
     "vitest": "5.0.3",
     "yaml": "2.9.1"
+  },
+  "dependencies": {
+    "glob": "13.0.6"
   }
 }

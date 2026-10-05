@@ -13,5 +13,10 @@
   },
   "scripts": {
     "build": "tsc -b"
+  },
+  "dependencies": {
+    "@testcontainers/postgresql": "12.2.0",
+    "pg": "8.23.1",
+    "testcontainers": "12.2.0"
   }
 }
