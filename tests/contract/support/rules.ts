@@ -1,5 +1,5 @@
 // Regras do TS-040 (contrato). Cada regra e pura: recebe o contexto e devolve a lista de violacoes.
-// Fontes: OpenAPI 02.33.2, matriz de rastreabilidade, AGENTS.md (secoes 13 e 14), Especificacao 02.33
+// Fontes: OpenAPI 02.33.3, matriz de rastreabilidade, AGENTS.md (secoes 13 e 14), Especificacao 02.33
 // (secao 13) e ADR-001 v1.5. Excecoes explicitas ficam em ALLOWANCES e exigem GAP registrado na matriz.
 import {
   asArray,
@@ -15,7 +15,7 @@ import type { ContractContext } from './load.js';
 export interface Rule {
   readonly id: string;
   readonly title: string;
-  readonly check: (ctx: ContractContext) => string[];
+  readonly check: (ctx: ContractContext, allowances?: readonly Allowance[]) => string[];
 }
 
 export interface Allowance {
@@ -25,39 +25,11 @@ export interface Allowance {
   readonly reason: string;
 }
 
-/** Excecoes conhecidas, cada uma amarrada a uma lacuna registrada em known_gaps da matriz. */
-export const ALLOWANCES: readonly Allowance[] = [
-  {
-    rule: 'R05',
-    key: 'createResponse:410',
-    gap: 'GAP-008',
-    reason: 'createResponse declara 410 sem base normativa; decisao humana pendente',
-  },
-  {
-    rule: 'R12',
-    key: 'getHealth:200',
-    gap: 'GAP-009',
-    reason: 'getHealth nao documenta X-Correlation-ID; decisao pendente',
-  },
-  {
-    rule: 'R12',
-    key: 'getHealth:503',
-    gap: 'GAP-009',
-    reason: 'getHealth nao documenta X-Correlation-ID; decisao pendente',
-  },
-  {
-    rule: 'R12',
-    key: 'resendVerification:202',
-    gap: 'GAP-009',
-    reason: 'resposta 202 com corpo sem X-Correlation-ID; decisao pendente',
-  },
-  {
-    rule: 'R12',
-    key: 'requestPasswordReset:202',
-    gap: 'GAP-009',
-    reason: 'resposta 202 com corpo sem X-Correlation-ID; decisao pendente',
-  },
-];
+/**
+ * Excecoes conhecidas, cada uma amarrada a uma lacuna registrada em known_gaps da matriz.
+ * Vazio desde a OpenAPI 02.33.3 (GAP-008 e GAP-009 resolvidos em 04/10/2026).
+ */
+export const ALLOWANCES: readonly Allowance[] = [];
 
 // Conjuntos normativos (AGENTS.md secoes 13 e 14; Especificacao 02.33 secoes 13.2 e 13.3).
 const PUBLIC_OPERATIONS = [
@@ -194,8 +166,8 @@ function gapIds(ctx: ContractContext): string[] {
   );
 }
 
-function allowed(rule: string, key: string): boolean {
-  return ALLOWANCES.some((a) => a.rule === rule && a.key === key);
+function allowed(allowances: readonly Allowance[], rule: string, key: string): boolean {
+  return allowances.some((a) => a.rule === rule && a.key === key);
 }
 
 const sorted = (values: Iterable<string>): string[] => [...values].sort();
@@ -295,14 +267,14 @@ export const RULES: readonly Rule[] = [
   {
     id: 'R05',
     title: 'todo status 4xx/5xx declarado por uma operacao esta mapeado em algum erro da matriz',
-    check: (ctx) => {
+    check: (ctx, allowances = ALLOWANCES) => {
       const out: string[] = [];
       const errors = matrixErrors(ctx);
       for (const op of operations(ctx.api)) {
         for (const status of responsesOf(ctx.api, op).keys()) {
           if (!/^[45]/.test(status)) continue;
           const mapped = errors.some((e) => e.http === status && e.ops.includes(op.id));
-          if (!mapped && !allowed('R05', `${op.id}:${status}`))
+          if (!mapped && !allowed(allowances, 'R05', `${op.id}:${status}`))
             out.push(`${op.id}: ${status} sem erro mapeado na matriz`);
         }
       }
@@ -435,17 +407,14 @@ export const RULES: readonly Rule[] = [
   },
   {
     id: 'R12',
-    title: 'respostas com corpo (200/201 e o corpo do health) declaram X-Correlation-ID',
+    title: 'toda resposta, de sucesso ou de erro, declara X-Correlation-ID',
     check: (ctx) => {
       const out: string[] = [];
       for (const op of operations(ctx.api)) {
         for (const [status, response] of responsesOf(ctx.api, op)) {
-          const successWithBody = status.startsWith('2') && 'content' in response;
-          const hasBody = successWithBody || (op.id === 'getHealth' && status === '503');
-          if (!hasBody) continue;
           const headers = asObject(response['headers'] ?? {}, `${op.id}.${status}.headers`);
-          if (!('X-Correlation-ID' in headers) && !allowed('R12', `${op.id}:${status}`))
-            out.push(`${op.id}: ${status} com corpo sem X-Correlation-ID`);
+          if (!('X-Correlation-ID' in headers))
+            out.push(`${op.id}: ${status} sem X-Correlation-ID`);
         }
       }
       return out;
@@ -564,11 +533,11 @@ export const RULES: readonly Rule[] = [
   {
     id: 'R17',
     title: 'toda excecao do TS-040 tem lacuna registrada em known_gaps da matriz',
-    check: (ctx) => {
+    check: (ctx, allowances = ALLOWANCES) => {
       const ids = gapIds(ctx);
-      return ALLOWANCES.filter((a) => !ids.includes(a.gap)).map(
-        (a) => `excecao ${a.rule} ${a.key} sem ${a.gap} na matriz`,
-      );
+      return allowances
+        .filter((a) => !ids.includes(a.gap))
+        .map((a) => `excecao ${a.rule} ${a.key} sem ${a.gap} na matriz`);
     },
   },
 ];

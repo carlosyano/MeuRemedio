@@ -1,19 +1,17 @@
-# MeuRemedio OpenAPI 02.33.2 - completo
-# Base: MeuRemedio_OpenAPI_02.33.1_COMPLETO.yaml
-# Mudancas 02.33.2: CSRF (csrfToken/Origin/403); 409 SESSION_LIMIT_REACHED em createSession; confirmacao de duplicidade em createPlan
-# (DuplicateConfirmationProblem + duplicate_confirmation_token); enum fechado em Problem.code; 429 em todas as operacoes (exceto getHealth);
-# examples multiplos em Conflict/Gone; rastreabilidade ampliada; schema orfao Accepted removido.
-# Mantem as 27 operacoes e os operationId da 02.33.1.
+# MeuRemedio OpenAPI 02.33.3 - completo
+# Base: MeuRemedio_OpenAPI_02.33.2_COMPLETO.yaml
+# Mudancas 02.33.3 (decisao de 04/10/2026): removido o 410 de createResponse (GAP-008); X-Correlation-ID em toda resposta, inclusive 202, 204 e getHealth (GAP-009).
+# Mantem as 27 operacoes e os operationId da 02.33.2.
 openapi: 3.1.1
 info:
   title: MeuRemedio API
-  version: 02.33.2
-  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.2
+  version: 02.33.3
+  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.3
   description: API declaratoria para conta individual, planos de medicamentos, ocorrencias, respostas, historico,
     exportacoes e privacidade. Nao prescreve, nao valida medicamentos ou interacoes e nao substitui orientacao profissional.
     Todas as mutacoes autenticadas exigem protecao CSRF (cookie mr_csrf + cabecalho X-CSRF-Token) e validacao do
     cabecalho Origin; a API nao habilita CORS para origens fora da lista configurada do ambiente (same-site com
-    a aplicacao web).
+    a aplicacao web). Toda resposta, de sucesso ou de erro, inclui o cabecalho X-Correlation-ID.
   contact:
     name: Canal do produto a definir em GX-002
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
@@ -94,6 +92,9 @@ paths:
       responses:
         '204':
           description: Conta ativada ou token ja consumido sem novo efeito
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
         '400':
           $ref: '#/components/responses/BadRequest'
         '409':
@@ -133,6 +134,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Message'
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
         '400':
           $ref: '#/components/responses/BadRequest'
         '429':
@@ -168,6 +172,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Message'
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
         '400':
           $ref: '#/components/responses/BadRequest'
         '429':
@@ -199,6 +206,9 @@ paths:
       responses:
         '204':
           description: Senha alterada e sessoes revogadas
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
         '400':
           $ref: '#/components/responses/BadRequest'
         '409':
@@ -281,6 +291,8 @@ paths:
         '204':
           description: Sessao revogada de forma idempotente
           headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
             Set-Cookie:
               $ref: '#/components/headers/SetCookie'
         '401':
@@ -576,6 +588,9 @@ paths:
       responses:
         '204':
           description: Exclusao logica idempotente
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -670,8 +685,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
-        '410':
-          $ref: '#/components/responses/Gone'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -845,6 +858,9 @@ paths:
       responses:
         '204':
           description: Exportacao cancelada
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1013,12 +1029,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Health'
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
         '503':
           description: Servico degradado ou indisponivel
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Health'
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
       security: []
       x-traceability:
       - RNF-015
@@ -1111,6 +1133,9 @@ paths:
       responses:
         '204':
           description: Sessoes revogadas
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '409':

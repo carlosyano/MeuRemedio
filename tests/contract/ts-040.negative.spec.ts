@@ -1,8 +1,8 @@
 // @trace TS-040 (testes dos testes): cada regra precisa REPROVAR um contrato deliberadamente quebrado.
 import { describe, expect, it } from 'vitest';
-import { asArray, asObject, asString, asStrings, dig, type JsonObject } from './support/json.js';
+import { asArray, asString, asStrings, dig, type JsonObject } from './support/json.js';
 import { loadContract, type ContractContext } from './support/load.js';
-import { RULES } from './support/rules.js';
+import { RULES, type Allowance } from './support/rules.js';
 
 const base = loadContract();
 
@@ -75,11 +75,13 @@ const MUTATIONS: Readonly<Record<string, (ctx: ContractContext) => void>> = {
   R16: (c) => {
     Object.assign(c, { openapiSha256: '0'.repeat(64) });
   },
-  R17: (c) => {
-    c.matrix['known_gaps'] = asArray(c.matrix['known_gaps'], 'gaps').filter(
-      (g) => asObject(g, 'g')['id'] !== 'GAP-008',
-    );
-  },
+  R17: () => undefined, // usa EXTRA_ALLOWANCES (excecao sintetica sem lacuna na matriz)
+};
+
+const EXTRA_ALLOWANCES: Readonly<Record<string, readonly Allowance[]>> = {
+  R17: [
+    { rule: 'R05', key: 'opSintetica:410', gap: 'GAP-404', reason: 'excecao sintetica sem lacuna' },
+  ],
 };
 
 describe('TS-040 testes negativos: toda regra detecta um contrato quebrado', () => {
@@ -95,7 +97,7 @@ describe('TS-040 testes negativos: toda regra detecta um contrato quebrado', () 
       const before = rule.check(base).length;
       const broken: ContractContext = structuredClone(base);
       mutate(broken);
-      const after = rule.check(broken);
+      const after = rule.check(broken, EXTRA_ALLOWANCES[id]);
       expect(
         after.length,
         `${id}: violacoes antes=${String(before)} depois=${String(after.length)}`,
