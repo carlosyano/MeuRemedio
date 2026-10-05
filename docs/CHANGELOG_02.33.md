@@ -69,3 +69,13 @@ Efeitos: matriz 2.1.1 (hashes da Especificação e da ADR atualizados; GAP-005 r
 - OpenAPI 02.33.2: validador OpenAPI 3.1 sem erros e Spectral (`spectral:oas`) sem erros nem avisos.
 - Especificação e ADR: validação estrutural do `.docx` aprovada.
 - `validate_all.py` e `traceability-check.py`: PASS no ambiente local (schema real) e no CI do GitHub.
+
+## Revisão 02.33.3 da OpenAPI (04/10/2026)
+
+Decisão do mantenedor ("A e A") sobre as lacunas encontradas pelo TS-040:
+
+1. **GAP-008:** o 410 foi removido de `createResponse` (sem base normativa na Especificação).
+2. **GAP-009:** `X-Correlation-ID` passou a ser documentado em toda resposta, inclusive 202, 204 e `getHealth` (10 respostas ajustadas).
+
+Efeitos: OpenAPI `02.33.3` (arquivo renomeado), matriz `2.1.3` (hashes, `response_statuses` de `createResponse`, lacunas resolvidas), `AGENTS.md` 1.4 e referências atualizadas na Especificação e na ADR. As regras R05 e R12 do TS-040 ficaram sem exceções.
+

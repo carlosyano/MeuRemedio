@@ -149,4 +149,4 @@ Os valores foram calculados com `zoneinfo` e o tzdata do ambiente de referência
 
 **Pendentes (dependem de ferramenta externa ou da API):** verificação 2 (`oasdiff`), 3 (rotas da aplicação x OpenAPI), 4 (Schemathesis) e a emissão real dos cookies (6).
 
-**Lacunas registradas na matriz:** GAP-008 (`createResponse` declara 410 sem base normativa) e GAP-009 (`X-Correlation-ID` ausente em respostas com corpo de `getHealth` e dos 202 de `resendVerification` e `requestPasswordReset`). Ambas aguardam decisão humana e estão tratadas como exceções explícitas nas regras R05 e R12.
+**Decisões de 04/10/2026 (resolvidas na OpenAPI 02.33.3):** GAP-008, o 410 de `createResponse` foi removido do contrato; GAP-009, `X-Correlation-ID` é exigido em toda resposta (regra R12). Não há mais exceções registradas nas regras R05 e R12.

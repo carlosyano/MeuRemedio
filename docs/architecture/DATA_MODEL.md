@@ -422,5 +422,5 @@ Perfil versionado e reproduzível de desempenho.
 ## 5. Regras de completude
 
 - Cada campo possui as 11 propriedades exigidas pela Especificação §5.1 (campo, tipo, obrigatoriedade, tamanho, formato, padrão, unicidade, FK, LGPD, validação e entidade).
-- Os campos expostos pela API devem ser equivalentes aos schemas da OpenAPI 02.33.2, comprovado por testes de contrato (RNF-014, TS-040).
+- Os campos expostos pela API devem ser equivalentes aos schemas da OpenAPI 02.33.3, comprovado por testes de contrato (RNF-014, TS-040).
 - Pendências explícitas: retenção definitiva de `audit_events` (GX-003; padrão provisório de 180 dias configuráveis) e conteúdo final de `incident_records` (GX-006).
