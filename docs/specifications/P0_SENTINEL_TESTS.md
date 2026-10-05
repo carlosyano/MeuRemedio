@@ -26,6 +26,8 @@
 
 **Proibido:** 0 ou 2 linhas de resposta; dois `201`; qualquer `5xx`; deadlock exposto ao cliente; estado final divergente da resposta aceita.
 
+**Estado (PR 5):** a base de banco está em `tests/integration/db-core.spec.ts` (PostgreSQL 17 real): em 60 corridas simultâneas, exatamente uma resposta vence e a outra viola `responses_occurrence_id_key`. O teste HTTP completo permanece pendente (requer a API).
+
 ---
 
 ## TS-008 — Acesso horizontal (BOLA) em recurso individual

@@ -61,3 +61,17 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test:contract
+
+  integration:
+    name: QG-004 Integration (PostgreSQL 17 real via Testcontainers)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:integration
+
