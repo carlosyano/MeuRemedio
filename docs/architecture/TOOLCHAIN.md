@@ -22,6 +22,8 @@
 | @eslint/js | 10.0.1 | Regras base |
 | prettier | 3.9.9 | Formatação (código e JSON; Markdown, YAML e `.docx` ficam fora) |
 | vitest | 5.0.3 | QG-003 e QG-004 |
+| testcontainers, @testcontainers/postgresql | 12.2.0 | PostgreSQL 17 real em contêiner descartável nos testes de integração (exige Docker) |
+| pg, @types/pg | 8.23.1 | Driver PostgreSQL (runner de migrações e testes) |
 | yaml | 2.9.1 | Leitura da OpenAPI e da matriz nos testes de contrato (TS-040) |
 | fast-check | 4.10.2 | Testes de propriedade (TS-024 e demais); dependência única: pure-rand |
 | @types/node | 24.19.1 | Tipos do Node 24 |
@@ -41,14 +43,21 @@
 | `npm run lint` | QG-002 | Implementado |
 | `npm run format:check` | QG-002 | Implementado |
 | `npm run test:unit` | QG-003 | Implementado (infraestrutura e domínio: TS-024 parte pura) |
+| `npm run test:integration` | QG-004 (parcial) | Implementado (esquema central no PostgreSQL 17 real; exige Docker) |
 | `npm run test:contract` | QG-001 (parcial) | Implementado (TS-040 estático; oasdiff, Schemathesis e rotas da API pendentes) |
 | `npm run openapi:lint` | QG-001 (parcial) | Implementado (Spectral) |
 | `npm run traceability:check` | QG-011 | Implementado (`python validate_all.py`) |
 | `npm run verify` | — | Executa typecheck, lint, format:check, test:unit, test:contract e openapi:lint em sequência |
-| `test:integration`, `test:ownership`, `test:e2e`, `test:a11y`, `test:mutation`, `security`, `sbom`, `openapi:diff` | QG-001, 004 a 010 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (oasdiff, Schemathesis, Playwright, Stryker, CodeQL, Semgrep, Gitleaks, Trivy) |
+| `test:ownership`, `test:e2e`, `test:a11y`, `test:mutation`, `security`, `sbom`, `openapi:diff` | QG-001, 004 a 010 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (oasdiff, Schemathesis, Playwright, Stryker, CodeQL, Semgrep, Gitleaks, Trivy) |
 
 ## 4. Política de atualização
 
 - Toda atualização de dependência entra por pull request, com `npm run verify` e `npm audit` verdes.
 - Achado alto ou crítico em dependência bloqueia o merge (QG-006) até correção ou exceção formal aprovada por humano.
 - Não usar `npm install` para adicionar pacote sem `--save-exact`; o `.npmrc` já impõe `save-exact=true`.
+
+## 5. Banco de dados nos testes
+
+- Padrão: o Testcontainers sobe um contêiner `postgres:17` descartável por arquivo de teste.
+- `MEUREMEDIO_TEST_PG_URL`: se definida, usa um servidor PostgreSQL existente (por exemplo, um service container da CI) e cria um banco isolado por teste, removido ao final.
+- `npm run verify` não inclui `test:integration`, para continuar rápido e sem Docker; a CI executa os dois.

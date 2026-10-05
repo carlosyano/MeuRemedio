@@ -173,7 +173,7 @@ Horário civil único por plano.
 
 **Constraints e índices:**
 - UNIQUE(plan_id,time_of_day) WHERE removed_at IS NULL
-- 1..10 horários ativos por plano: validado na transação do plano (trigger deferred de apoio)
+- No máximo 10 horários ativos por plano: trigger com bloqueio da linha do plano (RN-006); o mínimo de 1 é validado pelo serviço na transação do plano
 
 ### ENT-007 — `occurrences`
 
@@ -221,7 +221,7 @@ Resposta TAKEN/NOT_TAKEN, motivo, captura e atraso.
 **Constraints e índices:**
 - UNIQUE(occurrence_id)
 - CHECK(type<>'TAKEN' OR reason IS NULL)
-- Imutável: sem UPDATE/DELETE (REVOKE + trigger)
+- Imutável: UPDATE bloqueado por trigger; DELETE permitido ao expurgo em cascata (REVOKE por papel entra com os papéis IAM)
 
 ### ENT-009 — `email_reminders`
 
@@ -424,3 +424,19 @@ Perfil versionado e reproduzível de desempenho.
 - Cada campo possui as 11 propriedades exigidas pela Especificação §5.1 (campo, tipo, obrigatoriedade, tamanho, formato, padrão, unicidade, FK, LGPD, validação e entidade).
 - Os campos expostos pela API devem ser equivalentes aos schemas da OpenAPI 02.33.3, comprovado por testes de contrato (RNF-014, TS-040).
 - Pendências explícitas: retenção definitiva de `audit_events` (GX-003; padrão provisório de 180 dias configuráveis) e conteúdo final de `incident_records` (GX-006).
+
+## 6. Estado de implementação (migrações)
+
+| Migração | Entidades | Situação |
+|---|---|---|
+| `apps/api/migrations/0001_core.sql` | ENT-001 `users`, ENT-004 `sessions`, ENT-005 `medication_plans`, ENT-006 `schedule_times`, ENT-007 `occurrences`, ENT-008 `responses` | Implementada e coberta por `tests/integration/db-core.spec.ts` (PostgreSQL 17 real) |
+| Demais entidades | ENT-002, ENT-003, ENT-009 a ENT-017 e tabelas de plataforma | Pendentes; entram em migrações próprias junto de cada funcionalidade |
+
+Decisões de implementação derivadas deste modelo:
+
+- **Titularidade no próprio esquema (defesa em profundidade contra BOLA):** chaves estrangeiras compostas garantem que a ocorrência pertence ao titular do plano (`occurrences_plan_owner_fk`), que o horário pertence ao plano (`occurrences_time_plan_fk`) e que a resposta pertence ao titular da ocorrência (`responses_occurrence_owner_fk`).
+- **Limite de 10 horários ativos:** trigger com bloqueio da linha do plano (serializa inserções concorrentes). O mínimo de 1 horário é regra de serviço, validada junto com o plano.
+- **Limite de 3 sessões ativas:** regra de serviço (transação com bloqueio do titular), não do esquema (TS-018).
+- **Imutabilidade de `responses`:** o trigger bloqueia UPDATE; o DELETE segue permitido para o expurgo em cascata (FL-001).
+- **Constraints nomeadas:** cada regra tem nome (`users_email_normalized_chk`, `occurrences_deadline_chk` etc.), e os testes verificam qual regra disparou.
+
