@@ -24,6 +24,7 @@
 | vitest | 5.0.3 | QG-003 e QG-004 |
 | testcontainers, @testcontainers/postgresql | 12.2.0 | PostgreSQL 17 real em contêiner descartável nos testes de integração (exige Docker) |
 | pg, @types/pg | 8.23.1 | Driver PostgreSQL (runner de migrações e testes) |
+| drizzle-orm (em `apps/api`) | 0.45.3 | Acesso a dados tipado (ADR-001 v1.5 OA-001); sem dependências transitivas. Última estável em 06/10/2026 (a linha 1.0 está em beta). `drizzle-kit` **não** é usado: as migrações seguem em SQL explícito |
 | yaml | 2.9.1 | Leitura da OpenAPI e da matriz nos testes de contrato (TS-040) |
 | fast-check | 4.10.2 | Testes de propriedade (TS-024 e demais); dependência única: pure-rand |
 | @types/node | 24.19.1 | Tipos do Node 24 |
@@ -33,7 +34,7 @@
 
 - **TypeScript 6.0.3, e não 7.x.** A versão mais recente do TypeScript é a 7.0.2, mas o `typescript-eslint` 8.71.0 declara compatibilidade apenas com TypeScript `<6.1.0`. Subir para o TypeScript 7 exige uma versão do `typescript-eslint` compatível; reavaliar por PR próprio.
 - **Spectral sem a CLI.** `@stoplight/spectral-cli` depende de `fast-glob` → `micromatch` → `braces`, com vulnerabilidade **alta** (GHSA-vfj7-8cjw-p6xm) sem correção publicada em 04/10/2026, o que violaria o QG-006 (RNF-009). O lint usa o núcleo do Spectral (`spectral-core`) com o ruleset `oas`, e o `npm audit` fica em 0 vulnerabilidades. Quando houver correção publicada, avaliar o retorno à CLI.
-- **Versões das bibliotecas de aplicação** (Next.js, NestJS, Fastify, Drizzle, pg-boss, Testcontainers, Playwright, axe, Stryker, Zod etc.) **não estão fixadas ainda**: serão escolhidas, com consulta ao registro, checagem de compatibilidade (`peerDependencies` e `engines`) e `npm audit`, no PR que cada uma introduzir.
+- **Versões das bibliotecas de aplicação** (Next.js, NestJS, Fastify, pg-boss, Testcontainers, Playwright, axe, Stryker, Zod etc.) **não estão fixadas ainda**: serão escolhidas, com consulta ao registro, checagem de compatibilidade (`peerDependencies` e `engines`) e `npm audit`, no PR que cada uma introduzir.
 
 ## 3. Scripts e quality gates
 

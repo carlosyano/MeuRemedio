@@ -107,7 +107,7 @@ describe('schemas Drizzle coincidem com as migracoes SQL', () => {
 
   it('cada enum do banco tem pgEnum com os mesmos valores, na mesma ordem', async () => {
     const result = await pool.query<{ name: string; labels: string[] }>(
-      `SELECT t.typname AS name, array_agg(e.enumlabel ORDER BY e.enumsortorder) AS labels
+      `SELECT t.typname AS name, array_agg(e.enumlabel::text ORDER BY e.enumsortorder) AS labels
          FROM pg_type t JOIN pg_enum e ON e.enumtypid = t.oid GROUP BY t.typname`,
     );
     const fromDb = Object.fromEntries(result.rows.map((r) => [r.name, r.labels]));
