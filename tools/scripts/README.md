@@ -1,3 +1,9 @@
 # tools/scripts
 
-Reservado para scripts operacionais versionados (por exemplo, procedimentos de docs/operations/RIGHTS_AND_INCIDENTS.md).
+Scripts operacionais versionados.
+
+| Script | Uso |
+|---|---|
+| `openapi-lint.mjs` | `npm run openapi:lint`: Spectral (ruleset `oas`) na OpenAPI normativa (QG-001) |
+| `openapi-diff.mjs` | `npm run openapi:diff [base] [revisao]`: oasdiff `breaking` contra a base (arquivo ou ref git; padrão: merge-base com `origin/main` ou `OPENAPI_DIFF_BASE`). Incompatibilidades aprovadas em `tools/oasdiff/approved-breaking.txt` |
+| `oasdiff-bin.mjs` | Download do binário fixado do oasdiff com verificação de SHA-256 (usado pelo `openapi-diff.mjs`) |

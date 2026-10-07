@@ -1,6 +1,6 @@
 // @trace TS-040 RNF-014 RNF-016 RNF-006 (Especificacao 02.33 secao 13; AGENTS.md secoes 13 e 14)
 // Escopo desta etapa: verificacoes ESTATICAS do contrato (OpenAPI x matriz). Pendentes e dependentes de
-// ferramentas ou da API em execucao: oasdiff, rotas da aplicacao x OpenAPI, Schemathesis, Set-Cookie real.
+// API em execucao: rotas da aplicacao x OpenAPI, Schemathesis, Set-Cookie real (oasdiff: openapi-diff.spec.ts).
 import { describe, expect, it } from 'vitest';
 import { loadContract } from './support/load.js';
 import { RULES } from './support/rules.js';
@@ -17,9 +17,6 @@ describe('TS-040 contrato: OpenAPI x matriz de rastreabilidade', () => {
 });
 
 describe('TS-040 pendencias conhecidas (fora desta etapa)', () => {
-  it.todo(
-    'oasdiff: sem incompatibilidade em relacao a ultima versao aprovada (ferramenta externa)',
-  );
   it.todo(
     'rotas da aplicacao em execucao sao identicas a OpenAPI e nao ha rota extra (requer a API)',
   );

@@ -38,19 +38,25 @@ jobs:
       - run: npm run test:unit
 
   openapi:
-    name: QG-001 OpenAPI (Spectral; Schemathesis e oasdiff pendentes)
+    name: QG-001 OpenAPI (Spectral e oasdiff; Schemathesis pendente)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # o oasdiff compara com a OpenAPI do merge-base
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - run: npm run openapi:lint
+      - run: npm run openapi:diff
+        env:
+          # PR: ponto de bifurcacao com o branch de destino; push na main: commit anterior ao push.
+          OPENAPI_DIFF_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
 
   contract:
-    name: QG-001 Contract (TS-040 estatico; oasdiff e Schemathesis pendentes)
+    name: QG-001 Contract (TS-040 estatico e testes do openapi:diff; Schemathesis pendente)
     needs: build
     runs-on: ubuntu-latest
     steps:

@@ -28,11 +28,13 @@
 | fast-check | 4.10.2 | Testes de propriedade (TS-024 e demais); dependência única: pure-rand |
 | @types/node | 24.19.1 | Tipos do Node 24 |
 | @stoplight/spectral-core, -parsers, -rulesets | 1.24.0, 1.0.5, 1.23.0 | QG-001 (lint da OpenAPI) via `tools/scripts/openapi-lint.mjs` |
+| oasdiff (binário Go, fora do npm) | 1.33.0 | QG-001 (incompatibilidades da OpenAPI) via `tools/scripts/openapi-diff.mjs`; SHA-256 de cada plataforma fixado em `tools/scripts/oasdiff-bin.mjs` |
 
 ### Decisões de versão
 
 - **TypeScript 6.0.3, e não 7.x.** A versão mais recente do TypeScript é a 7.0.2, mas o `typescript-eslint` 8.71.0 declara compatibilidade apenas com TypeScript `<6.1.0`. Subir para o TypeScript 7 exige uma versão do `typescript-eslint` compatível; reavaliar por PR próprio.
 - **Spectral sem a CLI.** `@stoplight/spectral-cli` depende de `fast-glob` → `micromatch` → `braces`, com vulnerabilidade **alta** (GHSA-vfj7-8cjw-p6xm) sem correção publicada em 04/10/2026, o que violaria o QG-006 (RNF-009). O lint usa o núcleo do Spectral (`spectral-core`) com o ruleset `oas`, e o `npm audit` fica em 0 vulnerabilidades. Quando houver correção publicada, avaliar o retorno à CLI.
+- **oasdiff como binário verificado.** O oasdiff não tem pacote npm oficial (o nome `oasdiff` no npm é um placeholder de segurança `0.0.1-security`, verificado em 06/10/2026: não instalar). `tools/scripts/oasdiff-bin.mjs` baixa o `.tar.gz` da release oficial (linux amd64/arm64, windows amd64/arm64, darwin), confere o SHA-256 fixado (copiado do `checksums.txt` da release) e guarda o binário em `node_modules/.cache/oasdiff/<versão>/`. Divergência de hash aborta. Exige `tar` no PATH (nativo no Windows 10+, Linux e macOS). Atualizar = trocar versão e hashes no mesmo PR. O script desliga `$ref` externo (`--allow-external-refs=false`, contra SSRF) e nunca usa `--open`, que enviaria a especificação a serviço externo.
 - **Versões das bibliotecas de aplicação** (Next.js, NestJS, Fastify, Drizzle, pg-boss, Testcontainers, Playwright, axe, Stryker, Zod etc.) **não estão fixadas ainda**: serão escolhidas, com consulta ao registro, checagem de compatibilidade (`peerDependencies` e `engines`) e `npm audit`, no PR que cada uma introduzir.
 
 ## 3. Scripts e quality gates
@@ -44,11 +46,12 @@
 | `npm run format:check` | QG-002 | Implementado |
 | `npm run test:unit` | QG-003 | Implementado (infraestrutura e domínio: TS-024 parte pura) |
 | `npm run test:integration` | QG-004 (parcial) | Implementado (esquema central no PostgreSQL 17 real; exige Docker) |
-| `npm run test:contract` | QG-001 (parcial) | Implementado (TS-040 estático; oasdiff, Schemathesis e rotas da API pendentes) |
+| `npm run test:contract` | QG-001 (parcial) | Implementado (TS-040 estático e testes do `openapi:diff`; Schemathesis e rotas da API pendentes) |
 | `npm run openapi:lint` | QG-001 (parcial) | Implementado (Spectral) |
+| `npm run openapi:diff` | QG-001 (parcial) | Implementado (oasdiff `breaking` contra a OpenAPI do merge-base com `origin/main`, ou `OPENAPI_DIFF_BASE`; aprovações em `tools/oasdiff/approved-breaking.txt`) |
 | `npm run traceability:check` | QG-011 | Implementado (`python validate_all.py`) |
-| `npm run verify` | — | Executa typecheck, lint, format:check, test:unit, test:contract e openapi:lint em sequência |
-| `test:ownership`, `test:e2e`, `test:a11y`, `test:mutation`, `security`, `sbom`, `openapi:diff` | QG-001, 004 a 010 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (oasdiff, Schemathesis, Playwright, Stryker, CodeQL, Semgrep, Gitleaks, Trivy) |
+| `npm run verify` | — | Executa typecheck, lint, format:check, test:unit, test:contract, openapi:lint e openapi:diff em sequência (a primeira execução baixa o oasdiff) |
+| `test:ownership`, `test:e2e`, `test:a11y`, `test:mutation`, `security`, `sbom` | QG-001, 004 a 010 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (Schemathesis, Playwright, Stryker, CodeQL, Semgrep, Gitleaks, Trivy) |
 
 ## 4. Política de atualização
 
