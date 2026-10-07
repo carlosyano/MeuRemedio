@@ -52,6 +52,20 @@ async function insert(
   return first.id;
 }
 
+/** Conexao dedicada; em falha, descarta a conexao em vez de devolve-la com transacao aberta. */
+async function withClient<T>(fn: (client: pg.PoolClient) => Promise<T>): Promise<T> {
+  const client = await pool.connect();
+  let broken = false;
+  try {
+    return await fn(client);
+  } catch (error) {
+    broken = true;
+    throw error;
+  } finally {
+    client.release(broken);
+  }
+}
+
 const count = async (table: string, where = 'true'): Promise<number> => {
   const result = await pool.query<{ n: string }>(
     `SELECT count(*)::text AS n FROM ${table} WHERE ${where}`,
@@ -232,6 +246,33 @@ describe('idempotency_records (ENT-011)', () => {
     }
   });
 
+  it('sem created_at nem expires_at, os defaults expiram 168 horas depois (TS-038 passo 5)', async () => {
+    const row = idemRow();
+    delete row['created_at'];
+    delete row['expires_at'];
+    const id = await insert('idempotency_records', row);
+    const result = await pool.query<{ hours: number }>(
+      `SELECT extract(epoch FROM expires_at - created_at)::int / 3600 AS hours
+         FROM idempotency_records WHERE id = $1`,
+      [id],
+    );
+    expect(result.rows[0]?.hours).toBe(168);
+  });
+
+  it('a expiracao e de 168 horas mesmo com a conexao em fuso com DST', async () => {
+    // 30/10 -> 06/11/2026 atravessa o fim do horario de verao em New York (01/11).
+    await withClient(async (client) => {
+      await client.query("SET TimeZone = 'America/New_York'");
+      await insert(
+        'idempotency_records',
+        idemRow({ created_at: '2026-10-30T12:00:00Z', expires_at: '2026-11-06T12:00:00Z' }),
+        client,
+      );
+      await client.query('RESET TimeZone');
+    });
+    expect(await count('idempotency_records')).toBe(1);
+  });
+
   it('expira exatamente 7 dias apos a criacao (TS-038 passo 5)', async () => {
     for (const expires of ['2026-10-12T12:00:01Z', '2026-10-12T11:59:59Z']) {
       await expectPgError(insert('idempotency_records', idemRow({ expires_at: expires })), {
@@ -275,6 +316,23 @@ describe('idempotency_records (ENT-011)', () => {
     );
   });
 
+  it('o expurgo da conta remove os snapshots de idempotencia do titular (FL-001, LGPD)', async () => {
+    const u1 = await insert('users', userRow());
+    const u2 = await insert('users', userRow());
+    await insert('idempotency_records', idemRow({ scope_key: u1 }));
+    await insert('idempotency_records', idemRow({ scope_key: u1, operation_id: 'updatePlan' }));
+    await insert('idempotency_records', idemRow({ scope_key: u2 }));
+    await insert(
+      'idempotency_records',
+      idemRow({ operation_id: 'createAccount', scope_key: 'public' }),
+    );
+
+    await pool.query('DELETE FROM users WHERE id = $1', [u1]);
+
+    expect(await count('idempotency_records', `scope_key = '${u1}'`)).toBe(0);
+    expect(await count('idempotency_records')).toBe(2);
+  });
+
   it('possui indice por expires_at para o expurgo', async () => {
     const result = await pool.query<{ indexdef: string }>(
       "SELECT indexdef FROM pg_indexes WHERE tablename = 'idempotency_records' AND indexname = 'idempotency_records_expires_idx'",
@@ -285,9 +343,8 @@ describe('idempotency_records (ENT-011)', () => {
   it('chamadas simultaneas com a mesma chave registram um unico efeito (TS-015 passo 5)', async () => {
     const attempts = 10;
     const winners = await Promise.all(
-      Array.from({ length: attempts }, async () => {
-        const client = await pool.connect();
-        try {
+      Array.from({ length: attempts }, () =>
+        withClient(async (client) => {
           await client.query('BEGIN');
           const row = idemRow({ key: 'K2' });
           const keys = Object.keys(row);
@@ -299,10 +356,8 @@ describe('idempotency_records (ENT-011)', () => {
           );
           await client.query('COMMIT');
           return result.rowCount ?? 0;
-        } finally {
-          client.release();
-        }
-      }),
+        }),
+      ),
     );
     expect(winners.reduce((a, b) => a + b, 0)).toBe(1);
     expect(await count('idempotency_records', "key = 'K2'")).toBe(1);
@@ -350,8 +405,7 @@ describe('outbox_events (ENT-012)', () => {
 
   it('o evento e gravado na mesma transacao do dominio (TS-016)', async () => {
     const userId = await insert('users', userRow());
-    const client = await pool.connect();
-    try {
+    await withClient(async (client) => {
       await client.query('BEGIN');
       const planId = await insert('medication_plans', planRow(userId), client);
       await insert('outbox_events', outboxRow({ aggregate_id: planId }), client);
@@ -364,9 +418,7 @@ describe('outbox_events (ENT-012)', () => {
       const committed = await insert('medication_plans', planRow(userId), client);
       await insert('outbox_events', outboxRow({ aggregate_id: committed }), client);
       await client.query('COMMIT');
-    } finally {
-      client.release();
-    }
+    });
     expect(await count('medication_plans')).toBe(1);
     expect(await count('outbox_events', 'dispatched_at IS NULL')).toBe(1);
   });
@@ -379,23 +431,20 @@ describe('outbox_events (ENT-012)', () => {
     const claim = `SELECT id FROM outbox_events
                     WHERE dispatched_at IS NULL AND available_at <= now()
                     ORDER BY available_at LIMIT 4 FOR UPDATE SKIP LOCKED`;
-    const a = await pool.connect();
-    const b = await pool.connect();
-    try {
-      await a.query('BEGIN');
-      await b.query('BEGIN');
-      const fromA = (await a.query<{ id: string }>(claim)).rows.map((r) => r.id);
-      const fromB = (await b.query<{ id: string }>(claim)).rows.map((r) => r.id);
-      await a.query('COMMIT');
-      await b.query('COMMIT');
+    await withClient((a) =>
+      withClient(async (b) => {
+        await a.query('BEGIN');
+        await b.query('BEGIN');
+        const fromA = (await a.query<{ id: string }>(claim)).rows.map((r) => r.id);
+        const fromB = (await b.query<{ id: string }>(claim)).rows.map((r) => r.id);
+        await a.query('COMMIT');
+        await b.query('COMMIT');
 
-      expect(fromA).toHaveLength(4);
-      expect(fromB).toHaveLength(2);
-      expect(fromA.filter((id) => fromB.includes(id))).toEqual([]);
-    } finally {
-      a.release();
-      b.release();
-    }
+        expect(fromA).toHaveLength(4);
+        expect(fromB).toHaveLength(2);
+        expect(fromA.filter((id) => fromB.includes(id))).toEqual([]);
+      }),
+    );
   });
 
   it('possui indice parcial dos eventos pendentes', async () => {
