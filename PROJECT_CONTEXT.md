@@ -207,7 +207,7 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 |---|---|
 | Baseline documental 02.33 / 02.33.3 / v1.5 / AGENTS 1.3 | Revisada e **aprovada em 04/10/2026** pelo mantenedor (interino); parecer jurídico e de privacidade pendente |
 | Matriz 2.1.3 e schema | Validadas (`PASS`) com o schema real e no CI |
-| Fundação do monorepo | Em andamento: estrutura, toolchain e CI (PR #3); PostgreSQL 17 com Testcontainers e migrações `0001_core` e `0002_platform` (ENT-001, ENT-004 a ENT-008, ENT-011 e ENT-012); oasdiff, Schemathesis e Drizzle pendentes |
+| Fundação do monorepo | Em andamento: estrutura, toolchain e CI (PR #3); PostgreSQL 17 com Testcontainers e migrações `0001_core` e `0002_platform` (ENT-001, ENT-004 a ENT-008, ENT-011 e ENT-012) com schemas Drizzle por módulo; oasdiff em PR próprio; Schemathesis pendente |
 | Implementação funcional | Não iniciada |
 | Testes sentinela | TS-024 (parte pura) e TS-040 (estático) verdes; base de banco de TS-001, TS-015, TS-016, TS-017 e TS-038 verde; TS-008 e TS-023 e os testes HTTP pendentes (requerem a API) |
 | Evidências de segurança dinâmica e de desempenho | Não produzidas |

@@ -1,5 +1,6 @@
+// @trace ENT-001 ENT-004 ENT-005 ENT-006 ENT-007 ENT-008 ENT-011 ENT-012
 // Schemas Drizzle x migracoes SQL (ADR-001 v1.5 OA-001; AGENTS.md §12.1: sem divergencia entre o
-// conjunto de migracoes e o esquema efetivo). Sem ID normativo proprio: infraestrutura de persistencia.
+// conjunto de migracoes e o esquema efetivo). Rastreia as entidades do DATA_MODEL mapeadas.
 // O SQL e a fonte do esquema; o Drizzle e apenas o mapeamento tipado e precisa coincidir com o banco
 // real em tabelas, colunas, tipos, nulidade, presenca de default, chave primaria e enums.
 import { eq, is } from 'drizzle-orm';

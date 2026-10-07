@@ -1,5 +1,6 @@
 // Mapeamento Drizzle de ENT-011 idempotency_records e ENT-012 outbox_events (migracao 0002_platform).
 // O SQL e a fonte do esquema: as regras de idempotencia e de tamanho vivem na migracao.
+import { sql } from 'drizzle-orm';
 import { integer, jsonb, pgTable, smallint, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { bytea, type JsonObject } from '../../../platform/db/types.js';
 
@@ -13,7 +14,10 @@ export const idempotencyRecords = pgTable('idempotency_records', {
   responseHeaders: jsonb('response_headers').$type<Record<string, string>>(),
   responseBody: jsonb('response_body').$type<JsonObject>(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  // Quem informa createdAt (Clock injetavel) informa expiresAt = createdAt + 168h (CHECK no SQL).
+  expiresAt: timestamp('expires_at', { withTimezone: true })
+    .notNull()
+    .default(sql`now() + interval '168 hours'`),
 });
 
 export const outboxEvents = pgTable('outbox_events', {
