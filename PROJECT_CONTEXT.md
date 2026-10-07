@@ -20,7 +20,7 @@ Este documento fornece contexto operacional para continuidade do projeto **MeuRe
 | Projeto | MeuRemedio |
 | Repositório | `https://github.com/carlosyano/MeuRemedio` |
 | Branch principal | `main` |
-| Fase atual | Baseline documental revisada (02.33); fundação técnica ainda não iniciada |
+| Fase atual | Fundação técnica Test-First em andamento (§12, passos 5 a 7) |
 | Modelo de engenharia | Contract-First, Test-First e IA-First com aprovação humana |
 | Matriz de rastreabilidade | versão `2.1.3` |
 | Autorização de produção | Não concedida |
@@ -207,9 +207,9 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 |---|---|
 | Baseline documental 02.33 / 02.33.3 / v1.5 / AGENTS 1.3 | Revisada e **aprovada em 04/10/2026** pelo mantenedor (interino); parecer jurídico e de privacidade pendente |
 | Matriz 2.1.3 e schema | Validadas (`PASS`) com o schema real e no CI |
-| Fundação do monorepo | Em andamento: estrutura, toolchain e CI definidos no PR 1 (sem regra de negócio) |
+| Fundação do monorepo | Em andamento: estrutura, toolchain e CI (PR #3); PostgreSQL 17 com Testcontainers e migrações `0001_core` e `0002_platform` (ENT-001, ENT-004 a ENT-008, ENT-011 e ENT-012); oasdiff, Schemathesis e Drizzle pendentes |
 | Implementação funcional | Não iniciada |
-| Testes sentinela | Planejados; cenários dos bloqueadores detalhados |
+| Testes sentinela | TS-024 (parte pura) e TS-040 (estático) verdes; base de banco de TS-001, TS-015, TS-016, TS-017 e TS-038 verde; TS-008 e TS-023 e os testes HTTP pendentes (requerem a API) |
 | Evidências de segurança dinâmica e de desempenho | Não produzidas |
 | GX-001 a GX-006 | Abertos (responsável interino `@carlosyano`; reatribuir) |
 | Produção | Bloqueada |
