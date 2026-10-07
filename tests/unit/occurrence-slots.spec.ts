@@ -215,7 +215,7 @@ describe('TS-024 occurrenceSlots: propriedades (fast-check)', () => {
     'scheduled_at monotonico no dia, deadline = scheduled_at + 60 min e local_time preservado',
     () => {
       fc.assert(
-        fc.property(inputArb, ({ span: _span, ...input }) => {
+        fc.property(inputArb, (input) => {
           const slots = occurrenceSlots(input);
           const requested = new Set(input.times.map((t) => t.timeOfDay));
           for (let i = 0; i < slots.length; i += 1) {
