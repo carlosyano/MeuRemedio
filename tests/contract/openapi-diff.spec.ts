@@ -2,13 +2,13 @@
 // Testa `npm run openapi:diff` (tools/scripts/openapi-diff.mjs) com variacoes da OpenAPI normativa:
 // cada mudanca incompativel precisa REPROVAR, e as compativeis ou aprovadas precisam passar.
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { stringify } from 'yaml';
-import { asObject, type JsonObject } from './support/json.js';
+import { asObject, isObject, type JsonObject } from './support/json.js';
 import { loadContract } from './support/load.js';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -24,9 +24,9 @@ interface Run {
   readonly output: string;
 }
 
-function diff(args: string[], env: Record<string, string> = {}): Run {
+function diff(args: string[], env: Record<string, string> = {}, cwd = ROOT): Run {
   const result = spawnSync(process.execPath, [SCRIPT, ...args], {
-    cwd: ROOT,
+    cwd,
     encoding: 'utf8',
     env: { ...process.env, ...env },
     timeout: TIMEOUT,
@@ -47,8 +47,6 @@ const paths = (api: JsonObject): JsonObject => asObject(api['paths'], 'paths');
 
 beforeAll(() => {
   dir = mkdtempSync(join(tmpdir(), 'mr-oasdiff-'));
-  // Primeira execucao baixa e verifica o binario fixado; as seguintes usam o cache.
-  expect(diff([NORMATIVE, NORMATIVE]).status).toBe(0);
 }, TIMEOUT);
 
 afterAll(() => {
@@ -56,7 +54,7 @@ afterAll(() => {
 });
 
 describe('openapi:diff (oasdiff breaking)', () => {
-  it('contrato identico passa', () => {
+  it('contrato identico passa (a primeira execucao baixa e verifica o binario)', () => {
     const run = diff([NORMATIVE, NORMATIVE]);
     expect(run.status, run.output).toBe(0);
   });
@@ -82,6 +80,21 @@ describe('openapi:diff (oasdiff breaking)', () => {
     });
     const run = diff([NORMATIVE, revision]);
     expect(run.status, run.output).toBe(1);
+  });
+
+  it('remover parametro de query reprova (incompatibilidade de nivel WARN tambem bloqueia)', () => {
+    const revision = variant('sem-cursor', (api) => {
+      const listPlans = asObject(asObject(paths(api)['/plans'], '/plans')['get'], 'listPlans');
+      const params = listPlans['parameters'];
+      if (!Array.isArray(params)) throw new Error('listPlans sem parametros');
+      listPlans['parameters'] = params.filter(
+        (p) => !(isObject(p) && p['$ref'] === '#/components/parameters/Cursor'),
+      );
+      expect(listPlans['parameters']).toHaveLength(params.length - 1);
+    });
+    const run = diff([NORMATIVE, revision]);
+    expect(run.status, run.output).toBe(1);
+    expect(run.output).toMatch(/request-parameter-removed/);
   });
 
   it('acrescentar um endpoint novo e compativel', () => {
@@ -122,6 +135,53 @@ describe('openapi:diff (oasdiff breaking)', () => {
     const run = diff(['HEAD', 'HEAD']);
     expect(run.status, run.output).toBe(0);
     expect(run.output).toMatch(/MeuRemedio_OpenAPI_.*_COMPLETO\.yaml/);
+  });
+
+  it('sem argumentos compara o merge-base de OPENAPI_DIFF_BASE com a arvore de trabalho', () => {
+    const run = diff([], { OPENAPI_DIFF_BASE: 'HEAD' });
+    expect(run.status, run.output).toBe(0);
+    expect(run.output).toMatch(/base [0-9a-f]{40}:MeuRemedio_OpenAPI_/);
+  });
+
+  it('OPENAPI_DIFF_BASE zerado (push que cria o branch) usa o commit anterior', () => {
+    const run = diff([], { OPENAPI_DIFF_BASE: '0'.repeat(40) });
+    expect(run.output).toMatch(/base HEAD~1/);
+    expect([0, 1], run.output).toContain(run.status);
+  });
+
+  it('funciona a partir de um subdiretorio', () => {
+    const run = diff([NORMATIVE, NORMATIVE], {}, join(ROOT, 'tests'));
+    expect(run.status, run.output).toBe(0);
+  });
+
+  it('falha de infraestrutura (download) sai com codigo proprio, nunca 1', () => {
+    const cache = mkdtempSync(join(tmpdir(), 'mr-oasdiff-cache-'));
+    try {
+      const run = diff([NORMATIVE, NORMATIVE], {
+        OASDIFF_CACHE_DIR: cache,
+        OASDIFF_BASE_URL: 'http://127.0.0.1:9/',
+      });
+      expect(run.status, run.output).toBe(3);
+    } finally {
+      rmSync(cache, { recursive: true, force: true });
+    }
+  });
+
+  it('binario incompleto no cache (sem marca de verificacao) nao e executado', () => {
+    const cache = mkdtempSync(join(tmpdir(), 'mr-oasdiff-cache-'));
+    try {
+      const version = join(cache, '1.33.0');
+      mkdirSync(version);
+      writeFileSync(join(version, process.platform === 'win32' ? 'oasdiff.exe' : 'oasdiff'), 'x');
+      const run = diff([NORMATIVE, NORMATIVE], {
+        OASDIFF_CACHE_DIR: cache,
+        OASDIFF_BASE_URL: 'http://127.0.0.1:9/',
+      });
+      // Sem a marca, tenta baixar de novo (e falha aqui por causa da URL), em vez de rodar o lixo.
+      expect(run.status, run.output).toBe(3);
+    } finally {
+      rmSync(cache, { recursive: true, force: true });
+    }
   });
 
   it('ref git inexistente falha com erro de uso', () => {
