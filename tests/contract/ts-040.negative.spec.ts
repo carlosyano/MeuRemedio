@@ -75,6 +75,9 @@ const MUTATIONS: Readonly<Record<string, (ctx: ContractContext) => void>> = {
   R16: (c) => {
     Object.assign(c, { openapiSha256: '0'.repeat(64) });
   },
+  R18: (c) => {
+    without(dig(paths(c, '/plans', 'get'), 'responses'), '500');
+  },
   R17: () => undefined, // usa EXTRA_ALLOWANCES (excecao sintetica sem lacuna na matriz)
 };
 

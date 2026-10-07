@@ -19,8 +19,9 @@
     "format:check": "prettier --check .",
     "test:unit": "vitest run --project unit",
     "openapi:lint": "node tools/scripts/openapi-lint.mjs",
+    "openapi:diff": "node tools/scripts/openapi-diff.mjs",
     "traceability:check": "python validate_all.py",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test:unit && npm run test:contract && npm run openapi:lint",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test:unit && npm run test:contract && npm run openapi:lint && npm run openapi:diff",
     "test:contract": "vitest run --project contract",
     "test:integration": "vitest run --project integration"
   },

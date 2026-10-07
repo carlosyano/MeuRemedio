@@ -1,5 +1,5 @@
 // Regras do TS-040 (contrato). Cada regra e pura: recebe o contexto e devolve a lista de violacoes.
-// Fontes: OpenAPI 02.33.3, matriz de rastreabilidade, AGENTS.md (secoes 13 e 14), Especificacao 02.33
+// Fontes: OpenAPI 02.33.4, matriz de rastreabilidade, AGENTS.md (secoes 13 e 14), Especificacao 02.33
 // (secao 13) e ADR-001 v1.5. Excecoes explicitas ficam em ALLOWANCES e exigem GAP registrado na matriz.
 import {
   asArray,
@@ -527,6 +527,29 @@ export const RULES: readonly Rule[] = [
         );
       if (artifact['sha256'] !== ctx.openapiSha256)
         out.push('SHA-256 da OpenAPI difere do registrado na matriz');
+      return out;
+    },
+  },
+  {
+    id: 'R18',
+    title:
+      'falha inesperada documentada em toda operacao: 500 INTERNAL_ERROR (ERR-016) e 503 (ERR-011; getHealth com Health)',
+    check: (ctx) => {
+      const out: string[] = [];
+      const errors = matrixErrors(ctx);
+      const err016 = errors.find((e) => e.code === 'INTERNAL_ERROR');
+      if (err016?.http !== '500') out.push('ERR INTERNAL_ERROR (500) ausente da matriz');
+      const err011 = errors.find((e) => e.code === 'DEPENDENCY_UNAVAILABLE');
+      const all = operations(ctx.api).map((op) => op.id);
+      for (const op of operations(ctx.api)) {
+        const statuses = responsesOf(ctx.api, op);
+        if (!statuses.has('500')) out.push(`${op.id}: sem 500`);
+        if (!statuses.has('503')) out.push(`${op.id}: sem 503`);
+      }
+      if (err016 && sorted(err016.ops).join() !== sorted(all).join())
+        out.push('ERR-016 nao lista todas as operacoes');
+      if (err011 && sorted(err011.ops).join() !== sorted(all).join())
+        out.push('ERR-011 nao lista todas as operacoes');
       return out;
     },
   },
