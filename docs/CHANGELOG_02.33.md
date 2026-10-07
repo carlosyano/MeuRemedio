@@ -79,3 +79,14 @@ Decisão do mantenedor ("A e A") sobre as lacunas encontradas pelo TS-040:
 
 Efeitos: OpenAPI `02.33.3` (arquivo renomeado), matriz `2.1.3` (hashes, `response_statuses` de `createResponse`, lacunas resolvidas), `AGENTS.md` 1.4 e referências atualizadas na Especificação e na ADR. As regras R05 e R12 do TS-040 ficaram sem exceções.
 
+## Revisão 02.33.4 da OpenAPI (06/10/2026)
+
+Decisão do mantenedor sobre a lacuna encontrada ao planejar o esqueleto da API (**GAP-010**): o contrato 02.33.3 não documentava `500` e 23 operações não documentavam `503`, então uma falha inesperada (defeito ou dependência fora do ar) produziria um status fora do contrato.
+
+1. **DEC-026 / ERR-016:** novo código `INTERNAL_ERROR` (500, `Problem`, sem alteração confirmada), com resposta `InternalError` em todas as 27 operações. Mensagem ao usuário: "Não foi possível concluir a solicitação agora. Tente novamente em instantes." Detalhes técnicos só no log, com `correlation_id`.
+2. **ERR-011:** `503 DEPENDENCY_UNAVAILABLE` passa a ser declarado em todas as operações (`getHealth` mantém o schema `Health` no 503).
+3. **TS-040:** nova regra R18 exige 500 e 503 em toda operação e ERR-011 e ERR-016 mapeando todas as operações.
+
+Efeitos: OpenAPI `02.33.4` (arquivo renomeado), matriz `2.1.4` (hashes, `response_statuses`, ERR-011, ERR-016, DEC-026, `R-GAP010`), `AGENTS.md` 1.5, Especificação (tabela de erros, DEC-026, nota de revisão e referências vigentes) e ADR (referências vigentes). **Incompatibilidade aprovada:** acrescentar `INTERNAL_ERROR` ao enum fechado `Problem.code` é incompatível para clientes gerados do contrato anterior (o oasdiff acusa 100 ocorrências de `response-property-enum-value-added`, uma por resposta de erro). É o efeito esperado de um catálogo fechado; as ocorrências ficam registradas em `tools/oasdiff/approved-breaking.txt` com referência ao DEC-026.
+
+**Aprovação:** pendente, no pull request desta revisão (AGENTS.md §19.8 e §20.1).
