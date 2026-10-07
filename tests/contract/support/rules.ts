@@ -531,6 +531,29 @@ export const RULES: readonly Rule[] = [
     },
   },
   {
+    id: 'R18',
+    title:
+      'falha inesperada documentada em toda operacao: 500 INTERNAL_ERROR (ERR-016) e 503 (ERR-011; getHealth com Health)',
+    check: (ctx) => {
+      const out: string[] = [];
+      const errors = matrixErrors(ctx);
+      const err016 = errors.find((e) => e.code === 'INTERNAL_ERROR');
+      if (err016?.http !== '500') out.push('ERR INTERNAL_ERROR (500) ausente da matriz');
+      const err011 = errors.find((e) => e.code === 'DEPENDENCY_UNAVAILABLE');
+      const all = operations(ctx.api).map((op) => op.id);
+      for (const op of operations(ctx.api)) {
+        const statuses = responsesOf(ctx.api, op);
+        if (!statuses.has('500')) out.push(`${op.id}: sem 500`);
+        if (!statuses.has('503')) out.push(`${op.id}: sem 503`);
+      }
+      if (err016 && sorted(err016.ops).join() !== sorted(all).join())
+        out.push('ERR-016 nao lista todas as operacoes');
+      if (err011 && sorted(err011.ops).join() !== sorted(all).join())
+        out.push('ERR-011 nao lista todas as operacoes');
+      return out;
+    },
+  },
+  {
     id: 'R17',
     title: 'toda excecao do TS-040 tem lacuna registrada em known_gaps da matriz',
     check: (ctx, allowances = ALLOWANCES) => {
