@@ -1,5 +1,5 @@
 # Incompatibilidades da OpenAPI aprovadas formalmente (QG-001; AGENTS.md §8 e §20.1).
-# Lido por `npm run openapi:diff` via `oasdiff breaking --err-ignore`.
+# Lido por `npm run openapi:diff` via `oasdiff breaking --err-ignore` e `--warn-ignore` (ERR e WARN bloqueiam).
 # Formato de cada entrada: METODO /path mensagem do oasdiff (copiada da saida do `openapi:diff`).
 # Toda entrada exige, na linha anterior, um comentario com a decisao ou o PR que a aprovou.
 # Remover as entradas depois do merge da mudanca aprovada (a base passa a ser a nova versao).

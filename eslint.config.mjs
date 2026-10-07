@@ -8,7 +8,14 @@ export default defineConfig(
   {
     files: ['tools/**/*.mjs'],
     languageOptions: {
-      globals: { Buffer: 'readonly', console: 'readonly', fetch: 'readonly', process: 'readonly' },
+      globals: {
+        AbortSignal: 'readonly',
+        Buffer: 'readonly',
+        URL: 'readonly',
+        console: 'readonly',
+        fetch: 'readonly',
+        process: 'readonly',
+      },
     },
   },
   {

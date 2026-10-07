@@ -1,9 +1,10 @@
 // Binario fixado do oasdiff (QG-001). O oasdiff e distribuido como binario Go, nao como pacote npm:
 // a versao e os SHA-256 abaixo vem do checksums.txt da release oficial e sao conferidos a cada download.
-// Cache: node_modules/.cache/oasdiff/<versao>/ (fora do controle de versao). Ver docs/architecture/TOOLCHAIN.md.
+// Cache: node_modules/.cache/oasdiff/<versao>/ (ou OASDIFF_CACHE_DIR/<versao>/). Ver docs/architecture/TOOLCHAIN.md.
+// OASDIFF_BASE_URL permite um espelho da release (o SHA-256 continua obrigatorio).
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 export const OASDIFF_VERSION = '1.33.0';
@@ -16,6 +17,11 @@ const SHA256 = {
   windows_arm64: 'd51bd1ea4b05ff9b314245d1e97f84c222b22ce34a930e8e305c68c32edbe951',
 };
 
+const DOWNLOAD_TIMEOUT_MS = 60_000;
+/** Escrita apenas depois de baixar, verificar e extrair: sem ela, o cache e descartado. */
+const MARKER = '.verified';
+const BIN = process.platform === 'win32' ? 'oasdiff.exe' : 'oasdiff';
+
 function platformKey() {
   const arch = { x64: 'amd64', arm64: 'arm64' }[process.arch];
   if (process.platform === 'darwin') return 'darwin_all';
@@ -27,16 +33,20 @@ function platformKey() {
   return key;
 }
 
-/** Devolve o caminho do binario, baixando e verificando o SHA-256 na primeira chamada. */
-export async function ensureOasdiff(root = process.cwd()) {
+/** Devolve o caminho do binario, baixando e verificando o SHA-256 quando o cache nao e valido. */
+export async function ensureOasdiff(root) {
   const key = platformKey();
-  const dir = join(root, 'node_modules', '.cache', 'oasdiff', OASDIFF_VERSION);
-  const bin = join(dir, process.platform === 'win32' ? 'oasdiff.exe' : 'oasdiff');
-  if (existsSync(bin)) return bin;
+  const cacheRoot =
+    process.env.OASDIFF_CACHE_DIR || join(root, 'node_modules', '.cache', 'oasdiff');
+  const dir = join(cacheRoot, OASDIFF_VERSION);
+  if (existsSync(join(dir, MARKER)) && existsSync(join(dir, BIN))) return join(dir, BIN);
 
   const asset = `oasdiff_${OASDIFF_VERSION}_${key}.tar.gz`;
-  const url = `https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/${asset}`;
-  const response = await fetch(url);
+  const base =
+    process.env.OASDIFF_BASE_URL ||
+    `https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/`;
+  const url = new URL(asset, base).toString();
+  const response = await fetch(url, { signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS) });
   if (!response.ok) throw new Error(`oasdiff: download falhou (${String(response.status)}) ${url}`);
   const bytes = Buffer.from(await response.arrayBuffer());
   const digest = createHash('sha256').update(bytes).digest('hex');
@@ -44,15 +54,28 @@ export async function ensureOasdiff(root = process.cwd()) {
     throw new Error(`oasdiff: SHA-256 divergente para ${asset} (obtido ${digest})`);
   }
 
-  mkdirSync(dir, { recursive: true });
-  const archive = join(dir, asset);
-  writeFileSync(archive, bytes);
-  // cwd + nome relativo: evita que o GNU tar interprete "C:" como host remoto no Windows.
-  const tar = spawnSync('tar', ['-xzf', asset], { cwd: dir, encoding: 'utf8' });
-  rmSync(archive, { force: true });
-  if (tar.status !== 0 || !existsSync(bin)) {
+  // Extrai em diretorio temporario e so entao troca pelo definitivo: uma execucao interrompida
+  // nunca deixa um binario truncado no lugar do valido.
+  mkdirSync(cacheRoot, { recursive: true });
+  const staging = mkdtempSync(join(cacheRoot, `.staging-${OASDIFF_VERSION}-`));
+  try {
+    writeFileSync(join(staging, asset), bytes);
+    // cwd + nome relativo: evita que o GNU tar interprete "C:" como host remoto no Windows.
+    const tar = spawnSync('tar', ['-xzf', asset], { cwd: staging, encoding: 'utf8' });
+    if (tar.status !== 0 || !existsSync(join(staging, BIN))) {
+      throw new Error(`oasdiff: falha ao extrair ${asset}: ${tar.stderr || String(tar.error)}`);
+    }
+    rmSync(join(staging, asset), { force: true });
+    writeFileSync(join(staging, MARKER), `${digest}\n`, 'utf8');
     rmSync(dir, { recursive: true, force: true });
-    throw new Error(`oasdiff: falha ao extrair ${asset}: ${tar.stderr || String(tar.error)}`);
+    try {
+      renameSync(staging, dir);
+    } catch (error) {
+      // Outra execucao concorrente pode ter instalado primeiro; vale se estiver completa.
+      if (!(existsSync(join(dir, MARKER)) && existsSync(join(dir, BIN)))) throw error;
+    }
+  } finally {
+    rmSync(staging, { recursive: true, force: true });
   }
-  return bin;
+  return join(dir, BIN);
 }

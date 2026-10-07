@@ -61,6 +61,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # os testes do openapi:diff usam refs git (HEAD~1)
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
