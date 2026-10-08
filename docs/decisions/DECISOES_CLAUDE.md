@@ -28,6 +28,11 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-020 | Invalidação de tokens no reenvio e na falha de envio | Vigente |
 | DC-021 | Token de verificação no fragmento do link | Vigente |
 | DC-022 | Processo do worker na base de código da API | Vigente |
+| DC-023 | Falhas de login indistinguíveis | Vigente |
+| DC-024 | Janela e reinício do contador de falhas de login | Vigente |
+| DC-025 | Cookie de sessão e registro de atividade | Vigente |
+| DC-026 | Ordem dos controles de acesso e regra de Origin | Vigente |
+| DC-027 | Pepper único do HMAC de e-mail | Vigente |
 
 ---
 
@@ -202,3 +207,38 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** o worker é um **processo e uma implantação separados** (`apps/api/src/worker.ts`, entrada `worker-main.ts`) que reaproveitam os módulos da API. `apps/worker/README.md` aponta para eles.
 - **Riscos:** baixos. Mover para `apps/worker` depois é mecânico.
 - **Aplica-se a:** `apps/api/src/worker.ts`, `worker-main.ts` e `apps/worker/README.md`.
+
+## DC-023 — Falhas de login indistinguíveis (08/10/2026)
+
+- **Contexto:** a OpenAPI exige que e-mail inexistente e senha incorreta sejam indistinguíveis (401). A Especificação diz que a conta nova não autentica antes da verificação, mas não define a resposta.
+- **Decisão:** senha errada, e-mail inexistente e conta fora de `ACTIVE` (pendente ou com exclusão agendada) respondem o mesmo `401 AUTHENTICATION_REQUIRED` e contam como falha para o bloqueio. Para e-mail inexistente, a senha é verificada contra um hash Argon2id de referência, o que equaliza o tempo de resposta.
+- **Riscos:** o usuário com conta pendente não recebe "verifique seu e-mail" no login. A interface pode orientar o reenvio da verificação sem revelar o estado da conta.
+- **Aplica-se a:** `apps/api/src/modules/identity/application/sessions.ts`.
+
+## DC-024 — Janela e reinício do contador de falhas de login (08/10/2026)
+
+- **Contexto:** o DEC-016 e o CA-004 fixam 5 falhas em 15 min e 15 min de bloqueio, mas não o tipo de janela nem o efeito de um login bem-sucedido.
+- **Decisão:** a janela começa na primeira falha e vale 15 min. A 5ª falha dentro dela ainda responde 401 e bloqueia por 15 min a partir dali. Durante o bloqueio, toda tentativa (inclusive com a senha certa) responde 423 com `Retry-After` e não conta nova falha. Login bem-sucedido apaga o contador.
+- **Riscos:** baixos. O rate limit por IP limita a varredura de e-mails.
+- **Aplica-se a:** `apps/api/src/modules/identity/application/login-throttle.ts`.
+
+## DC-025 — Cookie de sessão e registro de atividade (08/10/2026)
+
+- **Contexto:** a sessão expira por inatividade (30 min) e por duração absoluta (24 h); o DATA_MODEL diz "atualizado com throttling", sem o intervalo.
+- **Decisão:** os cookies usam `Max-Age` de 24 h (duração absoluta), e o servidor controla a inatividade. A atividade é gravada no máximo 1 vez por minuto, com `idle_expires_at = mín(agora + 30 min, absolute_expires_at)`. Sessões expiradas não são marcadas como revogadas na leitura; a limpeza fica para um job futuro.
+- **Riscos:** a inatividade efetiva pode passar de 30 min por até 1 min, o que é aceitável.
+- **Aplica-se a:** `sessions.ts` e `session-cookies.ts`.
+
+## DC-026 — Ordem dos controles de acesso e regra de Origin (08/10/2026)
+
+- **Contexto:** as mutações autenticadas exigem sessão (401) e CSRF (403), e o OA-008 manda validar Origin "ou Sec-Fetch-Site".
+- **Decisão:** um único guard roda antes da validação do corpo, nesta ordem: sessão (401), rate limit por titular (429) e, só nas mutações, CSRF (403). O CSRF exige que o `X-CSRF-Token`, o cookie `mr_csrf` e o HMAC esperado da sessão coincidam (comparação em tempo constante) e que o `Origin` esteja na lista do ambiente. Sem `Origin`, exige `Sec-Fetch-Site: same-origin`; sem nenhum dos dois, recusa. Os testes de segurança ficam em `tests/security`, nos caminhos planejados pela matriz, e rodam no projeto de integração.
+- **Riscos:** clientes sem `Origin` nem `Sec-Fetch-Site` (fora de navegador) não conseguem fazer mutações, o que é intencional no MVP (a API é same-site com a aplicação web).
+- **Aplica-se a:** `apps/api/src/platform/http/access.guard.ts` e `vitest.config.ts`.
+
+## DC-027 — Pepper único do HMAC de e-mail (08/10/2026)
+
+- **Contexto:** o bloqueio de login (DEC-016) e o tombstone (RN-019) usam HMAC do e-mail normalizado com pepper em KMS.
+- **Decisão:** um único segredo, `EMAIL_PEPPER` (32 bytes ou mais), serve aos dois usos, mantendo um só valor para guardar e rotacionar no Secrets Manager/KMS.
+- **Riscos:** rotacionar o pepper zera os contadores de falha (efêmeros) e exige recalcular os tombstones, o que deve entrar no procedimento de rotação.
+- **Aplica-se a:** `apps/api/src/app.ts` e `main.ts`.
