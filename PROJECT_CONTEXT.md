@@ -3,8 +3,8 @@
 | Campo | Valor |
 |---|---|
 | Versão do documento | 1.3 |
-| Última atualização | 04/10/2026 (aprovação das decisões da revisão 02.33) |
-| Baseline descrita | Especificação 02.33 · OpenAPI 02.33.4 · ADR-001 v1.5 · AGENTS.md 1.5 · Matriz 2.1.4 |
+| Última atualização | 08/10/2026 (DEC-027: horizonte de geração) |
+| Baseline descrita | Especificação 02.33 · OpenAPI 02.33.4 · ADR-001 v1.5 · AGENTS.md 1.5 · Matriz 2.1.5 |
 | Commit da baseline | _preencher no merge do PR que aplica esta revisão_ |
 
 ## 1. Finalidade
@@ -22,7 +22,7 @@ Este documento fornece contexto operacional para continuidade do projeto **MeuRe
 | Branch principal | `main` |
 | Fase atual | Fundação técnica Test-First em andamento (baseline 02.33.4; §12, passos 5 a 7) |
 | Modelo de engenharia | Contract-First, Test-First e IA-First com aprovação humana |
-| Matriz de rastreabilidade | versão `2.1.4` |
+| Matriz de rastreabilidade | versão `2.1.5` |
 | Autorização de produção | Não concedida |
 | Idioma | Código, identificadores, commits e contratos em inglês; documentação e textos de interface em português do Brasil |
 
@@ -207,7 +207,8 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 |---|---|
 | Baseline documental 02.33 / 02.33.3 / v1.5 / AGENTS 1.3 | Revisada e **aprovada em 04/10/2026** pelo mantenedor (interino); parecer jurídico e de privacidade pendente |
 | Revisão 02.33.4 / AGENTS 1.5 / matriz 2.1.4 | Aprovada em 06/10/2026 pelo mantenedor (interino) no PR #8 (DEC-026) |
-| Matriz 2.1.4 e schema | Validadas (`PASS`) com o schema real e no CI |
+| DEC-027 / matriz 2.1.5 | Texto confirmado pelo mantenedor em 08/10/2026; aprovação formal no PR desta revisão |
+| Matriz 2.1.5 e schema | Validadas (`PASS`) com o schema real e no CI |
 | Fundação do monorepo | Em andamento: estrutura, toolchain e CI; PostgreSQL 17 com Testcontainers e migrações `0001_core` e `0002_platform` (ENT-001, ENT-004 a ENT-008, ENT-011 e ENT-012) com schemas Drizzle por módulo; `openapi:lint` e `openapi:diff`; Schemathesis pendente |
 | Implementação funcional | Iniciada: tempo civil (`resolveCivilInstant`) e gerador de ocorrências por janela explícita (`generateOccurrences`); API HTTP não iniciada |
 | Testes sentinela | Parciais: TS-040 (estático) e TS-024 (puro e integração) verdes; base de banco de TS-001, TS-015, TS-016, TS-017 e TS-038 verde; TS-008, TS-023 e os testes HTTP pendentes (requerem a API); estado em `docs/specifications/P0_SENTINEL_TESTS.md` |
@@ -253,6 +254,8 @@ Aprovador: Carlos Yano (`@carlosyano`), mantenedor, **em caráter interino**. A 
 | Convenção de idioma (seção 2) | Aprovada |
 | GAP-008 e GAP-009 (decisão "A e A", 04/10/2026) | Removido o 410 de `createResponse`; `X-Correlation-ID` exigido em toda resposta (OpenAPI 02.33.3) |
 | GAP-010 / DEC-026 (decisão de 06/10/2026, aprovação no PR) | Falha inesperada documentada: ERR-016 `INTERNAL_ERROR` (500) e 503 `DEPENDENCY_UNAVAILABLE` em todas as operações (OpenAPI 02.33.4, matriz 2.1.4, AGENTS.md 1.5) |
+| DEC-027 (texto confirmado em 08/10/2026, aprovação no PR) | Horizonte de geração: da data civil atual (ou `start_date`) até + 30 dias, inclusive, limitado a `end_date`; horários do dia já vencidos nascem `NO_RESPONSE` (matriz 2.1.5) |
+| Papel de privacidade (08/10/2026) | Haverá um DPO designado; ele substitui a alternativa "jurista ou DPO" das pendências |
 
 ### 14.1 Governança de alterações
 
@@ -267,7 +270,7 @@ Aprovador: Carlos Yano (`@carlosyano`), mantenedor, **em caráter interino**. A 
 - recalibrar o `PerformanceProfile` após os spikes de infraestrutura;
 - implementar os quality gates QG-001 a QG-012 na pipeline;
 - encerrar GX-001 a GX-006 antes de produção;
-- designar jurista ou DPO e substituir o responsável interino antes de dados reais ou produção;
+- designar o DPO e substituir o responsável interino antes de dados reais ou produção;
 - reavaliar a proteção da `main` quando houver um segundo desenvolvedor (seção 8.1).
 
 ## 16. Checklist de retomada

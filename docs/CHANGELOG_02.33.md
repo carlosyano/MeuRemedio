@@ -90,3 +90,15 @@ Decisão do mantenedor sobre a lacuna encontrada ao planejar o esqueleto da API 
 Efeitos: OpenAPI `02.33.4` (arquivo renomeado), matriz `2.1.4` (hashes, `response_statuses`, ERR-011, ERR-016, DEC-026, `R-GAP010`), `AGENTS.md` 1.5, Especificação (tabela de erros, DEC-026, nota de revisão e referências vigentes) e ADR (referências vigentes). **Incompatibilidade aprovada:** acrescentar `INTERNAL_ERROR` ao enum fechado `Problem.code` é incompatível para clientes gerados do contrato anterior (o oasdiff acusa 100 ocorrências de `response-property-enum-value-added`, uma por resposta de erro). É o efeito esperado de um catálogo fechado; as ocorrências ficam registradas em `tools/oasdiff/approved-breaking.txt` com referência ao DEC-026.
 
 **Aprovação:** pendente, no pull request desta revisão (AGENTS.md §19.8 e §20.1).
+
+## DEC-027: limites do horizonte de geração (08/10/2026)
+
+Lacuna encontrada ao implementar o gerador de ocorrências (TS-024): RF-004 e RN-018 citavam o horizonte móvel de 30 dias sem definir onde ele começa e termina, nem o que fazer, na criação do plano, com horários do dia que já passaram.
+
+1. **DEC-027:** o horizonte vai da data civil atual no fuso da conta (ou de `start_date`, se posterior) até a data atual + 30 dias, inclusive, limitado a `end_date`.
+2. Horários do dia que já passaram também são gerados: se `deadline_at` já foi atingido, a ocorrência nasce `NO_RESPONSE`, com `no_response_reached_at` igual ao instante da geração; antes do prazo, nasce `PROGRAMMED`.
+3. **RN-018** passa a remeter à DEC-027.
+
+Efeitos: Especificação (tabela de decisões, RN-018 e nota de revisão no Anexo C), matriz `2.1.5` (hash da Especificação, RN-018, DEC-027 e catálogo de decisões) e `maxProperties` de `decisions` no schema (26 → 27). OpenAPI, ADR e `AGENTS.md` inalterados. A implementação (teste vermelho e verde do gerador) vem em PR separado.
+
+**Aprovação:** texto confirmado pelo mantenedor em 08/10/2026; aprovação formal no pull request desta revisão (AGENTS.md §19.8 e §20.1).
