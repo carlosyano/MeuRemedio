@@ -1,7 +1,7 @@
 // @trace TS-024 RN-013 RNF-010 RF-004 (secao 13.5 da Especificacao 02.33; ADR-001 v1.5 OA-003)
 // Escopo desta etapa: resolucao de data, hora e fuso civis em instante UTC (parte pura do TS-024).
-// O artefato de integracao planejado na matriz (tests/integration/ts-024.spec.ts) cobre o gerador
-// de ocorrencias com PostgreSQL e chega em PR proprio.
+// O gerador de ocorrencias esta em tests/unit/occurrence-slots.spec.ts e
+// tests/integration/ts-024.spec.ts (PostgreSQL).
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import {
@@ -374,9 +374,8 @@ describe('TS-024 resolveCivilInstant: entradas invalidas', () => {
 
 describe('TS-024 pendencias conhecidas (fora desta etapa)', () => {
   it.todo(
-    'gera exatamente 1 ocorrencia por (plano, data, horario) no dia de repeticao de hora (gerador + PostgreSQL)',
+    'horizonte movel de 30 dias: limites da janela (decisao pendente) e disparo via Outbox/job',
   );
-  it.todo('reexecutar o gerador nao altera linhas ja existentes (gerador + PostgreSQL)');
   it.todo(
     'account_timezone aceita somente identificador IANA canonico (validacao em createAccount)',
   );

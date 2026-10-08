@@ -4,7 +4,7 @@
 |---|---|
 | Versão do documento | 1.3 |
 | Última atualização | 04/10/2026 (aprovação das decisões da revisão 02.33) |
-| Baseline descrita | Especificação 02.33 · OpenAPI 02.33.3 · ADR-001 v1.5 · AGENTS.md 1.3 · Matriz 2.1.3 |
+| Baseline descrita | Especificação 02.33 · OpenAPI 02.33.4 · ADR-001 v1.5 · AGENTS.md 1.5 · Matriz 2.1.4 |
 | Commit da baseline | _preencher no merge do PR que aplica esta revisão_ |
 
 ## 1. Finalidade
@@ -20,9 +20,9 @@ Este documento fornece contexto operacional para continuidade do projeto **MeuRe
 | Projeto | MeuRemedio |
 | Repositório | `https://github.com/carlosyano/MeuRemedio` |
 | Branch principal | `main` |
-| Fase atual | Fundação técnica Test-First em andamento (§12, passos 5 a 7) |
+| Fase atual | Fundação técnica Test-First em andamento (baseline 02.33.4; §12, passos 5 a 7) |
 | Modelo de engenharia | Contract-First, Test-First e IA-First com aprovação humana |
-| Matriz de rastreabilidade | versão `2.1.3` |
+| Matriz de rastreabilidade | versão `2.1.4` |
 | Autorização de produção | Não concedida |
 | Idioma | Código, identificadores, commits e contratos em inglês; documentação e textos de interface em português do Brasil |
 
@@ -54,7 +54,7 @@ A prevalência depende do assunto tratado.
 
 | Assunto | Fonte normativa | Prevalece para |
 |---|---|---|
-| Superfície HTTP | `MeuRemedio_OpenAPI_02.33.3_COMPLETO.yaml` | paths, métodos, `operationId`, parâmetros, cabeçalhos, cookies, payloads, schemas, enums, códigos HTTP, `Problem.code` e segurança da API |
+| Superfície HTTP | `MeuRemedio_OpenAPI_02.33.4_COMPLETO.yaml` | paths, métodos, `operationId`, parâmetros, cabeçalhos, cookies, payloads, schemas, enums, códigos HTTP, `Problem.code` e segurança da API |
 | Comportamento funcional | `MeuRemedio_Especificacao_Funcional_02.33.docx` | requisitos, regras de negócio, entidades, fluxos, estados de tela, histórias, critérios de aceitação, mensagens, testes sentinela e gates externos |
 | Arquitetura | `ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx` | arquitetura, stack, persistência, processamento assíncrono, infraestrutura e governança arquitetural |
 | Processo operacional | `AGENTS.md` (v1.3) | comportamento de agentes, desenvolvimento, quality gates, testes, rastreabilidade, segurança e aprovação humana |
@@ -95,7 +95,7 @@ docs/
 ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
 AGENTS.md
 MeuRemedio_Especificacao_Funcional_02.33.docx
-MeuRemedio_OpenAPI_02.33.3_COMPLETO.yaml
+MeuRemedio_OpenAPI_02.33.4_COMPLETO.yaml
 PROJECT_CONTEXT.md
 requirements-validation.txt
 traceability-check.py
@@ -104,7 +104,7 @@ traceability-matrix.yaml
 validate_all.py
 ```
 
-Arquivos `.txt` usados como cópia de conteúdo não são fontes normativas e não devem ser consumidos pela automação. As versões anteriores (OpenAPI 02.33.1 e anteriores, Especificação 02.32, ADR v1.4) não são fontes normativas.
+Arquivos `.txt` usados como cópia de conteúdo não são fontes normativas e não devem ser consumidos pela automação. As versões anteriores (OpenAPI 02.33.3 e anteriores, Especificação 02.32, ADR v1.4) não são fontes normativas.
 
 ## 6. Baseline de rastreabilidade
 
@@ -156,7 +156,7 @@ Use a versão de Python definida em `.github/workflows/traceability-validation.y
 6. cobertura de ownership (TS-023) em toda operação privada;
 7. existência de artefato de teste planejado para todo TS.
 
-`validate_all.py` exige o arquivo `MeuRemedio_OpenAPI_02.33.3_COMPLETO.yaml` no diretório; ao trocar a versão da OpenAPI, atualize a constante `OPENAPI` e a matriz.
+`validate_all.py` exige o arquivo `MeuRemedio_OpenAPI_02.33.4_COMPLETO.yaml` no diretório; ao trocar a versão da OpenAPI, atualize a constante `OPENAPI` e a matriz.
 
 ### 7.3 Significado de PASS
 
@@ -206,10 +206,11 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 | Área | Estado |
 |---|---|
 | Baseline documental 02.33 / 02.33.3 / v1.5 / AGENTS 1.3 | Revisada e **aprovada em 04/10/2026** pelo mantenedor (interino); parecer jurídico e de privacidade pendente |
-| Matriz 2.1.3 e schema | Validadas (`PASS`) com o schema real e no CI |
-| Fundação do monorepo | Em andamento: estrutura, toolchain e CI (PR #3); PostgreSQL 17 com Testcontainers e migrações `0001_core` e `0002_platform` (ENT-001, ENT-004 a ENT-008, ENT-011 e ENT-012) com schemas Drizzle por módulo; oasdiff em PR próprio; Schemathesis pendente |
-| Implementação funcional | Não iniciada |
-| Testes sentinela | TS-024 (parte pura) e TS-040 (estático) verdes; base de banco de TS-001, TS-015, TS-016, TS-017 e TS-038 verde; TS-008 e TS-023 e os testes HTTP pendentes (requerem a API) |
+| Revisão 02.33.4 / AGENTS 1.5 / matriz 2.1.4 | Aprovada em 06/10/2026 pelo mantenedor (interino) no PR #8 (DEC-026) |
+| Matriz 2.1.4 e schema | Validadas (`PASS`) com o schema real e no CI |
+| Fundação do monorepo | Em andamento: estrutura, toolchain e CI; PostgreSQL 17 com Testcontainers e migrações `0001_core` e `0002_platform` (ENT-001, ENT-004 a ENT-008, ENT-011 e ENT-012) com schemas Drizzle por módulo; `openapi:lint` e `openapi:diff`; Schemathesis pendente |
+| Implementação funcional | Iniciada: tempo civil (`resolveCivilInstant`) e gerador de ocorrências por janela explícita (`generateOccurrences`); API HTTP não iniciada |
+| Testes sentinela | Parciais: TS-040 (estático) e TS-024 (puro e integração) verdes; base de banco de TS-001, TS-015, TS-016, TS-017 e TS-038 verde; TS-008, TS-023 e os testes HTTP pendentes (requerem a API); estado em `docs/specifications/P0_SENTINEL_TESTS.md` |
 | Evidências de segurança dinâmica e de desempenho | Não produzidas |
 | GX-001 a GX-006 | Abertos (responsável interino `@carlosyano`; reatribuir) |
 | Produção | Bloqueada |
@@ -251,6 +252,7 @@ Aprovador: Carlos Yano (`@carlosyano`), mantenedor, **em caráter interino**. A 
 | Retenção de `audit_events` | Padrão provisório de 180 dias configuráveis; definitivo em GX-003 |
 | Convenção de idioma (seção 2) | Aprovada |
 | GAP-008 e GAP-009 (decisão "A e A", 04/10/2026) | Removido o 410 de `createResponse`; `X-Correlation-ID` exigido em toda resposta (OpenAPI 02.33.3) |
+| GAP-010 / DEC-026 (decisão de 06/10/2026, aprovação no PR) | Falha inesperada documentada: ERR-016 `INTERNAL_ERROR` (500) e 503 `DEPENDENCY_UNAVAILABLE` em todas as operações (OpenAPI 02.33.4, matriz 2.1.4, AGENTS.md 1.5) |
 
 ### 14.1 Governança de alterações
 
@@ -287,7 +289,7 @@ Antes de propor ou alterar código, leia integralmente:
 1. AGENTS.md
 2. PROJECT_CONTEXT.md
 3. traceability-matrix.yaml
-4. MeuRemedio_OpenAPI_02.33.3_COMPLETO.yaml
+4. MeuRemedio_OpenAPI_02.33.4_COMPLETO.yaml
 5. MeuRemedio_Especificacao_Funcional_02.33.docx
 6. ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
 7. docs/specifications/P0_SENTINEL_TESTS.md e docs/architecture/DATA_MODEL.md
