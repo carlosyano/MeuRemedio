@@ -430,7 +430,10 @@ Perfil versionado e reproduzível de desempenho.
 | Migração | Entidades | Situação |
 |---|---|---|
 | `apps/api/migrations/0001_core.sql` | ENT-001 `users`, ENT-004 `sessions`, ENT-005 `medication_plans`, ENT-006 `schedule_times`, ENT-007 `occurrences`, ENT-008 `responses` | Implementada e coberta por `tests/integration/db-core.spec.ts` (PostgreSQL 17 real) |
-| Demais entidades | ENT-002, ENT-003, ENT-009 a ENT-017 e tabelas de plataforma | Pendentes; entram em migrações próprias junto de cada funcionalidade |
+| `apps/api/migrations/0002_platform.sql` | ENT-011 `idempotency_records`, ENT-012 `outbox_events` | Implementada e coberta por `tests/integration/db-platform.spec.ts` (PostgreSQL 17 real) |
+| Demais entidades | ENT-002, ENT-003, ENT-009, ENT-010, ENT-013 a ENT-017 e tabelas de plataforma | Pendentes; entram em migrações próprias junto de cada funcionalidade |
+
+**Rollback:** as migrações criam apenas objetos novos, sem dados nem dependentes externos; o rollback é uma migração nova que remove os objetos criados (a lista está no cabeçalho de cada arquivo). Uma migração aplicada nunca é editada.
 
 Decisões de implementação derivadas deste modelo:
 
@@ -438,5 +441,8 @@ Decisões de implementação derivadas deste modelo:
 - **Limite de 10 horários ativos:** trigger com bloqueio da linha do plano (serializa inserções concorrentes). O mínimo de 1 horário é regra de serviço, validada junto com o plano.
 - **Limite de 3 sessões ativas:** regra de serviço (transação com bloqueio do titular), não do esquema (TS-018).
 - **Imutabilidade de `responses`:** o trigger bloqueia UPDATE; o DELETE segue permitido para o expurgo em cascata (FL-001).
+- **Idempotência no esquema:** `operation_id` restrito às 7 operações com `Idempotency-Key` na OpenAPI (o teste compara com o contrato); escopo `'public'` só em `createAccount` e UUID do titular nas demais; chave no formato do contrato; `expires_at = created_at + 168 horas` (horas absolutas, independentes do fuso da conexão e do DST), com default `now() + 168 horas` para quando `created_at` também usa o default; quem informa `created_at` (Clock injetável) informa `expires_at`; snapshot sem `Set-Cookie` em qualquer caixa. Como `scope_key` é texto (`'public'` ou UUID) e não admite FK, o trigger `users_purge_idempotency` remove os snapshots do titular no expurgo da conta (FL-001), pois `response_body` pode conter dados de saúde. Não persistir o `409` e não sobrescrever o snapshot são regras de serviço (TS-015).
+- **Outbox:** `payload` é objeto JSON de até 8 KB; `aggregate_id` sem FK (sobrevive ao expurgo); índice parcial dos pendentes sustenta a reivindicação com `FOR UPDATE SKIP LOCKED`. Payload apenas com identificadores é regra de serviço.
+- **Schemas Drizzle:** cada módulo mapeia as próprias tabelas em `apps/api/src/modules/<módulo>/infrastructure/schema.ts`, agregadas em `apps/api/src/platform/db/schema.ts`. O SQL das migrações é a fonte do esquema; o Drizzle só tipa o acesso e não declara constraints, FKs nem índices (as FKs entre módulos ficam só no SQL). `tests/integration/drizzle-schema.spec.ts` exige que tabelas, colunas, tipos, nulidade, presença de default, chave primária e enums do Drizzle coincidam com o banco migrado.
 - **Constraints nomeadas:** cada regra tem nome (`users_email_normalized_chk`, `occurrences_deadline_chk` etc.), e os testes verificam qual regra disparou.
 

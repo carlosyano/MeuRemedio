@@ -70,6 +70,8 @@
 
 **Proibido:** segundo plano; o `409` do passo 2 sobrescrever o snapshot original.
 
+**Estado (PR 8):** a base de banco está em `tests/integration/db-platform.spec.ts` (PostgreSQL 17 real): unicidade por (operação, escopo, chave), escopo por titular (passo 4) e 10 inserções simultâneas com a mesma chave gravando um único registro (passo 5). O teste HTTP completo permanece pendente (requer a API).
+
 ---
 
 ## TS-038 — Matriz de idempotência
@@ -85,6 +87,8 @@
 **Observações:** `createAccount` usa escopo `public`. Em `updatePlan`, o `If-Match` integra o hash da requisição.
 
 **Decisão (aprovada em 04/10/2026 pelo mantenedor, interino):** em `requestAccountDeletion` e `revokeAllSessions` o efeito revoga a própria sessão; o replay da mesma chamada **retorna `401`**, pois a autenticação precede a consulta ao registro de idempotência. O cliente trata um `401` posterior à confirmação da ação como resultado já alcançado. O TS-038 cobre os passos 1 a 5 com chamadas feitas antes da revogação e acrescenta o passo 6: replay após a revogação retorna `401` sem novo efeito.
+
+**Estado (PR 8):** a base de banco está em `tests/integration/db-platform.spec.ts`: o esquema aceita exatamente as operações que declaram `Idempotency-Key` na OpenAPI, usa escopo `public` só em `createAccount` e fixa `expires_at = created_at + 7 dias` (passo 5). Os passos HTTP permanecem pendentes.
 
 ---
 
@@ -124,6 +128,8 @@ Os valores foram calculados com `zoneinfo` e o tzdata do ambiente de referência
 
 **Proibido:** resposta de sucesso sem evento persistido; perda silenciosa.
 
+**Estado (PR 8):** a base de banco está em `tests/integration/db-platform.spec.ts`: plano e evento na mesma transação (ROLLBACK descarta os dois; COMMIT deixa o evento pendente) e consumidores concorrentes com `FOR UPDATE SKIP LOCKED` recebem eventos disjuntos. Despachante e pg-boss permanecem pendentes.
+
 ---
 
 ## TS-017 — Retomada de worker sem efeito duplicado
@@ -132,6 +138,8 @@ Os valores foram calculados com `zoneinfo` e o tzdata do ambiente de referência
 **Passos:** worker de lembrete interrompido (kill) após enviar ao provedor falso e antes do `ack`; reiniciar. Repetir interrompendo antes do envio.
 
 **Esperado:** no máximo 1 e-mail por ocorrência (o provedor falso conta envios); `email_reminders` termina em `SENT` ou, sem confirmação, em `DELIVERY_UNKNOWN` **sem reenvio cego**; reexecução do gerador e do job de prazo não altera estados.
+
+**Estado (PR 8):** só a reivindicação disjunta de eventos do Outbox está coberta (`tests/integration/db-platform.spec.ts`); `email_reminders` (ENT-009), o worker e o provedor falso permanecem pendentes.
 
 ---
 
