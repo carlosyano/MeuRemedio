@@ -21,6 +21,13 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-013 | Biblioteca de Argon2id | Vigente |
 | DC-014 | Versão fixada da lista de senhas comprometidas | Vigente |
 | DC-015 | Conjunto de fusos aceitos no cadastro | Vigente |
+| DC-016 | Versão do pg-boss | Vigente |
+| DC-017 | Enfileiramento transacional e backoff do Outbox | Vigente |
+| DC-018 | Produtor do TS-016 antes dos planos | Vigente |
+| DC-019 | Respostas do verifyAccount | Vigente |
+| DC-020 | Invalidação de tokens no reenvio e na falha de envio | Vigente |
+| DC-021 | Token de verificação no fragmento do link | Vigente |
+| DC-022 | Processo do worker na base de código da API | Vigente |
 
 ---
 
@@ -144,3 +151,54 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** aceitar exatamente `Intl.supportedValuesOf('timeZone')` (leitura literal de "reconhecido pela plataforma"). A interface web vai oferecer a mesma lista, o que mantém o comportamento consistente. Todos os fusos brasileiros estão nela; aliases (`Brazil/East`) e nomes inexistentes recebem 400.
 - **Riscos:** alguns canônicos IANA modernos (`Asia/Kolkata`) não são aceitos, mas o equivalente aparece na lista oferecida. Reavaliar se a tzdata ou o ICU mudarem.
 - **Aplica-se a:** `apps/api/src/modules/identity/application/create-account.ts`.
+
+## DC-016 — Versão do pg-boss (08/10/2026)
+
+- **Contexto:** o OA-002 aprova o pg-boss, mas a linha 12 publica versões quase diárias.
+- **Decisão:** fixar a **12.34.0**, com 2 semanas de publicada em 08/10/2026 (ESM, MIT, `npm audit` limpo).
+- **Riscos:** baixos. Subir de versão entra por PR próprio, com os testes do Outbox.
+- **Aplica-se a:** `apps/api/package.json` e `docs/architecture/TOOLCHAIN.md`.
+
+## DC-017 — Enfileiramento transacional e backoff do Outbox (08/10/2026)
+
+- **Contexto:** o TS-016 exige que nenhum evento se perca e que o despacho ocorra exatamente uma vez. A Especificação não define retentativa.
+- **Alternativas:** enviar ao pg-boss fora da transação e deduplicar por `singletonKey`; enfileirar na mesma transação.
+- **Decisão:** um evento por transação (`FOR UPDATE SKIP LOCKED`), com o job enfileirado na **mesma transação** que marca `dispatched_at` (opção `db` do `send` do pg-boss) e o id do job igual ao id do evento. Na falha, `attempts` incrementa, `last_error_code` registra só o código, e o evento volta após `2^attempts` s, até 300 s.
+- **Riscos:** baixos. O backoff máximo de 5 min atrasa no máximo esse tempo depois de uma indisponibilidade longa.
+- **Aplica-se a:** `apps/api/src/platform/outbox/dispatcher.ts`.
+
+## DC-018 — Produtor do TS-016 antes dos planos (08/10/2026)
+
+- **Contexto:** o TS-016 descreve `POST /plans` como produtor, mas o módulo de planos ainda não existe.
+- **Decisão:** provar o despachante com o `createAccount` como produtor, que já grava evento no Outbox. O cenário com `POST /plans` entra com o módulo de planos.
+- **Riscos:** nenhum. O despachante é genérico por tipo de evento.
+- **Aplica-se a:** `tests/integration/ts-016.spec.ts`.
+
+## DC-019 — Respostas do verifyAccount (08/10/2026)
+
+- **Contexto:** o contrato prevê 204 (inclusive para token já consumido), 409 e 410, mas não diz quando usar cada um.
+- **Decisão:** token já consumido responde 204 sem efeito. Token desconhecido, expirado (24 h) ou substituído responde **410 `TOKEN_EXPIRED`**, sem distinguir os casos, o que não revela se o token existiu. Token válido de conta fora de `PENDING_VERIFICATION` responde **409 `STATE_CONFLICT`**.
+- **Riscos:** baixos. A mensagem do ERR-008 ("Este link não pode mais ser usado. Solicite um novo.") serve para os três casos de 410.
+- **Aplica-se a:** `apps/api/src/modules/identity/application/verify-account.ts`.
+
+## DC-020 — Invalidação de tokens no reenvio e na falha de envio (08/10/2026)
+
+- **Contexto:** a RN-017 diz que "novo token invalida o anterior", e a OpenAPI diz que o reenvio "invalida o token anterior". Pela DC-008, o token novo é emitido pelo worker.
+- **Decisão:** o `resendVerification` invalida os tokens abertos já na requisição (sem esperar o worker), e o worker invalida de novo ao emitir. Se o envio do e-mail falha, o pg-boss refaz o job, e a nova execução emite outro token, substituindo o que não chegou ao usuário.
+- **Riscos:** se o e-mail sair e a confirmação do job se perder, o usuário recebe 2 e-mails e só o último link vale. É aceitável para a verificação; o lembrete de dose tem regra própria (TS-017).
+- **Aplica-se a:** `resend-verification.ts` e `issue-verification.ts`.
+
+## DC-021 — Token de verificação no fragmento do link (08/10/2026)
+
+- **Contexto:** o link de verificação precisa levar o token, e logs não podem conter tokens (RNF de logs).
+- **Decisão:** link `${WEB_BASE_URL}/conta/verificar#token=<token>`. O fragmento não é enviado ao servidor web nem aparece no `Referer`; a aplicação web lê o token e chama `verifyAccount`.
+- **Riscos:** nenhum. A rota exata da aplicação web pode mudar quando ela for construída.
+- **Aplica-se a:** `issue-verification.ts`.
+
+## DC-022 — Processo do worker na base de código da API (08/10/2026)
+
+- **Contexto:** o AGENTS §6 exige separação entre aplicação web, API e workers, e a estrutura de referência reserva `apps/worker`. Os consumidores precisam dos módulos de domínio que vivem em `apps/api`.
+- **Alternativas:** pacote `apps/worker` importando `apps/api` por exports e project references; processo separado com o mesmo código.
+- **Decisão:** o worker é um **processo e uma implantação separados** (`apps/api/src/worker.ts`, entrada `worker-main.ts`) que reaproveitam os módulos da API. `apps/worker/README.md` aponta para eles.
+- **Riscos:** baixos. Mover para `apps/worker` depois é mecânico.
+- **Aplica-se a:** `apps/api/src/worker.ts`, `worker-main.ts` e `apps/worker/README.md`.
