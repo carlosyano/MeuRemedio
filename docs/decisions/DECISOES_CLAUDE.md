@@ -16,6 +16,11 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-008 | Emissão do token de verificação pelo worker | Vigente |
 | DC-009 | Quais respostas viram snapshot de idempotência | Vigente |
 | DC-010 | Serialização e hash da requisição idempotente | Vigente |
+| DC-011 | Janela e chave do rate limit | Vigente |
+| DC-012 | Hash de requisição idempotente com HMAC | Vigente |
+| DC-013 | Biblioteca de Argon2id | Vigente |
+| DC-014 | Versão fixada da lista de senhas comprometidas | Vigente |
+| DC-015 | Conjunto de fusos aceitos no cadastro | Vigente |
 
 ---
 
@@ -99,3 +104,43 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** `pg_advisory_xact_lock` sobre `(operação, escopo, chave)` no início da transação do comando: a segunda chamada espera a primeira e então faz o replay. O hash é o SHA-256 do JSON canônico (chaves de objeto ordenadas, arrays na ordem) das partes da requisição: o corpo e, quando houver, os parâmetros e o `If-Match` (TS-038).
 - **Riscos:** colisão do hash de 64 bits do advisory lock só serializa chaves distintas, sem erro de correção.
 - **Aplica-se a:** `apps/api/src/platform/idempotency/idempotency.ts`.
+
+## DC-011 — Janela e chave do rate limit (08/10/2026)
+
+- **Contexto:** o RNF-006 fixa 20 req/min por IP em rotas públicas e 100 req/min por titular; a DEC-019 manda usar contadores UNLOGGED com "janela por chave", sem dizer o tipo de janela.
+- **Alternativas:** janela fixa; janela deslizante (log ou contador ponderado); token bucket.
+- **Decisão:** janela fixa de 1 minuto alinhada ao minuto UTC, com incremento atômico (`INSERT ... ON CONFLICT DO UPDATE`). A chave persistida é o SHA-256 do IP (rotas públicas) ou do UUID do titular (rotas autenticadas), nunca o valor em claro. O excedente recebe `Retry-After` com os segundos até o fim da janela (mínimo 1). O IP vem de `request.ip` do Fastify; atrás do balanceador (ECS/ALB), o `trustProxy` precisa ser configurado na implantação, senão todos os clientes compartilham o IP do balanceador.
+- **Riscos:** a janela fixa admite até 2× o limite na virada do minuto, o que é aceitável para o MVP. O `trustProxy` entra na checklist de implantação.
+- **Aplica-se a:** `apps/api/src/platform/rate-limit/`.
+
+## DC-012 — Hash de requisição idempotente com HMAC (08/10/2026)
+
+- **Contexto:** o `request_hash` de `idempotency_records` cobre o corpo, que no `createAccount` inclui a senha. Um SHA-256 simples permitiria a quem lê o banco testar senhas por força bruta rápida, anulando o Argon2id.
+- **Alternativas:** excluir a senha do hash, o que deixaria um payload divergente só na senha virar replay em vez de 409; HMAC com segredo do servidor.
+- **Decisão:** HMAC-SHA-256 com segredo do servidor (`REQUEST_HASH_KEY`, 32 bytes ou mais, do Secrets Manager em produção) em todas as operações idempotentes.
+- **Riscos:** trocar o segredo invalida os hashes guardados, e replays dentro dos 7 dias responderiam 409. A rotação deve ser rara e planejada.
+- **Aplica-se a:** `apps/api/src/platform/idempotency/idempotency.ts` e `main.ts`.
+
+## DC-013 — Biblioteca de Argon2id (08/10/2026)
+
+- **Contexto:** a RN-017 e o OA-009 pedem Argon2id (19 MiB, t=2, p=1).
+- **Alternativas:** `argon2` 0.45.1 (addon nativo via `node-gyp-build`, com `cross-env` como dependência de execução); `@node-rs/argon2` (N-API pré-compilado, sem dependências).
+- **Decisão:** `@node-rs/argon2` **2.2.1**. A 2.2.2 tinha 2 dias de publicada; a anterior tem 4 semanas de uso. O padrão da biblioteca é Argon2id, e o teste confere o prefixo `$argon2id$v=19$m=19456,t=2,p=1$`.
+- **Riscos:** baixos. A calibração de desempenho fica no spike S7.
+- **Aplica-se a:** `apps/api/src/modules/identity/infrastructure/password-hasher.ts`.
+
+## DC-014 — Versão fixada da lista de senhas comprometidas (08/10/2026)
+
+- **Contexto:** a DEC-029 cita `Passwords/Common-Credentials/10-million-password-list-top-100000.txt` do SecLists, mas o arquivo foi removido em 08/05/2025 (commit `4ff3ff8`) por duplicar `xato-net-10-million-passwords-100000.txt`, que hoje tem 7 linhas a menos.
+- **Alternativas:** usar o arquivo atual equivalente; usar o arquivo nomeado na versão anterior à remoção.
+- **Decisão:** fixar o arquivo nomeado na DEC-029 no commit `2d5dc75`, o último em que ele existe, com SHA-256 `e30e15fa...` conferido na carga e a licença MIT junto (`apps/api/assets/compromised-passwords/`).
+- **Riscos:** a lista não recebe atualizações do upstream. Trocá-la exige PR próprio.
+- **Aplica-se a:** `apps/api/assets/compromised-passwords/` e `compromised-passwords.ts`.
+
+## DC-015 — Conjunto de fusos aceitos no cadastro (08/10/2026)
+
+- **Contexto:** a DEC-023 e a OpenAPI pedem "IANA canônico reconhecido pela versão de tzdata fixada na plataforma (Node/ICU)". O ICU do Node 24 usa os identificadores canônicos do CLDR, que às vezes divergem dos da IANA (`Asia/Calcutta` x `Asia/Kolkata`, `Europe/Kiev` x `Europe/Kyiv`).
+- **Alternativas:** aceitar só `Intl.supportedValuesOf('timeZone')`; versionar a lista de zonas da tzdata (`zone1970.tab`) e aceitar os canônicos IANA; aceitar aliases e canonicalizar.
+- **Decisão:** aceitar exatamente `Intl.supportedValuesOf('timeZone')` (leitura literal de "reconhecido pela plataforma"). A interface web vai oferecer a mesma lista, o que mantém o comportamento consistente. Todos os fusos brasileiros estão nela; aliases (`Brazil/East`) e nomes inexistentes recebem 400.
+- **Riscos:** alguns canônicos IANA modernos (`Asia/Kolkata`) não são aceitos, mas o equivalente aparece na lista oferecida. Reavaliar se a tzdata ou o ICU mudarem.
+- **Aplica-se a:** `apps/api/src/modules/identity/application/create-account.ts`.
