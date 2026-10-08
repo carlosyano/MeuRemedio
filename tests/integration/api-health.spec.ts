@@ -24,6 +24,14 @@ const shiftedClock = (offsetMs: number): Clock => ({
 });
 const fixedClock = (now: string): Clock => ({ now: () => now });
 
+/** Corpo Health com o status esperado e time em RFC 3339 UTC (schema Instant). */
+function expectHealth(body: unknown, status: string): void {
+  expect(Object.keys(body as object).sort()).toEqual(['status', 'time']);
+  const health = body as { status: unknown; time: unknown };
+  expect(health.status).toBe(status);
+  expect(health.time).toEqual(expect.stringMatching(INSTANT) as unknown);
+}
+
 let db: PostgresHandle;
 let pool: pg.Pool;
 let app: NestFastifyApplication | undefined;
@@ -63,7 +71,7 @@ describe('getHealth (DEC-028)', () => {
   it('200 UP quando o banco responde e o desvio fica dentro do limite', async () => {
     const response = await call(await start(shiftedClock(0)), 'GET', '/health');
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ status: 'UP', time: expect.stringMatching(INSTANT) });
+    expectHealth(response.body, 'UP');
     expect(contract.validateResponse('getHealth', response)).toEqual([]);
   });
 
@@ -95,7 +103,7 @@ describe('getHealth (DEC-028)', () => {
       '/health',
     );
     expect(response.status).toBe(503);
-    expect(response.body).toEqual({ status: 'DEGRADED', time: expect.stringMatching(INSTANT) });
+    expectHealth(response.body, 'DEGRADED');
     expect(contract.validateResponse('getHealth', response)).toEqual([]);
   });
 
@@ -116,7 +124,7 @@ describe('getHealth (DEC-028)', () => {
         '/health',
       );
       expect(response.status).toBe(503);
-      expect(response.body).toEqual({ status: 'DOWN', time: expect.stringMatching(INSTANT) });
+      expectHealth(response.body, 'DOWN');
       expect(contract.validateResponse('getHealth', response)).toEqual([]);
     } finally {
       await unreachable.end();
