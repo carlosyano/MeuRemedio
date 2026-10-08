@@ -102,3 +102,15 @@ Lacuna encontrada ao implementar o gerador de ocorrências (TS-024): RF-004 e RN
 Efeitos: Especificação (tabela de decisões, RN-018 e nota de revisão no Anexo C), matriz `2.1.5` (hash da Especificação, RN-018, DEC-027 e catálogo de decisões) e `maxProperties` de `decisions` no schema (26 → 27). OpenAPI, ADR e `AGENTS.md` inalterados. A implementação (teste vermelho e verde do gerador) vem em PR separado.
 
 **Aprovação:** texto confirmado pelo mantenedor em 08/10/2026; aprovação formal no pull request desta revisão (AGENTS.md §19.8 e §20.1).
+
+## DEC-028 e DEC-029: saúde técnica e lista de senhas comprometidas (08/10/2026)
+
+Lacunas encontradas no spike S1 (esqueleto HTTP) e ao planejar o módulo `identity`:
+
+1. **DEC-028 (RNF-015, DEC-020):** `getHealth` compara, a cada chamada, o `Clock` da API com o `now()` do PostgreSQL. Desvio absoluto acima de `CLOCK_SKEW_MAX_MS` retorna `DEGRADED` com 503; PostgreSQL sem resposta dentro do tempo-limite da sondagem (padrão 2 s, configurável) retorna `DOWN` com 503; caso contrário, `UP` com 200. O corpo é `Health` em todos os casos; e-mail, storage e fila não entram na sondagem.
+2. **DEC-029 (RN-017, DEC-015):** a lista local de senhas comprometidas é o arquivo `Passwords/Common-Credentials/10-million-password-list-top-100000.txt` do SecLists (licença MIT), versionado no repositório com origem e SHA-256 registrados. A senha é rejeitada quando coincide exatamente com uma entrada; atualizar a lista exige PR próprio.
+3. **RN-017** e **RNF-015** passam a remeter às novas decisões.
+
+Efeitos: Especificação (tabela de decisões, RN-017, RNF-015 e nota de revisão no Anexo C), matriz `2.1.6` (hash da Especificação, RN-017, RNF-015, DEC-028, DEC-029 e catálogo de decisões) e `maxProperties` de `decisions` no schema (27 → 29). OpenAPI, ADR e `AGENTS.md` inalterados. A implementação vem em PRs separados.
+
+**Aprovação:** escolhas feitas pelo mantenedor em 08/10/2026; aprovação formal no pull request desta revisão (AGENTS.md §19.8 e §20.1).

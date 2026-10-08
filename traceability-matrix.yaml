@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-matrix_version: 2.1.5
+matrix_version: 2.1.6
 status: baseline-development-and-testing
 generated_from:
   functional_specification: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -15,7 +15,7 @@ generated_from:
     artifacts:
       functional_specification:
         file: MeuRemedio_Especificacao_Funcional_02.33.docx
-        sha256: f8cb064ef0990da92dbaa5b7f2c8b6b7f375c3cb7803fbb4977aafc26ee81177
+        sha256: 8dd1b29c997f52f4dd72f93693194e8f3d98f2cc5d06c7fc1cf8ceed3695f4b2
       openapi:
         file: MeuRemedio_OpenAPI_02.33.4_COMPLETO.yaml
         sha256: c08d17fab5ace9438944d1c93e72e8619178c68206070a763f4c1667f2bfe863
@@ -649,8 +649,8 @@ non_functional_requirements:
       source_table_index: 7
       mapping_type: explicit-catalog-row
   RNF-015:
-    title: Relógios sincronizados; desvio acima de CLOCK_SKEW_MAX_MS (padrão 5 s) bloqueia decisões temporais críticas e marca
-      getHealth como DEGRADED.
+    title: 'Relógios sincronizados; desvio acima de CLOCK_SKEW_MAX_MS (padrão 5 s) bloqueia decisões temporais críticas e marca
+      getHealth como DEGRADED. Referência do desvio e estados de getHealth: DEC-028.'
     tests:
     - TS-024
     gates:
@@ -5035,6 +5035,8 @@ catalog_completeness:
     - DEC-025
     - DEC-026
     - DEC-027
+    - DEC-028
+    - DEC-029
     actual_ids:
     - DEC-001
     - DEC-002
@@ -5063,6 +5065,8 @@ catalog_completeness:
     - DEC-025
     - DEC-026
     - DEC-027
+    - DEC-028
+    - DEC-029
     status: complete
   approved_questions:
     authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -5215,9 +5219,9 @@ business_rules:
       mapping_type: explicit-catalog-row
   RN-017:
     termo_regra: Credenciais e tokens
-    defini_o_normativa: Senha de 10 a 72 caracteres com minúscula, maiúscula e dígito, fora da lista local de senhas comprometidas
+    defini_o_normativa: 'Senha de 10 a 72 caracteres com minúscula, maiúscula e dígito, fora da lista local de senhas comprometidas
       e sem consulta remota; hash Argon2id. Token de verificação vale 24 h e o de redefinição 60 min, ambos de uso único;
-      novo token invalida o anterior.
+      novo token invalida o anterior. Fonte da lista de senhas comprometidas: DEC-029.'
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
@@ -5889,6 +5893,30 @@ decisions:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 27
+      mapping_type: explicit-catalog-row
+  DEC-028:
+    criticidade: Média
+    problema_causa: RNF-015 e DEC-020 não definiam a referência para medir o desvio de relógio, o status HTTP de getHealth
+      em DEGRADED nem o critério de DOWN.
+    decis_o_adotada: 'getHealth compara, a cada chamada, o Clock da API com o now() do PostgreSQL: desvio absoluto acima de
+      CLOCK_SKEW_MAX_MS retorna DEGRADED com 503. PostgreSQL sem resposta dentro do tempo-limite da sondagem (padrão 2 s,
+      configurável) retorna DOWN com 503. Caso contrário, UP com 200. O corpo é Health em todos os casos; e-mail, storage
+      e fila não entram na sondagem.'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 28
+      mapping_type: explicit-catalog-row
+  DEC-029:
+    criticidade: Média
+    problema_causa: RN-017 e DEC-015 exigiam lista local versionada de senhas comprometidas sem definir a fonte.
+    decis_o_adotada: 'Fonte: SecLists, arquivo Passwords/Common-Credentials/10-million-password-list-top-100000.txt (licença
+      MIT), versionado no repositório com origem e SHA-256 registrados. A senha informada é rejeitada quando coincide exatamente
+      com uma entrada da lista; a atualização da lista entra por PR próprio.'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 29
       mapping_type: explicit-catalog-row
 approved_questions:
   Q-001:
