@@ -212,7 +212,7 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 | DEC-027 / matriz 2.1.5 | Texto confirmado pelo mantenedor em 08/10/2026; aprovação formal no PR desta revisão |
 | Matriz 2.1.5 e schema | Validadas (`PASS`) com o schema real e no CI |
 | Fundação do monorepo | Em andamento: estrutura, toolchain e CI; PostgreSQL 17 com Testcontainers e migrações `0001_core` e `0002_platform` (ENT-001, ENT-004 a ENT-008, ENT-011 e ENT-012) com schemas Drizzle por módulo; `openapi:lint` e `openapi:diff`; Schemathesis pendente |
-| Implementação funcional | Iniciada: tempo civil (`resolveCivilInstant`) e gerador de ocorrências por janela explícita (`generateOccurrences`); API HTTP não iniciada |
+| Implementação funcional | Iniciada: tempo civil (`resolveCivilInstant`) e gerador de ocorrências com o horizonte da DEC-027 (`generateOccurrencesForHorizon`); esqueleto HTTP contract-first (spike S1: NestJS 12 + Fastify, `getHealth`, Problem e `X-Correlation-ID`) |
 | Testes sentinela | Parciais: TS-040 (estático) e TS-024 (puro e integração) verdes; base de banco de TS-001, TS-015, TS-016, TS-017 e TS-038 verde; TS-008, TS-023 e os testes HTTP pendentes (requerem a API); estado em `docs/specifications/P0_SENTINEL_TESTS.md` |
 | Evidências de segurança dinâmica e de desempenho | Não produzidas |
 | GX-001 a GX-006 | Abertos (responsável interino `@carlosyano`; reatribuir) |
