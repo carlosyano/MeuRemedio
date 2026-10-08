@@ -60,4 +60,16 @@ Monorepo npm workspaces (`apps/*`, `packages/*`), TypeScript strict (`tsconfig.b
 - Todo arquivo de teste começa com `// @trace TS-xxx RN-xxx RF-xxx ...` (IDs que existem na matriz). Pendências conhecidas ficam como `it.todo(...)` com a razão.
 - Identificadores e código em inglês; comentários de código em português sem acentos; documentação e textos de interface em pt-BR.
 - Fixtures só com dados sintéticos (`ana.silva@example.com`, `bruno.costa@example.com`).
-- Comportamento não definido na Especificação não é suprido por suposição: registre a lacuna e peça a decisão (AGENTS.md §18). Agentes abrem PRs, mas não aprovam nem fazem merge.
+- Comportamento não definido na Especificação não é suprido por suposição: registre a lacuna e peça a decisão (AGENTS.md §18).
+
+## Fluxo de trabalho autônomo (decisão do mantenedor, 08/10/2026)
+
+O agente evolui o projeto continuamente e só para quando houver uma pergunta que o mantenedor precisa responder (lacuna normativa, decisão de produto, conflito com uma fonte normativa). A cada PR:
+
+1. **Conferir antes:** CI toda verde (`gh pr checks`), PR sem conflito, diff restrito ao escopo, `python validate_all.py` e `npm run verify` locais (e `test:integration` quando tocar em persistência).
+2. **Merge:** o GitHub não deixa o autor aprovar o próprio PR, então "aprovar" significa fazer o merge (`gh pr merge --merge --delete-branch`) depois da conferência.
+   - **PR só de código, testes ou documentação de apoio:** o agente faz o merge.
+   - **PR com mudança normativa** (Especificação, OpenAPI, ADR, `AGENTS.md`, matriz ou schema da matriz): o agente abre o PR e espera o mantenedor fazer o merge, a menos que ele autorize aquele PR explicitamente.
+3. **Verificar depois:** atualizar a `main`, rodar `validate_all.py`, conferir o `ci` da `main` (`gh run list --branch main`) e só então seguir para o próximo passo do PROJECT_CONTEXT §12.
+
+Exceção registrada no PROJECT_CONTEXT §8.1.
