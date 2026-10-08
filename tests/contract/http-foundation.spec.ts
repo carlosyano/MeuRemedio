@@ -188,7 +188,9 @@ describe('assertRoutesMatchContract: rotas da aplicacao x OpenAPI', () => {
   };
 
   it('aceita rota com metodo, caminho e operationId do contrato', () => {
-    expect(() => assertRoutesMatchContract([health], contract)).not.toThrow();
+    expect(() => {
+      assertRoutesMatchContract([health], contract);
+    }).not.toThrow();
   });
 
   it.each([
@@ -198,13 +200,15 @@ describe('assertRoutesMatchContract: rotas da aplicacao x OpenAPI', () => {
     ['sem operationId', { ...health, operationId: undefined }],
     ['parametro com nome divergente', { ...health, path: '/plans/:id', operationId: 'getPlan' }],
   ] as const)('reprova %s', (_nome, route) => {
-    expect(() => assertRoutesMatchContract([route], contract)).toThrow(ContractMismatchError);
+    expect(() => {
+      assertRoutesMatchContract([route], contract);
+    }).toThrow(ContractMismatchError);
   });
 
   it('reprova a mesma operacao registrada duas vezes', () => {
-    expect(() => assertRoutesMatchContract([health, { ...health }], contract)).toThrow(
-      ContractMismatchError,
-    );
+    expect(() => {
+      assertRoutesMatchContract([health, { ...health }], contract);
+    }).toThrow(ContractMismatchError);
   });
 });
 
@@ -220,11 +224,16 @@ describe('PROBLEM_CATALOG: catalogo fechado ERR-001..ERR-016', () => {
   for (const response of Object.values(
     asObject(dig(ctx.api, 'components')['responses'], 'responses'),
   )) {
-    const example = isObject(response)
-      ? dig(asObject(response, 'response'), 'content', 'application/problem+json')['example']
-      : undefined;
-    if (isObject(example)) {
-      titles.set(asString(example['code'], 'code'), asString(example['title'], 'title'));
+    if (!isObject(response)) continue;
+    const media = dig(asObject(response, 'response'), 'content', 'application/problem+json');
+    // Exemplo unico (example) ou nomeado (examples.<nome>.value).
+    const named = isObject(media['examples'])
+      ? Object.values(media['examples']).map((item) => (isObject(item) ? item['value'] : undefined))
+      : [];
+    for (const example of [media['example'], ...named]) {
+      if (isObject(example)) {
+        titles.set(asString(example['code'], 'code'), asString(example['title'], 'title'));
+      }
     }
   }
 

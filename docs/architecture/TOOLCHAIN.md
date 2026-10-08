@@ -29,6 +29,11 @@
 | fast-check | 4.10.2 | Testes de propriedade (TS-024 e demais); dependência única: pure-rand |
 | @types/node | 24.19.1 | Tipos do Node 24 |
 | @stoplight/spectral-core, -parsers, -rulesets | 1.24.0, 1.0.5, 1.23.0 | QG-001 (lint da OpenAPI) via `tools/scripts/openapi-lint.mjs` |
+| @nestjs/common, @nestjs/core, @nestjs/platform-fastify (em `apps/api`) | 12.1.2 | API HTTP (ADR-001 v1.5 §4); linha 12 é ESM nativa (`"type": "module"`), como o repositório. MIT |
+| fastify (em `apps/api`) | 5.12.5 | Adaptador HTTP; mesma versão exigida pelo `@nestjs/platform-fastify` 12.1.2 |
+| reflect-metadata, rxjs (em `apps/api`) | 0.2.2, 7.8.2 | Dependências de par do NestJS |
+| ajv, ajv-formats (em `apps/api`) | 8.20.0, 3.0.1 | Validação de requisição e resposta contra os schemas da OpenAPI (JSON Schema 2020-12, `Ajv2020`) |
+| yaml (em `apps/api`) | 2.9.1 | Leitura da OpenAPI normativa em tempo de execução |
 | oasdiff (binário Go, fora do npm) | 1.33.0 | QG-001 (incompatibilidades da OpenAPI) via `tools/scripts/openapi-diff.mjs`; SHA-256 de cada plataforma fixado em `tools/scripts/oasdiff-bin.mjs` |
 
 ### Decisões de versão
@@ -36,7 +41,8 @@
 - **TypeScript 6.0.3, e não 7.x.** A versão mais recente do TypeScript é a 7.0.2, mas o `typescript-eslint` 8.71.0 declara compatibilidade apenas com TypeScript `<6.1.0`. Subir para o TypeScript 7 exige uma versão do `typescript-eslint` compatível; reavaliar por PR próprio.
 - **Spectral sem a CLI.** `@stoplight/spectral-cli` depende de `fast-glob` → `micromatch` → `braces`, com vulnerabilidade **alta** (GHSA-vfj7-8cjw-p6xm) sem correção publicada em 04/10/2026, o que violaria o QG-006 (RNF-009). O lint usa o núcleo do Spectral (`spectral-core`) com o ruleset `oas`, e o `npm audit` fica em 0 vulnerabilidades. Quando houver correção publicada, avaliar o retorno à CLI.
 - **oasdiff como binário verificado.** O oasdiff não tem pacote npm oficial (o nome `oasdiff` no npm é um placeholder de segurança `0.0.1-security`, verificado em 06/10/2026: não instalar). `tools/scripts/oasdiff-bin.mjs` baixa o `.tar.gz` da release oficial (linux amd64/arm64, windows amd64/arm64, darwin), confere o SHA-256 fixado (copiado do `checksums.txt` da release) e guarda o binário em `node_modules/.cache/oasdiff/<versão>/`. Divergência de hash aborta. Exige `tar` no PATH (nativo no Windows 10+, Linux e macOS). Atualizar = trocar versão e hashes no mesmo PR. A extração é feita em diretório temporário e só vale com a marca `.verified`, então execução interrompida não deixa binário truncado no cache; o download tem timeout de 60 s. `OASDIFF_CACHE_DIR` muda o cache e `OASDIFF_BASE_URL` aponta para um espelho da release (o SHA-256 continua obrigatório; o `fetch` do Node não usa `HTTP(S)_PROXY`). O script desliga `$ref` externo (`--allow-external-refs=false`, contra SSRF) e nunca usa `--open`, que enviaria a especificação a serviço externo. Incompatibilidades de nível ERR **e** WARN bloqueiam (`--fail-on WARN`). Códigos de saída: 0 sem incompatibilidade não aprovada, 1 incompatível, 2 erro de uso, 3 falha de infraestrutura.
-- **Versões das bibliotecas de aplicação** (Next.js, NestJS, Fastify, pg-boss, Testcontainers, Playwright, axe, Stryker, Zod etc.) **não estão fixadas ainda**: serão escolhidas, com consulta ao registro, checagem de compatibilidade (`peerDependencies` e `engines`) e `npm audit`, no PR que cada uma introduzir.
+- **NestJS 12 com decorators legados.** `apps/api` e `tests` ligam `experimentalDecorators`. Não há `emitDecoratorMetadata` (o Vitest transpila com oxc, sem metadados de tipo): toda injeção por construtor usa `@Inject(token)` explícito. Os módulos do Nest são classes vazias com decorator, liberadas na regra `no-extraneous-class` do ESLint.
+- **Versões das demais bibliotecas de aplicação** (Next.js, pg-boss, Playwright, axe, Stryker, Zod etc.) **não estão fixadas ainda**: serão escolhidas, com consulta ao registro, checagem de compatibilidade (`peerDependencies` e `engines`) e `npm audit`, no PR que cada uma introduzir.
 
 ## 3. Scripts e quality gates
 

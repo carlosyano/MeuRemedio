@@ -21,6 +21,10 @@ export default defineConfig(
   {
     files: ['**/*.ts'],
     extends: [tseslint.configs.strictTypeChecked],
+    rules: {
+      // Modulos do NestJS sao classes vazias com decorator.
+      '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
+    },
     languageOptions: {
       parserOptions: {
         projectService: { allowDefaultProject: ['vitest.config.ts'] },
