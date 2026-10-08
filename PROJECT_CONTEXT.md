@@ -180,6 +180,8 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 
 **Decisão de 04/10/2026:** adotada a opção C, como exceção formal enquanto houver um único mantenedor: toda mudança entra por pull request com o check verde; não há push direto na `main`; agentes de IA não têm permissão de merge; o mantenedor confere o check antes de cada merge. Reavaliar (opção A) quando houver um segundo desenvolvedor.
 
+**Ajuste de 08/10/2026 (decisão do mantenedor):** agentes de IA podem fazer o merge de PRs **sem mudança normativa** (código, testes e documentação de apoio), depois de conferir que o CI está verde, que o PR não tem conflito e que `validate_all.py` e `npm run verify` passam, e verificando a `main` depois do merge. PRs que alteram a Especificação, a OpenAPI, a ADR, o `AGENTS.md`, a matriz ou o seu schema continuam com merge pelo mantenedor, salvo autorização explícita para aquele PR. Procedimento em `CLAUDE.md` ("Fluxo de trabalho autônomo").
+
 ## 9. Stack, arquitetura e toolchain
 
 - **Frontend:** Next.js, React, TypeScript strict, Tailwind CSS, shadcn/ui, Radix UI, React Hook Form, Zod, TanStack Query.
