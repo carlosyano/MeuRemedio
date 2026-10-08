@@ -3,14 +3,15 @@
 //   - no maximo 1 slot por (data civil, horario civil); local_time preserva o horario pedido;
 //   - scheduled_at segue resolveCivilInstant (lacuna avanca; ambiguo usa o primeiro instante);
 //   - deadline_at = scheduled_at + 60 minutos.
-// A janela [fromDate, toDate] e explicita e inclusiva: a politica do horizonte movel de 30 dias
-// (onde comeca e onde termina) pertence a quem chama.
+// A janela [fromDate, toDate] e explicita e inclusiva; o horizonte movel de 30 dias (DEC-027) e
+// calculado por generationHorizon.
 import {
   InvalidCivilInputError,
   deadlineFor,
   resolveCivilInstant,
   type CivilResolution,
 } from './civil-time.js';
+import { civilDate, dayNumber } from './calendar.js';
 
 export interface ScheduleTimeInput {
   readonly id: string;
@@ -39,20 +40,7 @@ export interface OccurrenceSlot {
   readonly resolution: CivilResolution;
 }
 
-const DAY_MS = 86_400_000;
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-/** Data civil -> dias desde 1970-01-01 (aritmetica de calendario, sem fuso). */
-function dayNumber(date: string, field: string): number {
-  const epochMs = DATE_PATTERN.test(date) ? Date.parse(`${date}T00:00:00Z`) : Number.NaN;
-  if (Number.isNaN(epochMs) || new Date(epochMs).toISOString().slice(0, 10) !== date) {
-    throw new InvalidCivilInputError(`${field} invalida: "${date}"`);
-  }
-  return epochMs / DAY_MS;
-}
-
-const civilDate = (day: number): string => new Date(day * DAY_MS).toISOString().slice(0, 10);
 
 export function occurrenceSlots(input: OccurrenceSlotsInput): OccurrenceSlot[] {
   const from = dayNumber(input.fromDate, 'Data inicial da janela');

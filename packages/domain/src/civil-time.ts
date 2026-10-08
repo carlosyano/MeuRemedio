@@ -135,11 +135,11 @@ export function resolveCivilInstant(
   };
 }
 
-/** Prazo de resposta: 60 minutos de tempo decorrido apos o instante programado (RN-009). */
-export function deadlineFor(scheduledAtUtc: string): string {
-  const match = INSTANT_PATTERN.exec(scheduledAtUtc);
+/** Instante UTC YYYY-MM-DDTHH:MM:SSZ -> epoch em ms; rejeita formato e datas inexistentes. */
+export function parseInstant(instantUtc: string): number {
+  const match = INSTANT_PATTERN.exec(instantUtc);
   if (!match) {
-    throw new InvalidCivilInputError(`Instante UTC fora do formato: "${scheduledAtUtc}"`);
+    throw new InvalidCivilInputError(`Instante UTC fora do formato: "${instantUtc}"`);
   }
   const [year, month, day, hour, minute, second] = match.slice(1).map(Number) as [
     number,
@@ -149,5 +149,22 @@ export function deadlineFor(scheduledAtUtc: string): string {
     number,
     number,
   ];
-  return toInstantString(Date.UTC(year, month - 1, day, hour, minute, second) + DEADLINE_MS);
+  const epochMs = Date.UTC(year, month - 1, day, hour, minute, second);
+  if (toInstantString(epochMs) !== instantUtc) {
+    throw new InvalidCivilInputError(`Instante UTC inexistente: "${instantUtc}"`);
+  }
+  return epochMs;
+}
+
+/** Prazo de resposta: 60 minutos de tempo decorrido apos o instante programado (RN-009). */
+export function deadlineFor(scheduledAtUtc: string): string {
+  return toInstantString(parseInstant(scheduledAtUtc) + DEADLINE_MS);
+}
+
+/** Data civil (YYYY-MM-DD) do instante UTC no fuso informado. */
+export function civilDateAt(instantUtc: string, timeZone: string): string {
+  const parts = formatterFor(timeZone).formatToParts(parseInstant(instantUtc));
+  const field = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((part) => part.type === type)?.value ?? '';
+  return `${field('year')}-${field('month')}-${field('day')}`;
 }

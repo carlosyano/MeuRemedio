@@ -1,12 +1,20 @@
-// @trace TS-024 TS-003 RN-007 RN-009 RN-013 RF-004 (secao 13.5 da Especificacao 02.33; ADR-001 v1.5 OA-003)
-// Gerador de ocorrencias contra PostgreSQL 17 REAL (QG-004): DST, unicidade por (plano, data, horario)
-// e reexecucao sem alterar linhas. A janela de datas civis e explicita; a politica do horizonte movel
-// de 30 dias (inicio e limites) e o disparo via Outbox/job ficam fora desta etapa.
+// @trace TS-024 TS-003 RN-007 RN-009 RN-013 RN-018 RF-004 DEC-027 (secao 13.5 da Especificacao 02.33; ADR-001 v1.5 OA-003)
+// Gerador de ocorrencias contra PostgreSQL 17 REAL (QG-004): DST, unicidade por (plano, data, horario),
+// reexecucao sem alterar linhas e o horizonte de 30 dias da DEC-027 (limites e horarios ja vencidos).
+// O disparo via Outbox/job horario fica fora desta etapa.
 import pg from 'pg';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { generateOccurrences } from '../../apps/api/src/modules/occurrences/infrastructure/generate-occurrences.js';
+import {
+  generateOccurrences,
+  generateOccurrencesForHorizon,
+} from '../../apps/api/src/modules/occurrences/infrastructure/generate-occurrences.js';
 import { migrate } from '../../apps/api/src/platform/migrate.js';
 import { startPostgres, type PostgresHandle } from '../../packages/testkit/src/index.js';
+
+// Instante anterior a todas as janelas explicitas: nenhuma ocorrencia nasce vencida.
+const BEFORE_WINDOWS = '2026-01-01T00:00:00Z';
+// Relogio padrao dos cenarios (docs/specifications/P0_SENTINEL_TESTS.md).
+const NOW = '2026-10-05T11:05:00Z';
 
 let db: PostgresHandle;
 let pool: pg.Pool;
@@ -83,6 +91,7 @@ interface OccurrenceRow {
   scheduled_at: string;
   deadline_at: string;
   status: string;
+  no_response_reached_at: string | null;
   medication_name_snapshot: string;
   dose_text_snapshot: string;
   row_version: string;
@@ -97,7 +106,10 @@ async function occurrencesOf(planId: string): Promise<OccurrenceRow[]> {
             to_char(local_time, 'HH24:MI') AS local_time,
             to_char(scheduled_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS scheduled_at,
             to_char(deadline_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS deadline_at,
-            status, medication_name_snapshot, dose_text_snapshot, row_version::text,
+            status,
+            to_char(no_response_reached_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+              AS no_response_reached_at,
+            medication_name_snapshot, dose_text_snapshot, row_version::text,
             created_at::text, updated_at::text
        FROM occurrences WHERE plan_id = $1
       ORDER BY local_scheduled_date, local_time`,
@@ -125,6 +137,7 @@ describe('TS-024 generateOccurrences: dias de transicao no PostgreSQL', () => {
       const plan = await planFixture({ zone, times: [time] });
       const result = await generateOccurrences(pool, {
         planId: plan.planId,
+        now: BEFORE_WINDOWS,
         fromDate: date,
         toDate: date,
       });
@@ -154,6 +167,7 @@ describe('TS-024 generateOccurrences: dias de transicao no PostgreSQL', () => {
     const plan = await planFixture({ zone: 'America/New_York', times });
     await generateOccurrences(pool, {
       planId: plan.planId,
+      now: BEFORE_WINDOWS,
       fromDate: '2026-11-01',
       toDate: '2026-11-01',
     });
@@ -166,6 +180,7 @@ describe('TS-024 generateOccurrences: dias de transicao no PostgreSQL', () => {
     const plan = await planFixture({ zone: 'America/New_York', times: ['02:30', '03:00'] });
     await generateOccurrences(pool, {
       planId: plan.planId,
+      now: BEFORE_WINDOWS,
       fromDate: '2026-03-08',
       toDate: '2026-03-08',
     });
@@ -180,6 +195,7 @@ describe('TS-024 generateOccurrences: dias de transicao no PostgreSQL', () => {
     const plan = await planFixture({ zone: 'America/Sao_Paulo', times: ['08:00'] });
     await generateOccurrences(pool, {
       planId: plan.planId,
+      now: BEFORE_WINDOWS,
       fromDate: '2026-10-01',
       toDate: '2026-10-30',
     });
@@ -192,7 +208,12 @@ describe('TS-024 generateOccurrences: dias de transicao no PostgreSQL', () => {
 describe('TS-024 / TS-003 generateOccurrences: reexecucao e concorrencia', () => {
   it('reexecutar o gerador nao insere nem altera linhas existentes', async () => {
     const plan = await planFixture({ zone: 'Europe/Lisbon', times: ['01:30', '08:00'] });
-    const window = { planId: plan.planId, fromDate: '2026-10-20', toDate: '2026-10-30' };
+    const window = {
+      planId: plan.planId,
+      now: BEFORE_WINDOWS,
+      fromDate: '2026-10-20',
+      toDate: '2026-10-30',
+    };
     const first = await generateOccurrences(pool, window);
     expect(first.inserted).toBe(22);
     const before = await occurrencesOf(plan.planId);
@@ -206,12 +227,14 @@ describe('TS-024 / TS-003 generateOccurrences: reexecucao e concorrencia', () =>
     const plan = await planFixture({ zone: 'America/Santiago', times: ['23:30'] });
     await generateOccurrences(pool, {
       planId: plan.planId,
+      now: BEFORE_WINDOWS,
       fromDate: '2026-04-01',
       toDate: '2026-04-04',
     });
     const before = await occurrencesOf(plan.planId);
     const widened = await generateOccurrences(pool, {
       planId: plan.planId,
+      now: BEFORE_WINDOWS,
       fromDate: '2026-04-01',
       toDate: '2026-04-06',
     });
@@ -230,7 +253,12 @@ describe('TS-024 / TS-003 generateOccurrences: reexecucao e concorrencia', () =>
 
   it('execucoes simultaneas nao duplicam ocorrencias nem falham', async () => {
     const plan = await planFixture({ zone: 'America/New_York', times: ['01:30', '02:30'] });
-    const window = { planId: plan.planId, fromDate: '2026-10-28', toDate: '2026-11-03' };
+    const window = {
+      planId: plan.planId,
+      now: BEFORE_WINDOWS,
+      fromDate: '2026-10-28',
+      toDate: '2026-11-03',
+    };
     const results = await Promise.all(
       Array.from({ length: 8 }, () => generateOccurrences(pool, window)),
     );
@@ -251,6 +279,7 @@ describe('TS-024 generateOccurrences: escopo do plano', () => {
     });
     const result = await generateOccurrences(pool, {
       planId: plan.planId,
+      now: BEFORE_WINDOWS,
       fromDate: '2026-10-01',
       toDate: '2026-10-10',
     });
@@ -269,6 +298,7 @@ describe('TS-024 generateOccurrences: escopo do plano', () => {
     ]);
     await generateOccurrences(pool, {
       planId: plan.planId,
+      now: BEFORE_WINDOWS,
       fromDate: '2026-10-05',
       toDate: '2026-10-06',
     });
@@ -283,6 +313,7 @@ describe('TS-024 generateOccurrences: escopo do plano', () => {
     );
     const result = await generateOccurrences(pool, {
       planId: plan.planId,
+      now: BEFORE_WINDOWS,
       fromDate: '2026-10-05',
       toDate: '2026-10-06',
     });
@@ -293,9 +324,122 @@ describe('TS-024 generateOccurrences: escopo do plano', () => {
   it('plano inexistente nao gera ocorrencias', async () => {
     const result = await generateOccurrences(pool, {
       planId: '00000000-0000-4000-8000-000000000000',
+      now: BEFORE_WINDOWS,
       fromDate: '2026-10-05',
       toDate: '2026-10-06',
     });
     expect(result.inserted).toBe(0);
+  });
+});
+
+describe('DEC-027 generateOccurrencesForHorizon: horizonte de 30 dias', () => {
+  it('gera da data atual ate + 30 dias, inclusive, no fuso da conta', async () => {
+    const plan = await planFixture({ zone: 'America/Sao_Paulo', times: ['20:00'] });
+    const result = await generateOccurrencesForHorizon(pool, { planId: plan.planId, now: NOW });
+    expect(result.inserted).toBe(31);
+    const dates = (await occurrencesOf(plan.planId)).map((r) => r.local_scheduled_date);
+    expect(dates[0]).toBe('2026-10-05');
+    expect(dates.at(-1)).toBe('2026-11-04');
+  });
+
+  it('usa a data civil da conta: 01:30Z ainda e o dia anterior em Sao Paulo', async () => {
+    const plan = await planFixture({ zone: 'America/Sao_Paulo', times: ['23:00'] });
+    await generateOccurrencesForHorizon(pool, { planId: plan.planId, now: '2026-10-05T01:30:00Z' });
+    const rows = await occurrencesOf(plan.planId);
+    expect(rows[0]?.local_scheduled_date).toBe('2026-10-04');
+    expect(rows.at(-1)?.local_scheduled_date).toBe('2026-11-03');
+  });
+
+  it('horarios do dia ja vencidos nascem NO_RESPONSE; os demais, PROGRAMMED', async () => {
+    // 11:05Z = 08:05 em Sao Paulo: 06:00 ja venceu (prazo 10:00Z); 08:00 passou, mas o prazo
+    // (12:00Z) nao; 20:00 ainda vai acontecer.
+    const plan = await planFixture({
+      zone: 'America/Sao_Paulo',
+      times: ['06:00', '08:00', '20:00'],
+    });
+    await generateOccurrencesForHorizon(pool, { planId: plan.planId, now: NOW });
+    const rows = await occurrencesOf(plan.planId);
+    const today = rows.filter((r) => r.local_scheduled_date === '2026-10-05');
+    expect(today.map((r) => [r.local_time, r.status, r.no_response_reached_at])).toEqual([
+      ['06:00', 'NO_RESPONSE', NOW],
+      ['08:00', 'PROGRAMMED', null],
+      ['20:00', 'PROGRAMMED', null],
+    ]);
+    const later = rows.filter((r) => r.local_scheduled_date !== '2026-10-05');
+    expect(later).toHaveLength(90);
+    expect(later.every((r) => r.status === 'PROGRAMMED' && r.no_response_reached_at === null)).toBe(
+      true,
+    );
+  });
+
+  it('respeita start_date futura e end_date dentro do horizonte', async () => {
+    const plan = await planFixture({
+      zone: 'America/Sao_Paulo',
+      times: ['08:00'],
+      startDate: '2026-10-20',
+      endDate: '2026-10-25',
+    });
+    const result = await generateOccurrencesForHorizon(pool, { planId: plan.planId, now: NOW });
+    expect(result.inserted).toBe(6);
+    expect((await occurrencesOf(plan.planId)).map((r) => r.local_scheduled_date)).toEqual([
+      '2026-10-20',
+      '2026-10-21',
+      '2026-10-22',
+      '2026-10-23',
+      '2026-10-24',
+      '2026-10-25',
+    ]);
+  });
+
+  it('nao gera nada quando o plano comeca depois do horizonte ou ja terminou', async () => {
+    const future = await planFixture({
+      zone: 'America/Sao_Paulo',
+      times: ['08:00'],
+      startDate: '2026-11-05',
+    });
+    const ended = await planFixture({
+      zone: 'America/Sao_Paulo',
+      times: ['08:00'],
+      startDate: '2026-09-01',
+      endDate: '2026-10-04',
+    });
+    for (const plan of [future, ended]) {
+      const result = await generateOccurrencesForHorizon(pool, { planId: plan.planId, now: NOW });
+      expect(result.inserted).toBe(0);
+      expect(await occurrencesOf(plan.planId)).toEqual([]);
+    }
+  });
+
+  it('o job do dia seguinte insere so o novo ultimo dia e preserva as existentes', async () => {
+    const plan = await planFixture({ zone: 'America/Sao_Paulo', times: ['06:00', '20:00'] });
+    await generateOccurrencesForHorizon(pool, { planId: plan.planId, now: NOW });
+    const before = await occurrencesOf(plan.planId);
+
+    const next = await generateOccurrencesForHorizon(pool, {
+      planId: plan.planId,
+      now: '2026-10-06T11:05:00Z',
+    });
+    expect(next.inserted).toBe(2);
+    const after = await occurrencesOf(plan.planId);
+    expect(after.slice(0, before.length)).toEqual(before);
+    expect(after.slice(before.length).map((r) => [r.local_scheduled_date, r.status])).toEqual([
+      ['2026-11-05', 'PROGRAMMED'],
+      ['2026-11-05', 'PROGRAMMED'],
+    ]);
+  });
+
+  it('plano excluido logicamente ou inexistente nao gera ocorrencias', async () => {
+    const plan = await planFixture({ zone: 'America/Sao_Paulo', times: ['08:00'] });
+    await pool.query(
+      "UPDATE medication_plans SET status = 'DELETED', deleted_at = now() WHERE id = $1",
+      [plan.planId],
+    );
+    const deleted = await generateOccurrencesForHorizon(pool, { planId: plan.planId, now: NOW });
+    expect(deleted.inserted).toBe(0);
+    const missing = await generateOccurrencesForHorizon(pool, {
+      planId: '00000000-0000-4000-8000-000000000000',
+      now: NOW,
+    });
+    expect(missing.inserted).toBe(0);
   });
 });

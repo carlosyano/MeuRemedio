@@ -374,7 +374,7 @@ describe('TS-024 resolveCivilInstant: entradas invalidas', () => {
 
 describe('TS-024 pendencias conhecidas (fora desta etapa)', () => {
   it.todo(
-    'horizonte movel de 30 dias: limites da janela (decisao pendente) e disparo via Outbox/job',
+    'horizonte movel de 30 dias: disparo via Outbox (criar/editar plano) e job horario (requer o worker)',
   );
   it.todo(
     'account_timezone aceita somente identificador IANA canonico (validacao em createAccount)',
