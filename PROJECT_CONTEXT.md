@@ -20,9 +20,9 @@ Este documento fornece contexto operacional para continuidade do projeto **MeuRe
 | Projeto | MeuRemedio |
 | Repositório | `https://github.com/carlosyano/MeuRemedio` |
 | Branch principal | `main` |
-| Fase atual | Baseline documental revisada (02.33); fundação técnica ainda não iniciada |
+| Fase atual | Fundação técnica em andamento (baseline 02.33.4) |
 | Modelo de engenharia | Contract-First, Test-First e IA-First com aprovação humana |
-| Matriz de rastreabilidade | versão `2.1.3` |
+| Matriz de rastreabilidade | versão `2.1.4` |
 | Autorização de produção | Não concedida |
 | Idioma | Código, identificadores, commits e contratos em inglês; documentação e textos de interface em português do Brasil |
 
@@ -206,11 +206,11 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 | Área | Estado |
 |---|---|
 | Baseline documental 02.33 / 02.33.3 / v1.5 / AGENTS 1.3 | Revisada e **aprovada em 04/10/2026** pelo mantenedor (interino); parecer jurídico e de privacidade pendente |
-| Revisão 02.33.4 / AGENTS 1.5 / matriz 2.1.4 | Proposta em 06/10/2026 (DEC-026); aprovação do mantenedor no PR |
-| Matriz 2.1.3 e schema | Validadas (`PASS`) com o schema real e no CI |
-| Fundação do monorepo | Em andamento: estrutura, toolchain e CI definidos no PR 1 (sem regra de negócio) |
-| Implementação funcional | Não iniciada |
-| Testes sentinela | Planejados; cenários dos bloqueadores detalhados |
+| Revisão 02.33.4 / AGENTS 1.5 / matriz 2.1.4 | Aprovada em 06/10/2026 pelo mantenedor (interino) no PR #8 (DEC-026) |
+| Matriz 2.1.4 e schema | Validadas (`PASS`) com o schema real e no CI |
+| Fundação do monorepo | Em andamento: estrutura, toolchain, CI, migração `0001_core`, `openapi:lint` e `openapi:diff` |
+| Implementação funcional | Iniciada: tempo civil (`resolveCivilInstant`) e gerador de ocorrências por janela explícita (`generateOccurrences`); API HTTP não iniciada |
+| Testes sentinela | Parciais: TS-040 (estático), TS-024 (puro e integração) e base de banco do TS-001; demais planejados (estado em `docs/specifications/P0_SENTINEL_TESTS.md`) |
 | Evidências de segurança dinâmica e de desempenho | Não produzidas |
 | GX-001 a GX-006 | Abertos (responsável interino `@carlosyano`; reatribuir) |
 | Produção | Bloqueada |
