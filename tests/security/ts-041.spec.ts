@@ -8,6 +8,10 @@ import { login, startHarness, type Harness, type LoggedIn } from '../integration
 
 let h: Harness;
 
+/** Cabecalhos sem o Origin. */
+const withoutOrigin = (headers: Record<string, string>): Record<string, string> =>
+  Object.fromEntries(Object.entries(headers).filter(([name]) => name !== 'origin'));
+
 beforeAll(async () => {
   h = await startHarness();
 });
@@ -48,7 +52,7 @@ describe('TS-041 CSRF em deleteCurrentSession', () => {
   it.each([
     [
       'sem X-CSRF-Token',
-      (s: LoggedIn) => ({ cookie: s.read.cookie ?? '', origin: s.mutation.origin ?? '' }),
+      (s: LoggedIn) => ({ cookie: s.read['cookie'] ?? '', origin: s.mutation['origin'] ?? '' }),
     ],
     [
       'X-CSRF-Token errado',
@@ -59,19 +63,10 @@ describe('TS-041 CSRF em deleteCurrentSession', () => {
       (s: LoggedIn) => ({ ...s.mutation, cookie: `mr_session=${s.sessionCookie}` }),
     ],
     ['Origin nao permitida', (s: LoggedIn) => ({ ...s.mutation, origin: 'https://evil.example' })],
-    [
-      'sem Origin e sem Sec-Fetch-Site',
-      (s: LoggedIn) => {
-        const { origin: _o, ...rest } = s.mutation;
-        return rest;
-      },
-    ],
+    ['sem Origin e sem Sec-Fetch-Site', (s: LoggedIn) => withoutOrigin(s.mutation)],
     [
       'sem Origin e Sec-Fetch-Site cross-site',
-      (s: LoggedIn) => {
-        const { origin: _o, ...rest } = s.mutation;
-        return { ...rest, 'sec-fetch-site': 'cross-site' };
-      },
+      (s: LoggedIn) => ({ ...withoutOrigin(s.mutation), 'sec-fetch-site': 'cross-site' }),
     ],
   ])('%s: 403 CSRF_VALIDATION_FAILED sem efeito', async (_nome, headersFor) => {
     const s = await session();
@@ -95,8 +90,9 @@ describe('TS-041 CSRF em deleteCurrentSession', () => {
 
   it('sem Origin, Sec-Fetch-Site same-origin e aceito', async () => {
     const s = await session();
-    const { origin: _o, ...rest } = s.mutation;
-    expect((await logout({ ...rest, 'sec-fetch-site': 'same-origin' })).status).toBe(204);
+    expect(
+      (await logout({ ...withoutOrigin(s.mutation), 'sec-fetch-site': 'same-origin' })).status,
+    ).toBe(204);
   });
 
   it('sem sessao, a resposta e 401 antes da verificacao de CSRF', async () => {

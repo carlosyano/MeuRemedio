@@ -1,8 +1,10 @@
 // Rotas de conta (OpenAPI 02.33.4, tag Accounts).
-import { Body, Controller, Headers, Inject, Post, Res } from '@nestjs/common';
-import type { FastifyReply } from 'fastify';
+import { Body, Controller, Get, Headers, Inject, Post, Req, Res } from '@nestjs/common';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import { sessionOf } from '../../../platform/http/access.guard.js';
 import { OperationId } from '../../../platform/http/operation-id.js';
 import { CreateAccount, type CreateAccountRequest } from '../application/create-account.js';
+import { CurrentAccount } from '../application/current-account.js';
 import { ResendVerification } from '../application/resend-verification.js';
 import { VerifyAccount } from '../application/verify-account.js';
 
@@ -12,7 +14,14 @@ export class AccountsController {
     @Inject(CreateAccount) private readonly createAccount: CreateAccount,
     @Inject(VerifyAccount) private readonly verifyAccount: VerifyAccount,
     @Inject(ResendVerification) private readonly resendVerification: ResendVerification,
+    @Inject(CurrentAccount) private readonly currentAccount: CurrentAccount,
   ) {}
+
+  @Get('accounts/me')
+  @OperationId('getCurrentAccount')
+  async me(@Req() request: FastifyRequest): Promise<unknown> {
+    return this.currentAccount.profile(sessionOf(request).userId);
+  }
 
   @Post('accounts')
   @OperationId('createAccount')

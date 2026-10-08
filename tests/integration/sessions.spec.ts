@@ -40,10 +40,10 @@ const logout = (headers: Record<string, string>) =>
   h.call('deleteCurrentSession', 'DELETE', '/sessions/current', { headers });
 
 /** Corpo do Problem sem os campos que variam por requisicao. */
-const stable = (body: unknown): unknown => {
-  const { correlation_id: _c, ...rest } = body as Record<string, unknown>;
-  return rest;
-};
+const stable = (body: unknown): unknown =>
+  Object.fromEntries(
+    Object.entries(body as Record<string, unknown>).filter(([key]) => key !== 'correlation_id'),
+  );
 
 describe('createSession', () => {
   it('201 com Session, expiracoes de 30 min e 24 h, e cookies com os atributos do OA-008', async () => {

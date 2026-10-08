@@ -1,5 +1,5 @@
 // Ponto de entrada da API: sobe o servidor HTTP com o relogio do sistema e o PostgreSQL de
-// DATABASE_URL.
+// DATABASE_URL. Segredos em base64 (32+ bytes) vem do ambiente (Secrets Manager em producao).
 import pg from 'pg';
 import { createApp } from './app.js';
 import { systemClock } from './platform/clock.js';
@@ -9,19 +9,32 @@ const optionalNumber = (name: string): number | undefined => {
   return raw === undefined || raw === '' ? undefined : Number(raw);
 };
 
+const secret = (name: string): Buffer => {
+  const value = Buffer.from(process.env[name] ?? '', 'base64');
+  if (value.length < 32) throw new Error(`${name} (base64, 32+ bytes) nao definida`);
+  return value;
+};
+
 const databaseUrl = process.env['DATABASE_URL'];
 if (databaseUrl === undefined || databaseUrl === '') throw new Error('DATABASE_URL nao definida');
 
-const requestHashKey = Buffer.from(process.env['REQUEST_HASH_KEY'] ?? '', 'base64');
-if (requestHashKey.length < 32)
-  throw new Error('REQUEST_HASH_KEY (base64, 32+ bytes) nao definida');
+const allowedOrigins = (process.env['ALLOWED_ORIGINS'] ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter((origin) => origin !== '');
+if (allowedOrigins.length === 0) throw new Error('ALLOWED_ORIGINS nao definida');
 
 const clockSkewMaxMs = optionalNumber('CLOCK_SKEW_MAX_MS');
 const healthProbeTimeoutMs = optionalNumber('HEALTH_PROBE_TIMEOUT_MS');
 const app = await createApp({
   clock: systemClock,
   database: new pg.Pool({ connectionString: databaseUrl }),
-  secrets: { requestHashKey },
+  secrets: {
+    requestHashKey: secret('REQUEST_HASH_KEY'),
+    emailPepper: secret('EMAIL_PEPPER'),
+    csrfKey: secret('CSRF_KEY'),
+  },
+  allowedOrigins,
   ...(clockSkewMaxMs === undefined ? {} : { clockSkewMaxMs }),
   ...(healthProbeTimeoutMs === undefined ? {} : { healthProbeTimeoutMs }),
 });
