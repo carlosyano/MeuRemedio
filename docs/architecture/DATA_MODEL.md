@@ -431,7 +431,8 @@ Perfil versionado e reproduzível de desempenho.
 |---|---|---|
 | `apps/api/migrations/0001_core.sql` | ENT-001 `users`, ENT-004 `sessions`, ENT-005 `medication_plans`, ENT-006 `schedule_times`, ENT-007 `occurrences`, ENT-008 `responses` | Implementada e coberta por `tests/integration/db-core.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0002_platform.sql` | ENT-011 `idempotency_records`, ENT-012 `outbox_events` | Implementada e coberta por `tests/integration/db-platform.spec.ts` (PostgreSQL 17 real) |
-| Demais entidades | ENT-002, ENT-003, ENT-009, ENT-010, ENT-013 a ENT-017 e tabelas de plataforma | Pendentes; entram em migrações próprias junto de cada funcionalidade |
+| `apps/api/migrations/0003_identity.sql` | ENT-002 `verification_tokens` e a tabela de plataforma `rate_limit_counters` (UNLOGGED) | Implementada e coberta por `tests/integration/db-identity.spec.ts` (PostgreSQL 17 real) |
+| Demais entidades | ENT-003, ENT-009, ENT-010, ENT-013 a ENT-017, `login_failure_counters` e pg-boss | Pendentes; entram em migrações próprias junto de cada funcionalidade |
 
 **Rollback:** as migrações criam apenas objetos novos, sem dados nem dependentes externos; o rollback é uma migração nova que remove os objetos criados (a lista está no cabeçalho de cada arquivo). Uma migração aplicada nunca é editada.
 
