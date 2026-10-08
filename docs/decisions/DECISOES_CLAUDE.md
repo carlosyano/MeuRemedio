@@ -14,6 +14,8 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-006 | "Prazo atingido" na DEC-027 | Vigente |
 | DC-007 | Códigos e mensagens de `field_errors` | Vigente |
 | DC-008 | Emissão do token de verificação pelo worker | Vigente |
+| DC-009 | Quais respostas viram snapshot de idempotência | Vigente |
+| DC-010 | Serialização e hash da requisição idempotente | Vigente |
 
 ---
 
@@ -81,3 +83,19 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** alternativa 4. O "1 token de 24 h" do CA-001 passa a valer após o despacho do evento, e os 24 h contam da emissão. Se o despacho falhar, o Outbox retoma (TS-016), e o usuário também pode pedir o reenvio (`resendVerification`).
 - **Riscos:** baixos. O teste de aceite do CA-001 verifica o token depois de processar o Outbox. Por ser uma interpretação de temporalidade do CA-001, a decisão pode ser formalizada numa DEC no próximo PR normativo.
 - **Aplica-se a:** módulo `identity` (`createAccount`) e worker de e-mail.
+
+## DC-009 — Quais respostas viram snapshot de idempotência (08/10/2026)
+
+- **Contexto:** a Especificação manda devolver "o resultado original" no replay, e o DATA_MODEL só exclui explicitamente o `409 DUPLICATE_CONFIRMATION_REQUIRED`. Não diz se um erro (400, 409, 422, 503...) consome a chave.
+- **Alternativas:** persistir toda resposta; persistir só as de sucesso.
+- **Decisão:** só respostas **2xx** viram snapshot. Um erro desfaz a transação inteira, e a mesma chave pode ser reenviada depois de corrigido o problema. Assim, falhas transitórias (503) não ficam congeladas por 7 dias, e o `409` de payload divergente nunca sobrescreve o snapshot (TS-015).
+- **Riscos:** baixos. Um erro repetido com a mesma chave é reavaliado, sem efeito duplicado, porque nada foi gravado.
+- **Aplica-se a:** `apps/api/src/platform/idempotency/idempotency.ts`.
+
+## DC-010 — Serialização e hash da requisição idempotente (08/10/2026)
+
+- **Contexto:** chamadas simultâneas com a mesma chave devem produzir um único efeito (TS-015, passo 5), e "payload igual" precisa de definição estável.
+- **Alternativas:** `INSERT ... ON CONFLICT` com registro provisório; `SELECT ... FOR UPDATE`, que não trava linha inexistente; advisory lock de transação.
+- **Decisão:** `pg_advisory_xact_lock` sobre `(operação, escopo, chave)` no início da transação do comando: a segunda chamada espera a primeira e então faz o replay. O hash é o SHA-256 do JSON canônico (chaves de objeto ordenadas, arrays na ordem) das partes da requisição: o corpo e, quando houver, os parâmetros e o `If-Match` (TS-038).
+- **Riscos:** colisão do hash de 64 bits do advisory lock só serializa chaves distintas, sem erro de correção.
+- **Aplica-se a:** `apps/api/src/platform/idempotency/idempotency.ts`.
