@@ -90,6 +90,8 @@
 
 **Estado (PR 8):** a base de banco está em `tests/integration/db-platform.spec.ts`: o esquema aceita exatamente as operações que declaram `Idempotency-Key` na OpenAPI, usa escopo `public` só em `createAccount` e fixa `expires_at = created_at + 7 dias` (passo 5). Os passos HTTP permanecem pendentes.
 
+**Estado (PR 23):** `createAccount` cobre por HTTP os passos 1 a 4 (`tests/integration/create-account.spec.ts`: replay idêntico sem novo efeito, payload divergente com 409, ausência da chave com 400, concorrência com conta única); o passo 5 (expiração em 7 dias) está no serviço (`idempotency.spec.ts`). As outras 6 operações entram com seus módulos.
+
 ---
 
 ## TS-024 — DST e tempo civil

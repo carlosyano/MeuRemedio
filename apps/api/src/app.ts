@@ -5,6 +5,11 @@ import { Module, RequestMethod, type DynamicModule, type Type } from '@nestjs/co
 import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants.js';
 import { DiscoveryModule, DiscoveryService, MetadataScanner, NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import type { Pool } from 'pg';
+import { CreateAccount } from './modules/identity/application/create-account.js';
+import { AccountsController } from './modules/identity/infrastructure/accounts.controller.js';
+import { loadCompromisedPasswords } from './modules/identity/infrastructure/compromised-passwords.js';
+import { argon2idPasswordHasher } from './modules/identity/infrastructure/password-hasher.js';
 import {
   DEFAULT_CLOCK_SKEW_MAX_MS,
   DEFAULT_HEALTH_PROBE_TIMEOUT_MS,
@@ -22,13 +27,23 @@ import {
 } from './platform/http/contract-enforcement.js';
 import { OPERATION_ID } from './platform/http/operation-id.js';
 import { ProblemFilter } from './platform/http/problem-filter.js';
+import { createRequestHasher } from './platform/idempotency/idempotency.js';
+import { RateLimitGuard } from './platform/rate-limit/rate-limit.guard.js';
+import { PostgresRateLimiter } from './platform/rate-limit/rate-limiter.js';
 
-const CONTROLLERS: Type[] = [HealthController];
+const CONTROLLERS: Type[] = [HealthController, AccountsController];
 
 export interface CreateAppOptions {
   readonly clock: Clock;
-  /** PostgreSQL (pg.Pool). */
-  readonly database: Queryable;
+  /** PostgreSQL. */
+  readonly database: Pool;
+  /** Banco sondado por getHealth; por padrao, `database` (os testes trocam por um que trava). */
+  readonly healthProbeDatabase?: Queryable;
+  /** Segredos do servidor (Secrets Manager em producao). */
+  readonly secrets: {
+    /** Chave do HMAC do hash de requisicao idempotente (DC-012), 32 bytes ou mais. */
+    readonly requestHashKey: Buffer;
+  };
   /** CLOCK_SKEW_MAX_MS (RNF-015); padrao 5000. */
   readonly clockSkewMaxMs?: number;
   /** Tempo-limite da sondagem do banco em getHealth (DEC-028); padrao 2000. */
@@ -52,8 +67,18 @@ class AppModule {
       controllers: CONTROLLERS,
       providers: [
         { provide: CLOCK, useValue: options.clock },
-        { provide: DATABASE, useValue: options.database },
+        { provide: DATABASE, useValue: options.healthProbeDatabase ?? options.database },
         { provide: HEALTH_SETTINGS, useValue: health },
+        {
+          provide: CreateAccount,
+          useValue: new CreateAccount(
+            options.database,
+            options.clock,
+            createRequestHasher(options.secrets.requestHashKey),
+            argon2idPasswordHasher,
+            loadCompromisedPasswords(),
+          ),
+        },
       ],
     };
   }
@@ -107,6 +132,9 @@ export async function createApp(options: CreateAppOptions): Promise<NestFastifyA
   assertRoutesMatchContract(declaredRoutes(app), contract);
   registerContractHooks(app.getHttpAdapter().getInstance(), contract);
   app.useGlobalFilters(new ProblemFilter());
+  app.useGlobalGuards(
+    new RateLimitGuard(contract, new PostgresRateLimiter(options.database), options.clock),
+  );
   app.useGlobalInterceptors(new ContractRequestInterceptor(contract));
   await app.init();
   await app.getHttpAdapter().getInstance().ready();

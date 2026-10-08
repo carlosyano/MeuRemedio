@@ -4,8 +4,9 @@
 //   - registro vigente com o mesmo hash -> replay do snapshot, sem executar de novo;
 //   - registro vigente com hash diferente -> 409 IDEMPOTENCY_KEY_REUSED, sem sobrescrever;
 //   - registro expirado (7 dias) -> removido; a chave e tratada como nova;
-//   - so respostas 2xx viram snapshot; falha desfaz a transacao e nao consome a chave (DC-009).
-import { createHash } from 'node:crypto';
+//   - so respostas 2xx viram snapshot; falha desfaz a transacao e nao consome a chave (DC-009);
+//   - o hash da requisicao e HMAC com segredo do servidor (DC-012).
+import { createHmac } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import { ProblemError } from '../http/problem-catalog.js';
 
@@ -24,7 +25,7 @@ export interface IdempotencyRequest {
   readonly scopeKey: string;
   /** Valor do cabecalho Idempotency-Key (ja validado pelo contrato). */
   readonly key: string;
-  /** hashRequest(...) do corpo e dos parametros que definem a requisicao. */
+  /** RequestHasher(...) do corpo e dos parametros que definem a requisicao. */
   readonly requestHash: Buffer;
   /** Instante atual (Clock injetavel), UTC. */
   readonly now: string;
@@ -52,11 +53,20 @@ function canonical(value: unknown): unknown {
   return value;
 }
 
-/** SHA-256 (32 bytes) do JSON canonico das partes da requisicao. */
-export function hashRequest(parts: unknown): Buffer {
-  return createHash('sha256')
-    .update(JSON.stringify(canonical(parts)))
-    .digest();
+export type RequestHasher = (parts: unknown) => Buffer;
+
+/**
+ * HMAC-SHA-256 (32 bytes) do JSON canonico das partes da requisicao, com segredo do servidor
+ * (DC-012): o corpo pode conter senha, e um SHA-256 simples permitiria testar senhas por forca
+ * bruta rapida a partir de idempotency_records.
+ */
+export function createRequestHasher(secret: Buffer): RequestHasher {
+  if (secret.length < 32)
+    throw new Error('Segredo do hash de requisicao exige pelo menos 32 bytes');
+  return (parts) =>
+    createHmac('sha256', secret)
+      .update(JSON.stringify(canonical(parts)))
+      .digest();
 }
 
 interface RecordRow {

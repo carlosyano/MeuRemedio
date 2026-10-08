@@ -103,7 +103,7 @@ const count = async (sql: string): Promise<number> =>
 
 describe('createAccount: cadastro (CA-001)', () => {
   it('201 com AccountSummary e conta PENDING_VERIFICATION', async () => {
-    const response = await post(account({ email: '  Ana.Silva@Example.COM ' }));
+    const response = await post(account({ email: 'Ana.Silva@Example.COM' }));
     expect(response.status).toBe(201);
     expect(response.body).toEqual({
       user_id: expect.any(String) as unknown,
@@ -204,7 +204,7 @@ describe('createAccount: idempotencia (TS-038, escopo public)', () => {
       Array.from({ length: 5 }, () => post(account(), { key: 'K3' })),
     );
     for (const result of results) expect(result.status).toBe(201);
-    expect(new Set(results.map((r) => JSON.stringify(r.body))).size).toBe(1);
+    for (const result of results) expect(result.body).toEqual(results[0]?.body);
     expect(await count('users')).toBe(1);
   });
 

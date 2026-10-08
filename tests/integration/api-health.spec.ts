@@ -142,7 +142,7 @@ describe('getHealth (DEC-028)', () => {
     const hanging = { query: () => new Promise<never>(() => undefined) };
     const started = Date.now();
     const response = await call(
-      await start(shiftedClock(0), { database: hanging, healthProbeTimeoutMs: 200 }),
+      await start(shiftedClock(0), { healthProbeDatabase: hanging, healthProbeTimeoutMs: 200 }),
       'GET',
       '/health',
     );
