@@ -15,7 +15,7 @@ generated_from:
     artifacts:
       functional_specification:
         file: MeuRemedio_Especificacao_Funcional_02.33.docx
-        sha256: 8dd1b29c997f52f4dd72f93693194e8f3d98f2cc5d06c7fc1cf8ceed3695f4b2
+        sha256: 4afa6744c3aba93aacba724a6ff633df10c61e8cef2ae8455a21094c451a9f3a
       openapi:
         file: MeuRemedio_OpenAPI_02.33.4_COMPLETO.yaml
         sha256: c08d17fab5ace9438944d1c93e72e8619178c68206070a763f4c1667f2bfe863
@@ -5037,6 +5037,7 @@ catalog_completeness:
     - DEC-027
     - DEC-028
     - DEC-029
+    - DEC-030
     actual_ids:
     - DEC-001
     - DEC-002
@@ -5067,6 +5068,7 @@ catalog_completeness:
     - DEC-027
     - DEC-028
     - DEC-029
+    - DEC-030
     status: complete
   approved_questions:
     authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -5917,6 +5919,18 @@ decisions:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 29
+      mapping_type: explicit-catalog-row
+  DEC-030:
+    criticidade: Média
+    problema_causa: A Especificação não definia o resultado de createAccount para e-mail que já possui conta (users.email_normalized
+      é único).
+    decis_o_adotada: createAccount com e-mail normalizado já cadastrado, em qualquer estado da conta, retorna 409 STATE_CONFLICT
+      sem criar conta, token ou e-mail. A exposição de que o e-mail tem conta é aceita e mitigada pelo rate limit de rotas
+      públicas (RNF-006).
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 30
       mapping_type: explicit-catalog-row
 approved_questions:
   Q-001:

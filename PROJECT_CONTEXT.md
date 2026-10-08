@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Versão do documento | 1.3 |
-| Última atualização | 08/10/2026 (DEC-028 e DEC-029: saúde técnica e senhas comprometidas) |
+| Última atualização | 08/10/2026 (DEC-028 a DEC-030: saúde técnica, senhas comprometidas e e-mail já cadastrado) |
 | Baseline descrita | Especificação 02.33 · OpenAPI 02.33.4 · ADR-001 v1.5 · AGENTS.md 1.5 · Matriz 2.1.6 |
 | Commit da baseline | _preencher no merge do PR que aplica esta revisão_ |
 
@@ -210,7 +210,7 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 | Baseline documental 02.33 / 02.33.3 / v1.5 / AGENTS 1.3 | Revisada e **aprovada em 04/10/2026** pelo mantenedor (interino); parecer jurídico e de privacidade pendente |
 | Revisão 02.33.4 / AGENTS 1.5 / matriz 2.1.4 | Aprovada em 06/10/2026 pelo mantenedor (interino) no PR #8 (DEC-026) |
 | DEC-027 / matriz 2.1.5 | Aprovada no PR #11 (08/10/2026) |
-| DEC-028, DEC-029 / matriz 2.1.6 | Escolhas do mantenedor em 08/10/2026; aprovação formal no PR desta revisão |
+| DEC-028 a DEC-030 / matriz 2.1.6 | Escolhas do mantenedor em 08/10/2026; aprovação formal no PR desta revisão |
 | Matriz 2.1.6 e schema | Validadas (`PASS`) com o schema real e no CI |
 | Fundação do monorepo | Em andamento: estrutura, toolchain e CI; PostgreSQL 17 com Testcontainers e migrações `0001_core` e `0002_platform` (ENT-001, ENT-004 a ENT-008, ENT-011 e ENT-012) com schemas Drizzle por módulo; `openapi:lint` e `openapi:diff`; Schemathesis pendente |
 | Implementação funcional | Iniciada: tempo civil (`resolveCivilInstant`) e gerador de ocorrências com o horizonte da DEC-027 (`generateOccurrencesForHorizon`); esqueleto HTTP contract-first (spike S1: NestJS 12 + Fastify, `getHealth`, Problem e `X-Correlation-ID`) |
@@ -259,6 +259,7 @@ Aprovador: Carlos Yano (`@carlosyano`), mantenedor, **em caráter interino**. A 
 | GAP-010 / DEC-026 (decisão de 06/10/2026, aprovação no PR) | Falha inesperada documentada: ERR-016 `INTERNAL_ERROR` (500) e 503 `DEPENDENCY_UNAVAILABLE` em todas as operações (OpenAPI 02.33.4, matriz 2.1.4, AGENTS.md 1.5) |
 | DEC-027 (texto confirmado em 08/10/2026, aprovação no PR) | Horizonte de geração: da data civil atual (ou `start_date`) até + 30 dias, inclusive, limitado a `end_date`; horários do dia já vencidos nascem `NO_RESPONSE` (matriz 2.1.5) |
 | DEC-028 e DEC-029 (escolhas de 08/10/2026, aprovação no PR) | `getHealth`: desvio contra o relógio do PostgreSQL, `DEGRADED` e `DOWN` com 503; lista de senhas comprometidas: SecLists top 100.000 (MIT), comparação exata (matriz 2.1.6) |
+| DEC-030 (escolha de 08/10/2026, aprovação no PR) | `createAccount` com e-mail já cadastrado: `409 STATE_CONFLICT`, sem criar conta, token ou e-mail |
 | Papel de privacidade (08/10/2026) | Haverá um DPO designado; ele substitui a alternativa "jurista ou DPO" das pendências |
 
 ### 14.1 Governança de alterações

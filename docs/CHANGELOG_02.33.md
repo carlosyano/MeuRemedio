@@ -103,14 +103,15 @@ Efeitos: Especificação (tabela de decisões, RN-018 e nota de revisão no Anex
 
 **Aprovação:** texto confirmado pelo mantenedor em 08/10/2026; aprovação formal no pull request desta revisão (AGENTS.md §19.8 e §20.1).
 
-## DEC-028 e DEC-029: saúde técnica e lista de senhas comprometidas (08/10/2026)
+## DEC-028 a DEC-030: saúde técnica, senhas comprometidas e e-mail já cadastrado (08/10/2026)
 
 Lacunas encontradas no spike S1 (esqueleto HTTP) e ao planejar o módulo `identity`:
 
 1. **DEC-028 (RNF-015, DEC-020):** `getHealth` compara, a cada chamada, o `Clock` da API com o `now()` do PostgreSQL. Desvio absoluto acima de `CLOCK_SKEW_MAX_MS` retorna `DEGRADED` com 503; PostgreSQL sem resposta dentro do tempo-limite da sondagem (padrão 2 s, configurável) retorna `DOWN` com 503; caso contrário, `UP` com 200. O corpo é `Health` em todos os casos; e-mail, storage e fila não entram na sondagem.
 2. **DEC-029 (RN-017, DEC-015):** a lista local de senhas comprometidas é o arquivo `Passwords/Common-Credentials/10-million-password-list-top-100000.txt` do SecLists (licença MIT), versionado no repositório com origem e SHA-256 registrados. A senha é rejeitada quando coincide exatamente com uma entrada; atualizar a lista exige PR próprio.
-3. **RN-017** e **RNF-015** passam a remeter às novas decisões.
+3. **DEC-030:** `createAccount` com e-mail normalizado já cadastrado, em qualquer estado da conta, retorna `409 STATE_CONFLICT` sem criar conta, token ou e-mail. A exposição de que o e-mail tem conta é aceita e mitigada pelo rate limit de rotas públicas (RNF-006).
+4. **RN-017** e **RNF-015** passam a remeter à DEC-029 e à DEC-028.
 
-Efeitos: Especificação (tabela de decisões, RN-017, RNF-015 e nota de revisão no Anexo C), matriz `2.1.6` (hash da Especificação, RN-017, RNF-015, DEC-028, DEC-029 e catálogo de decisões) e `maxProperties` de `decisions` no schema (27 → 29). OpenAPI, ADR e `AGENTS.md` inalterados. A implementação vem em PRs separados.
+Efeitos: Especificação (tabela de decisões, RN-017, RNF-015 e notas de revisão no Anexo C), matriz `2.1.6` (hash da Especificação, RN-017, RNF-015, DEC-028 a DEC-030 e catálogo de decisões) e `maxProperties` de `decisions` no schema (27 → 30). OpenAPI, ADR e `AGENTS.md` inalterados. A implementação vem em PRs separados.
 
 **Aprovação:** escolhas feitas pelo mantenedor em 08/10/2026; aprovação formal no pull request desta revisão (AGENTS.md §19.8 e §20.1).
