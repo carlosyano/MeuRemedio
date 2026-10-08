@@ -1,4 +1,4 @@
-// @trace ENT-001 ENT-004 ENT-005 ENT-006 ENT-007 ENT-008 ENT-011 ENT-012
+// @trace ENT-001 ENT-002 ENT-004 ENT-005 ENT-006 ENT-007 ENT-008 ENT-011 ENT-012 DEC-019
 // Schemas Drizzle x migracoes SQL (ADR-001 v1.5 OA-001; AGENTS.md §12.1: sem divergencia entre o
 // conjunto de migracoes e o esquema efetivo). Rastreia as entidades do DATA_MODEL mapeadas.
 // O SQL e a fonte do esquema; o Drizzle e apenas o mapeamento tipado e precisa coincidir com o banco
@@ -31,7 +31,9 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await pool.query('TRUNCATE users, idempotency_records, outbox_events CASCADE');
+  await pool.query(
+    'TRUNCATE users, idempotency_records, outbox_events, rate_limit_counters CASCADE',
+  );
 });
 
 interface ColumnShape {
@@ -79,10 +81,18 @@ async function databaseColumns(table: string): Promise<Record<string, ColumnShap
 }
 
 function drizzleColumns(table: PgTable): Record<string, ColumnShape> {
+  const config = getTableConfig(table);
+  // Chave primaria composta (primaryKey({ columns })) marca cada coluna, como no catalogo.
+  const composite = new Set(config.primaryKeys.flatMap((pk) => pk.columns.map((c) => c.name)));
   return Object.fromEntries(
-    getTableConfig(table).columns.map((c) => [
+    config.columns.map((c) => [
       c.name,
-      { type: c.getSQLType(), notNull: c.notNull, hasDefault: c.hasDefault, primary: c.primary },
+      {
+        type: c.getSQLType(),
+        notNull: c.notNull,
+        hasDefault: c.hasDefault,
+        primary: c.primary || composite.has(c.name),
+      },
     ]),
   );
 }
