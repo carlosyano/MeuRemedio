@@ -5,10 +5,17 @@ import { Module, RequestMethod, type DynamicModule, type Type } from '@nestjs/co
 import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants.js';
 import { DiscoveryModule, DiscoveryService, MetadataScanner, NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import {
+  DEFAULT_CLOCK_SKEW_MAX_MS,
+  DEFAULT_HEALTH_PROBE_TIMEOUT_MS,
+  HEALTH_SETTINGS,
+  type HealthSettings,
+} from './modules/platform/application/health.js';
 import { HealthController } from './modules/platform/infrastructure/health.controller.js';
 import { CLOCK, type Clock } from './platform/clock.js';
 import { OpenApiContract, locateNormativeOpenApi } from './platform/contract/openapi-contract.js';
 import { assertRoutesMatchContract, type DeclaredRoute } from './platform/contract/route-check.js';
+import { DATABASE, type Queryable } from './platform/database.js';
 import {
   ContractRequestInterceptor,
   registerContractHooks,
@@ -20,6 +27,12 @@ const CONTROLLERS: Type[] = [HealthController];
 
 export interface CreateAppOptions {
   readonly clock: Clock;
+  /** PostgreSQL (pg.Pool). */
+  readonly database: Queryable;
+  /** CLOCK_SKEW_MAX_MS (RNF-015); padrao 5000. */
+  readonly clockSkewMaxMs?: number;
+  /** Tempo-limite da sondagem do banco em getHealth (DEC-028); padrao 2000. */
+  readonly healthProbeTimeoutMs?: number;
   /** Contrato ja carregado; por padrao, a OpenAPI normativa da raiz do repositorio. */
   readonly contract?: OpenApiContract;
   /** false desliga os logs (testes). */
@@ -28,12 +41,20 @@ export interface CreateAppOptions {
 
 @Module({})
 class AppModule {
-  static forRoot(clock: Clock): DynamicModule {
+  static forRoot(options: CreateAppOptions): DynamicModule {
+    const health: HealthSettings = {
+      clockSkewMaxMs: options.clockSkewMaxMs ?? DEFAULT_CLOCK_SKEW_MAX_MS,
+      probeTimeoutMs: options.healthProbeTimeoutMs ?? DEFAULT_HEALTH_PROBE_TIMEOUT_MS,
+    };
     return {
       module: AppModule,
       imports: [DiscoveryModule],
       controllers: CONTROLLERS,
-      providers: [{ provide: CLOCK, useValue: clock }],
+      providers: [
+        { provide: CLOCK, useValue: options.clock },
+        { provide: DATABASE, useValue: options.database },
+        { provide: HEALTH_SETTINGS, useValue: health },
+      ],
     };
   }
 }
@@ -78,7 +99,7 @@ function declaredRoutes(app: NestFastifyApplication): DeclaredRoute[] {
 export async function createApp(options: CreateAppOptions): Promise<NestFastifyApplication> {
   const contract = options.contract ?? OpenApiContract.load(locateNormativeOpenApi());
   const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule.forRoot(options.clock),
+    AppModule.forRoot(options),
     // HEAD automatico criaria rotas fora do contrato.
     new FastifyAdapter({ exposeHeadRoutes: false }),
     options.logger === false ? { logger: false } : {},
