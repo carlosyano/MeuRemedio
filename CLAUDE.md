@@ -65,12 +65,13 @@ Monorepo npm workspaces (`apps/*`, `packages/*`), TypeScript strict (`tsconfig.b
 
 ## Fluxo de trabalho autônomo (decisão do mantenedor, 08/10/2026)
 
-O agente evolui o projeto continuamente e só para quando houver uma pergunta que o mantenedor precisa responder (lacuna normativa, decisão de produto, conflito com uma fonte normativa). A cada PR:
+O agente evolui o projeto continuamente e só para quando houver um item crítico sem recomendação clara (passo 0); o resto ele decide, registra e segue. A cada PR:
 
+0. **Dúvidas:** em dúvida não crítica, analisar a fundo as alternativas, adotar a recomendação, registrar como **Decisão Claude** em `docs/decisions/DECISOES_CLAUDE.md` (DC-NNN: contexto, alternativas, decisão, riscos, onde se aplica) e seguir. Perguntar ao mantenedor só em item crítico (segurança, privacidade, dados de saúde, mudança de comportamento normativo de alto impacto) **e** sem recomendação clara. Decisão que preenche lacuna da Especificação continua indo para o PR normativo (DEC-xxx) para o merge do mantenedor; a DC registra a escolha até lá.
 1. **Conferir antes:** CI toda verde (`gh pr checks`), PR sem conflito, diff restrito ao escopo, `python validate_all.py` e `npm run verify` locais (e `test:integration` quando tocar em persistência).
 2. **Merge:** o GitHub não deixa o autor aprovar o próprio PR, então "aprovar" significa fazer o merge (`gh pr merge --merge --delete-branch`) depois da conferência.
    - **PR só de código, testes ou documentação de apoio:** o agente faz o merge.
    - **PR com mudança normativa** (Especificação, OpenAPI, ADR, `AGENTS.md`, matriz ou schema da matriz): o agente abre o PR e espera o mantenedor fazer o merge, a menos que ele autorize aquele PR explicitamente.
-3. **Verificar depois:** atualizar a `main`, rodar `validate_all.py`, conferir o `ci` da `main` (`gh run list --branch main`) e só então seguir para o próximo passo do PROJECT_CONTEXT §12.
+3. **Verificar depois:** garantir que tudo está coerente e funcionando (código, testes, documentação de apoio e registro de decisões); atualizar a `main`, rodar `validate_all.py`, conferir o `ci` da `main` (`gh run list --branch main`) e só então seguir para o próximo passo do PROJECT_CONTEXT §12.
 
 Exceção registrada no PROJECT_CONTEXT §8.1.
