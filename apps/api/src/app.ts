@@ -7,6 +7,8 @@ import { DiscoveryModule, DiscoveryService, MetadataScanner, NestFactory } from 
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { Pool } from 'pg';
 import { CreateAccount } from './modules/identity/application/create-account.js';
+import { ResendVerification } from './modules/identity/application/resend-verification.js';
+import { VerifyAccount } from './modules/identity/application/verify-account.js';
 import { AccountsController } from './modules/identity/infrastructure/accounts.controller.js';
 import { loadCompromisedPasswords } from './modules/identity/infrastructure/compromised-passwords.js';
 import { argon2idPasswordHasher } from './modules/identity/infrastructure/password-hasher.js';
@@ -78,6 +80,11 @@ class AppModule {
             argon2idPasswordHasher,
             loadCompromisedPasswords(),
           ),
+        },
+        { provide: VerifyAccount, useValue: new VerifyAccount(options.database, options.clock) },
+        {
+          provide: ResendVerification,
+          useValue: new ResendVerification(options.database, options.clock),
         },
       ],
     };
