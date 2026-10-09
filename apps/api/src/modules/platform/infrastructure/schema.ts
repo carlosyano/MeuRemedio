@@ -1,7 +1,18 @@
-// Mapeamento Drizzle de ENT-011 idempotency_records e ENT-012 outbox_events (migracao 0002_platform).
+// Mapeamento Drizzle de ENT-011 idempotency_records e ENT-012 outbox_events (migracao 0002_platform)
+// e da tabela de plataforma rate_limit_counters (migracao 0003_identity, DEC-019).
 // O SQL e a fonte do esquema: as regras de idempotencia e de tamanho vivem na migracao.
 import { sql } from 'drizzle-orm';
-import { integer, jsonb, pgTable, smallint, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  integer,
+  jsonb,
+  pgTable,
+  primaryKey,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { bytea, type JsonObject } from '../../../platform/db/types.js';
 
 export const idempotencyRecords = pgTable('idempotency_records', {
@@ -32,3 +43,14 @@ export const outboxEvents = pgTable('outbox_events', {
   lastErrorCode: varchar('last_error_code', { length: 64 }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const rateLimitCounters = pgTable(
+  'rate_limit_counters',
+  {
+    scope: text('scope').notNull(),
+    keyHash: bytea('key_hash').notNull(),
+    windowStart: timestamp('window_start', { withTimezone: true }).notNull(),
+    count: integer('count').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.scope, table.keyHash, table.windowStart] })],
+);

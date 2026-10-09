@@ -1,4 +1,5 @@
-// Mapeamento Drizzle de ENT-001 users e ENT-004 sessions (migracao 0001_core).
+// Mapeamento Drizzle de ENT-001 users e ENT-004 sessions (migracao 0001_core) e de ENT-002
+// verification_tokens (migracao 0003_identity).
 // O SQL e a fonte do esquema: constraints, FKs e indices vivem nas migracoes; este arquivo so tipa o
 // acesso e e conferido contra o banco real (tests/integration/drizzle-schema.spec.ts).
 import {
@@ -59,5 +60,17 @@ export const sessions = pgTable('sessions', {
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
   revokedReason: sessionRevokedReason('revoked_reason'),
   rowVersion: bigint('row_version', { mode: 'number' }).notNull().default(1),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const verificationTokens = pgTable('verification_tokens', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull(),
+  tokenHash: bytea('token_hash').notNull(),
+  issuedAt: timestamp('issued_at', { withTimezone: true }).notNull().defaultNow(),
+  // = issuedAt + 24 h (CHECK no SQL).
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  supersededAt: timestamp('superseded_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
