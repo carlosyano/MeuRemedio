@@ -123,6 +123,8 @@ export class ProblemError extends Error {
   constructor(
     public readonly code: ProblemCode,
     public readonly fieldErrors: readonly FieldError[] = [],
+    /** Cabecalhos da resposta de erro (ex.: retry-after no 429). */
+    public readonly headers: Readonly<Record<string, string>> = {},
   ) {
     super(code);
   }

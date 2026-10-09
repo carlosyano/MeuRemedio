@@ -1,2 +1,4 @@
 * text=auto eol=lf
 *.docx binary
+# Lista de senhas comprometidas: bytes exatos (o SHA-256 e conferido na carga; sem conversao de fim de linha).
+apps/api/assets/compromised-passwords/*.txt -text

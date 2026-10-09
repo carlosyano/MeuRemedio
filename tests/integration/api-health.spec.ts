@@ -3,6 +3,7 @@
 // real: getHealth (DEC-028: desvio do Clock contra o now() do banco, DEGRADED e DOWN com 503),
 // X-Correlation-ID em toda resposta, problem+json para rota fora do contrato e falha inesperada
 // (500 INTERNAL_ERROR), e resposta fora do contrato bloqueada antes de sair.
+import { randomBytes } from 'node:crypto';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import pg from 'pg';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -55,7 +56,13 @@ async function start(
   clock: Clock,
   overrides: Partial<Omit<CreateAppOptions, 'clock'>> = {},
 ): Promise<NestFastifyApplication> {
-  app = await createApp({ clock, database: pool, logger: false, ...overrides });
+  app = await createApp({
+    clock,
+    database: pool,
+    logger: false,
+    secrets: { requestHashKey: randomBytes(32) },
+    ...overrides,
+  });
   return app;
 }
 
@@ -135,7 +142,7 @@ describe('getHealth (DEC-028)', () => {
     const hanging = { query: () => new Promise<never>(() => undefined) };
     const started = Date.now();
     const response = await call(
-      await start(shiftedClock(0), { database: hanging, healthProbeTimeoutMs: 200 }),
+      await start(shiftedClock(0), { healthProbeDatabase: hanging, healthProbeTimeoutMs: 200 }),
       'GET',
       '/health',
     );

@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { Observable } from 'rxjs';
-import { toRoutePath, type OpenApiContract } from '../contract/openapi-contract.js';
+import type { OpenApiContract } from '../contract/openapi-contract.js';
 import {
   CORRELATION_HEADER,
   assignCorrelationId,
@@ -21,26 +21,15 @@ import {
 import { PROBLEM_CONTENT_TYPE } from './problem-filter.js';
 import { ProblemError, buildProblem } from './problem-catalog.js';
 
-/** Indice (metodo + rota do Fastify) -> operationId. */
-function operationIndex(contract: OpenApiContract): Map<string, string> {
-  return new Map(
-    contract.operations.map((op) => [`${op.method} ${toRoutePath(op.path)}`, op.operationId]),
-  );
-}
-
-const operationOf = (index: Map<string, string>, request: FastifyRequest): string | undefined =>
-  index.get(`${request.method} ${request.routeOptions.url ?? ''}`);
+const operationOf = (contract: OpenApiContract, request: FastifyRequest): string | undefined =>
+  contract.operationForRoute(request.method, request.routeOptions.url)?.operationId;
 
 export class ContractRequestInterceptor implements NestInterceptor {
-  private readonly index: Map<string, string>;
-
-  constructor(private readonly contract: OpenApiContract) {
-    this.index = operationIndex(contract);
-  }
+  constructor(private readonly contract: OpenApiContract) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<FastifyRequest>();
-    const operationId = operationOf(this.index, request);
+    const operationId = operationOf(this.contract, request);
     if (operationId === undefined) throw new Error('Rota sem operacao do contrato');
     const errors = this.contract.validateRequest(operationId, {
       params: (request.params ?? {}) as Record<string, unknown>,
@@ -70,7 +59,6 @@ function headersOf(reply: FastifyReply): Record<string, string | undefined> {
 }
 
 export function registerContractHooks(instance: FastifyInstance, contract: OpenApiContract): void {
-  const index = operationIndex(contract);
   const logger = new Logger('Contract');
 
   instance.addHook('onRequest', async (request, reply) => {
@@ -83,7 +71,7 @@ export function registerContractHooks(instance: FastifyInstance, contract: OpenA
     let errors: string[];
     try {
       body = parseBody(payload, headers['content-type']);
-      const operationId = operationOf(index, request);
+      const operationId = operationOf(contract, request);
       errors =
         operationId === undefined
           ? contract.validateProblem(body)

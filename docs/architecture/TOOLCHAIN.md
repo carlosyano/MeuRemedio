@@ -33,6 +33,7 @@
 | fastify (em `apps/api`) | 5.12.5 | Adaptador HTTP; mesma versão exigida pelo `@nestjs/platform-fastify` 12.1.2 |
 | reflect-metadata, rxjs (em `apps/api`) | 0.2.2, 7.8.2 | Dependências de par do NestJS |
 | ajv, ajv-formats (em `apps/api`) | 8.20.0, 3.0.1 | Validação de requisição e resposta contra os schemas da OpenAPI (JSON Schema 2020-12, `Ajv2020`) |
+| @node-rs/argon2 (em `apps/api`) | 2.2.1 | Argon2id (RN-017, OA-009): binários N-API pré-compilados, sem dependências em tempo de execução, MIT. A 2.2.2 tinha 2 dias em 08/10/2026; preferida a anterior (DC-013) |
 | yaml (em `apps/api`) | 2.9.1 | Leitura da OpenAPI normativa em tempo de execução |
 | oasdiff (binário Go, fora do npm) | 1.33.0 | QG-001 (incompatibilidades da OpenAPI) via `tools/scripts/openapi-diff.mjs`; SHA-256 de cada plataforma fixado em `tools/scripts/oasdiff-bin.mjs` |
 

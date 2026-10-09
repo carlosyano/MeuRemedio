@@ -36,6 +36,8 @@ export interface ContractOperation {
   readonly method: HttpMethod;
   /** Caminho no formato da OpenAPI, ex.: /plans/{plan_id}. */
   readonly path: string;
+  /** Operacao sem sessao (security: [] na OpenAPI). */
+  readonly public: boolean;
 }
 
 interface OperationSpec extends ContractOperation {
@@ -119,6 +121,7 @@ function toFieldErrors(errors: readonly ErrorObject[], prefix: string): FieldErr
 
 export class OpenApiContract {
   private readonly specs: ReadonlyMap<string, OperationSpec>;
+  private readonly byRoute: ReadonlyMap<string, OperationSpec>;
   private readonly compiled = new Map<string, ValidateFunction>();
 
   private constructor(
@@ -127,6 +130,9 @@ export class OpenApiContract {
     private readonly coercingAjv: Ajv2020,
   ) {
     this.specs = new Map(this.readOperations().map((spec) => [spec.operationId, spec]));
+    this.byRoute = new Map(
+      [...this.specs.values()].map((spec) => [`${spec.method} ${toRoutePath(spec.path)}`, spec]),
+    );
   }
 
   static load(file: URL): OpenApiContract {
@@ -151,6 +157,11 @@ export class OpenApiContract {
 
   operation(operationId: string): ContractOperation {
     return this.spec(operationId);
+  }
+
+  /** Operacao pelo metodo e pela rota no formato do Fastify (ex.: GET /plans/:plan_id). */
+  operationForRoute(method: string, routePath: string | undefined): ContractOperation | undefined {
+    return routePath === undefined ? undefined : this.byRoute.get(`${method} ${routePath}`);
   }
 
   validateRequest(operationId: string, request: HttpRequestParts): FieldError[] {
@@ -319,6 +330,7 @@ export class OpenApiContract {
           operationId: String(operation['operationId']),
           method,
           path,
+          public: Array.isArray(operation['security']) && operation['security'].length === 0,
           parameters,
           body: this.readBody(operation['requestBody'], `${method} ${path}`),
           responses: this.readResponses(operation['responses'], `${method} ${path}`),

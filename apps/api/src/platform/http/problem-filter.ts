@@ -48,9 +48,11 @@ export class ProblemFilter implements ExceptionFilter {
 
     let code: ProblemCode;
     let fieldErrors: readonly FieldError[] = [];
+    let headers: Readonly<Record<string, string>> = {};
     if (exception instanceof ProblemError) {
       code = exception.code;
       fieldErrors = exception.fieldErrors;
+      headers = exception.headers;
     } else {
       const status = statusOf(exception);
       code = status === undefined ? 'INTERNAL_ERROR' : codeForStatus(status);
@@ -65,6 +67,7 @@ export class ProblemFilter implements ExceptionFilter {
       );
     }
     const problem = buildProblem(code, instanceOf(request.url), correlationId, fieldErrors);
-    void reply.status(problem.status).header('content-type', PROBLEM_CONTENT_TYPE).send(problem);
+    void reply.headers(headers).status(problem.status).header('content-type', PROBLEM_CONTENT_TYPE);
+    void reply.send(problem);
   }
 }

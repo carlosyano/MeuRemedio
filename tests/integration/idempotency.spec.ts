@@ -1,13 +1,14 @@
-// @trace TS-015 TS-038 RF-003 CA-013 ERR-006 DEC-009 ENT-011 (AGENTS.md §13; ADR-001 v1.5 secao 7)
+// @trace TS-015 TS-038 RF-003 CA-013 ERR-006 DEC-009 ENT-011 (DC-009, DC-010, DC-012) (AGENTS.md §13; ADR-001 v1.5 secao 7)
 // Servico de idempotencia contra PostgreSQL 17 REAL: replay do snapshot, payload divergente
 // (409 IDEMPOTENCY_KEY_REUSED sem sobrescrever), escopo por titular, concorrencia com efeito unico,
 // expiracao de 7 dias e falha que nao consome a chave (DC-009, DC-010).
+import { createHash, randomBytes } from 'node:crypto';
 import pg from 'pg';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { withTransaction } from '../../apps/api/src/platform/db/transaction.js';
 import { ProblemError } from '../../apps/api/src/platform/http/problem-catalog.js';
 import {
-  hashRequest,
+  createRequestHasher,
   runIdempotent,
   type IdempotentResponse,
 } from '../../apps/api/src/platform/idempotency/idempotency.js';
@@ -34,6 +35,7 @@ beforeEach(async () => {
 });
 
 const NOW = '2026-10-05T11:05:00Z';
+const hashRequest = createRequestHasher(randomBytes(32));
 const U1 = '11111111-1111-4111-8111-111111111111';
 const U2 = '22222222-2222-4222-8222-222222222222';
 
@@ -74,7 +76,19 @@ const records = async (): Promise<number> =>
       ?.n,
   );
 
-describe('hashRequest', () => {
+describe('createRequestHasher (HMAC-SHA-256, DC-012)', () => {
+  it('depende do segredo e nao e o SHA-256 simples do JSON', () => {
+    const parts = { body: { password: 'Senha-Sintetica-2026' } };
+    const other = createRequestHasher(randomBytes(32));
+    expect(hashRequest(parts).equals(other(parts))).toBe(false);
+    const plain = createHash('sha256').update(JSON.stringify(parts)).digest();
+    expect(hashRequest(parts).equals(plain)).toBe(false);
+  });
+
+  it('exige segredo de pelo menos 32 bytes', () => {
+    expect(() => createRequestHasher(Buffer.alloc(16))).toThrow(/32 bytes/);
+  });
+
   it('ignora a ordem das propriedades e distingue conteudo diferente', () => {
     const a = hashRequest({ body: { b: 1, a: { y: [1, 2], x: null } }, ifMatch: '"3"' });
     const b = hashRequest({ ifMatch: '"3"', body: { a: { x: null, y: [1, 2] }, b: 1 } });
