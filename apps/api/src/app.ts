@@ -7,11 +7,15 @@ import { DiscoveryModule, DiscoveryService, MetadataScanner, NestFactory } from 
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { Pool } from 'pg';
 import { CreateAccount } from './modules/identity/application/create-account.js';
+import { CurrentAccount } from './modules/identity/application/current-account.js';
+import { LoginThrottle } from './modules/identity/application/login-throttle.js';
+import { Sessions } from './modules/identity/application/sessions.js';
 import { ResendVerification } from './modules/identity/application/resend-verification.js';
 import { VerifyAccount } from './modules/identity/application/verify-account.js';
 import { AccountsController } from './modules/identity/infrastructure/accounts.controller.js';
 import { loadCompromisedPasswords } from './modules/identity/infrastructure/compromised-passwords.js';
 import { argon2idPasswordHasher } from './modules/identity/infrastructure/password-hasher.js';
+import { SessionsController } from './modules/identity/infrastructure/sessions.controller.js';
 import {
   DEFAULT_CLOCK_SKEW_MAX_MS,
   DEFAULT_HEALTH_PROBE_TIMEOUT_MS,
@@ -27,13 +31,13 @@ import {
   ContractRequestInterceptor,
   registerContractHooks,
 } from './platform/http/contract-enforcement.js';
+import { AccessGuard } from './platform/http/access.guard.js';
 import { OPERATION_ID } from './platform/http/operation-id.js';
 import { ProblemFilter } from './platform/http/problem-filter.js';
 import { createRequestHasher } from './platform/idempotency/idempotency.js';
-import { RateLimitGuard } from './platform/rate-limit/rate-limit.guard.js';
 import { PostgresRateLimiter } from './platform/rate-limit/rate-limiter.js';
 
-const CONTROLLERS: Type[] = [HealthController, AccountsController];
+const CONTROLLERS: Type[] = [HealthController, AccountsController, SessionsController];
 
 export interface CreateAppOptions {
   readonly clock: Clock;
@@ -45,7 +49,13 @@ export interface CreateAppOptions {
   readonly secrets: {
     /** Chave do HMAC do hash de requisicao idempotente (DC-012), 32 bytes ou mais. */
     readonly requestHashKey: Buffer;
+    /** Pepper do HMAC do e-mail normalizado (bloqueio de login, DEC-016; tombstone, RN-019). */
+    readonly emailPepper: Buffer;
+    /** Chave do HMAC do token CSRF vinculado a sessao (OA-008). */
+    readonly csrfKey: Buffer;
   };
+  /** Origens aceitas no cabecalho Origin das mutacoes autenticadas (OA-008). */
+  readonly allowedOrigins: readonly string[];
   /** CLOCK_SKEW_MAX_MS (RNF-015); padrao 5000. */
   readonly clockSkewMaxMs?: number;
   /** Tempo-limite da sondagem do banco em getHealth (DEC-028); padrao 2000. */
@@ -58,7 +68,7 @@ export interface CreateAppOptions {
 
 @Module({})
 class AppModule {
-  static forRoot(options: CreateAppOptions): DynamicModule {
+  static forRoot(options: CreateAppOptions, sessions: Sessions): DynamicModule {
     const health: HealthSettings = {
       clockSkewMaxMs: options.clockSkewMaxMs ?? DEFAULT_CLOCK_SKEW_MAX_MS,
       probeTimeoutMs: options.healthProbeTimeoutMs ?? DEFAULT_HEALTH_PROBE_TIMEOUT_MS,
@@ -82,6 +92,8 @@ class AppModule {
           ),
         },
         { provide: VerifyAccount, useValue: new VerifyAccount(options.database, options.clock) },
+        { provide: CurrentAccount, useValue: new CurrentAccount(options.database) },
+        { provide: Sessions, useValue: sessions },
         {
           provide: ResendVerification,
           useValue: new ResendVerification(options.database, options.clock),
@@ -130,8 +142,15 @@ function declaredRoutes(app: NestFastifyApplication): DeclaredRoute[] {
 
 export async function createApp(options: CreateAppOptions): Promise<NestFastifyApplication> {
   const contract = options.contract ?? OpenApiContract.load(locateNormativeOpenApi());
+  const sessions = new Sessions(
+    options.database,
+    options.clock,
+    argon2idPasswordHasher,
+    new LoginThrottle(options.database, options.secrets.emailPepper),
+    options.secrets.csrfKey,
+  );
   const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule.forRoot(options),
+    AppModule.forRoot(options, sessions),
     // HEAD automatico criaria rotas fora do contrato.
     new FastifyAdapter({ exposeHeadRoutes: false }),
     options.logger === false ? { logger: false } : {},
@@ -140,7 +159,13 @@ export async function createApp(options: CreateAppOptions): Promise<NestFastifyA
   registerContractHooks(app.getHttpAdapter().getInstance(), contract);
   app.useGlobalFilters(new ProblemFilter());
   app.useGlobalGuards(
-    new RateLimitGuard(contract, new PostgresRateLimiter(options.database), options.clock),
+    new AccessGuard(
+      contract,
+      new PostgresRateLimiter(options.database),
+      sessions,
+      options.clock,
+      options.allowedOrigins,
+    ),
   );
   app.useGlobalInterceptors(new ContractRequestInterceptor(contract));
   await app.init();

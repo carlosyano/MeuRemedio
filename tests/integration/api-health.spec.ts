@@ -60,7 +60,12 @@ async function start(
     clock,
     database: pool,
     logger: false,
-    secrets: { requestHashKey: randomBytes(32) },
+    allowedOrigins: ['https://app.example.invalid'],
+    secrets: {
+      requestHashKey: randomBytes(32),
+      emailPepper: randomBytes(32),
+      csrfKey: randomBytes(32),
+    },
     ...overrides,
   });
   return app;

@@ -1,5 +1,6 @@
 // Mapeamento Drizzle de ENT-001 users e ENT-004 sessions (migracao 0001_core) e de ENT-002
-// verification_tokens (migracao 0003_identity).
+// verification_tokens (migracao 0003_identity), alem de login_failure_counters (migracao
+// 0004_login_failures, DEC-016).
 // O SQL e a fonte do esquema: constraints, FKs e indices vivem nas migracoes; este arquivo so tipa o
 // acesso e e conferido contra o banco real (tests/integration/drizzle-schema.spec.ts).
 import {
@@ -73,4 +74,11 @@ export const verificationTokens = pgTable('verification_tokens', {
   usedAt: timestamp('used_at', { withTimezone: true }),
   supersededAt: timestamp('superseded_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const loginFailureCounters = pgTable('login_failure_counters', {
+  emailHash: bytea('email_hash').primaryKey(),
+  windowStart: timestamp('window_start', { withTimezone: true }).notNull(),
+  failures: smallint('failures').notNull(),
+  lockedUntil: timestamp('locked_until', { withTimezone: true }),
 });

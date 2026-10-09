@@ -23,7 +23,8 @@ export default defineConfig({
         resolve,
         test: {
           name: 'integration',
-          include: ['tests/integration/**/*.spec.ts'],
+          // tests/security: cenarios de seguranca (TS-033, TS-041...) contra PostgreSQL real.
+          include: ['tests/integration/**/*.spec.ts', 'tests/security/**/*.spec.ts'],
           environment: 'node',
           testTimeout: 60_000,
           hookTimeout: 180_000,
