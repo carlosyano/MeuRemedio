@@ -132,6 +132,8 @@ Os valores foram calculados com `zoneinfo` e o tzdata do ambiente de referência
 
 **Estado (PR 8):** a base de banco está em `tests/integration/db-platform.spec.ts`: plano e evento na mesma transação (ROLLBACK descarta os dois; COMMIT deixa o evento pendente) e consumidores concorrentes com `FOR UPDATE SKIP LOCKED` recebem eventos disjuntos. Despachante e pg-boss permanecem pendentes.
 
+**Estado (PR 25):** `tests/integration/ts-016.spec.ts` (PostgreSQL 17 real e pg-boss): com o pg-boss fora, `createAccount` responde 201 e o evento fica pendente, com `attempts` e `last_error_code`; a nova tentativa respeita o backoff; na retomada, o evento vira exatamente 1 job com o mesmo id; 4 despachantes concorrentes não perdem nem duplicam eventos; o job é enfileirado na mesma transação que marca `dispatched_at`. O produtor é o `createAccount`, porque os planos ainda não existem; o cenário com `POST /plans` entra com o módulo de planos.
+
 ---
 
 ## TS-017 — Retomada de worker sem efeito duplicado
