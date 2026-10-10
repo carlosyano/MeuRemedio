@@ -1,6 +1,8 @@
-// Mapeamento Drizzle de ENT-005 medication_plans e ENT-006 schedule_times (migracao 0001_core).
+// Mapeamento Drizzle de ENT-005 medication_plans e ENT-006 schedule_times (migracao 0001_core) e
+// da tabela de plataforma plan_duplicate_confirmations (migracao 0005_plans, RN-016, DC-028).
 // O SQL e a fonte do esquema: constraints, FKs, triggers e indices vivem nas migracoes.
 import { bigint, date, pgEnum, pgTable, time, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import { bytea } from '../../../platform/db/types.js';
 
 export const planStatus = pgEnum('plan_status', ['ACTIVE', 'DELETED']);
 
@@ -58,4 +60,13 @@ export const scheduleTimes = pgTable('schedule_times', {
   timeOfDay: time('time_of_day').notNull(),
   removedAt: timestamp('removed_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const planDuplicateConfirmations = pgTable('plan_duplicate_confirmations', {
+  tokenHash: bytea('token_hash').primaryKey(),
+  userId: uuid('user_id').notNull(),
+  requestHash: bytea('request_hash').notNull(),
+  issuedAt: timestamp('issued_at', { withTimezone: true }).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  consumedAt: timestamp('consumed_at', { withTimezone: true }),
 });

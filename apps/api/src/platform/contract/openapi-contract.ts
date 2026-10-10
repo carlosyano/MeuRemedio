@@ -164,6 +164,13 @@ export class OpenApiContract {
     return routePath === undefined ? undefined : this.byRoute.get(`${method} ${routePath}`);
   }
 
+  /** Nomes dos parametros de caminho da operacao (ex.: plan_id). */
+  pathParameterNames(operationId: string): readonly string[] {
+    return this.spec(operationId)
+      .parameters.filter((parameter) => parameter.in === 'path')
+      .map((parameter) => parameter.name);
+  }
+
   validateRequest(operationId: string, request: HttpRequestParts): FieldError[] {
     const spec = this.spec(operationId);
     const errors: FieldError[] = [];

@@ -37,7 +37,15 @@ export class ContractRequestInterceptor implements NestInterceptor {
       headers: request.headers,
       body: request.body,
     });
-    if (errors.length > 0) throw new ProblemError('VALIDATION_FAILED', errors);
+    if (errors.length > 0) {
+      // Identificador de caminho fora do formato nao identifica recurso algum: 404, como o id
+      // inexistente (DC-031). Varias operacoes por id nem declaram 400 no contrato.
+      const pathNames = this.contract.pathParameterNames(operationId);
+      if (errors.some((error) => pathNames.includes(error.field))) {
+        throw new ProblemError('RESOURCE_NOT_FOUND');
+      }
+      throw new ProblemError('VALIDATION_FAILED', errors);
+    }
     return next.handle();
   }
 }

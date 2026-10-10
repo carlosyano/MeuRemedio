@@ -33,6 +33,12 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-025 | Cookie de sessão e registro de atividade | Vigente |
 | DC-026 | Ordem dos controles de acesso e regra de Origin | Vigente |
 | DC-027 | Pepper único do HMAC de e-mail | Vigente |
+| DC-028 | Token de confirmação de duplicidade de plano | Vigente |
+| DC-029 | Normalização, período e validações de `createPlan` | Vigente |
+| DC-030 | Ordem e cursor de `listPlans` | Vigente |
+| DC-031 | Identificador de caminho fora do formato | Vigente |
+| DC-032 | Auditoria `ownership.denied` e `audit_events` append-only | Vigente |
+| DC-033 | Geração de ocorrências do plano pelo Outbox | Vigente |
 
 ---
 
@@ -242,3 +248,47 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** um único segredo, `EMAIL_PEPPER` (32 bytes ou mais), serve aos dois usos, mantendo um só valor para guardar e rotacionar no Secrets Manager/KMS.
 - **Riscos:** rotacionar o pepper zera os contadores de falha (efêmeros) e exige recalcular os tombstones, o que deve entrar no procedimento de rotação.
 - **Aplica-se a:** `apps/api/src/app.ts` e `main.ts`.
+
+## DC-028 — Token de confirmação de duplicidade de plano (10/10/2026)
+
+- **Contexto:** RN-016 e o schema `DuplicateConfirmation` exigem um token opaco de uso único, com TTL de 10 min, vinculado ao titular e ao hash do payload sem o próprio token. O modelo de dados não tinha onde guardar esse token.
+- **Alternativas:** (a) token assinado sem estado (HMAC de titular, hash e expiração), que não garante o uso único; (b) tabela de plataforma com o hash do token e consumo atômico; (c) reaproveitar `idempotency_records`, o que mistura propósitos, e o 409 não pode virar snapshot.
+- **Decisão:** (b). A tabela de plataforma `plan_duplicate_confirmations` (migração `0005_plans`) guarda o SHA-256 do token, o titular (FK em cascata), o HMAC do payload canônico sem o token, `expires_at = issued_at + 10 min` e `consumed_at`. O token tem o formato `dup_` seguido de 32 bytes aleatórios em base64url. Quando há candidato a duplicidade, o token só vale se for do titular e do mesmo payload, se não tiver sido consumido e se estiver dentro do prazo; nesse caso, ele é consumido na transação que cria o plano. Token inválido, vencido, já usado ou de outro payload equivale a token ausente: o servidor responde outro 409 com um token novo. Sem candidato, o plano é criado e o token informado é ignorado (não é consumido). A verificação de duplicidade é serializada por titular (advisory lock), então duas criações equivalentes simultâneas resultam em um 201 e um 409. O 409 confirma a transação, para que o token novo fique gravado, mas não grava snapshot de idempotência.
+- **Riscos:** tokens vencidos se acumulam até existir um job de limpeza (o índice em `expires_at` já existe). O token em claro só aparece na resposta.
+- **Aplica-se a:** `apps/api/migrations/0005_plans.sql`, `modules/plans/application/create-plan.ts` e DATA_MODEL §4.
+
+## DC-029 — Normalização, período e validações de `createPlan` (10/10/2026)
+
+- **Contexto:** RN-016 define a normalização (trim, colapso de espaços, remoção de diacríticos, sem distinção de caixa) e a "interseção de períodos", mas não detalha os limites. A Especificação também não fixa o código de erro de `end_date < start_date`.
+- **Decisão:** a normalização decompõe o texto em NFD, remove as marcas combinantes, colapsa qualquer espaço Unicode (inclusive NBSP e tab), apara e converte para minúsculas. `end_date` é data civil inclusiva, então períodos que se tocam no mesmo dia se sobrepõem. `medication_name` e `dose_text` são gravados aparados, sem colapsar os espaços internos. Texto que fica vazio depois da normalização retorna 400 `VALIDATION_FAILED`. `end_date < start_date` retorna 422 `BUSINESS_RULE_VIOLATION` com `field_errors` em `end_date`, por ser uma regra entre campos que o schema não expressa. `schedule_times` volta em ordem crescente.
+- **Riscos:** nenhum relevante; a regra é pura e está coberta por `tests/unit/plan-rules.spec.ts`.
+- **Aplica-se a:** `packages/domain/src/plan-rules.ts` e `modules/plans/application/create-plan.ts`.
+
+## DC-030 — Ordem e cursor de `listPlans` (10/10/2026)
+
+- **Contexto:** a OpenAPI fixa a paginação por cursor (padrão 20, máximo 100), mas não a ordem.
+- **Decisão:** os planos vêm do mais recente para o mais antigo, por `(created_at DESC, id DESC)`. O cursor é o base64url de `{t, i}`, com o `created_at` em microssegundos UTC e o `id` do último item entregue. A página seguinte começa depois dessa posição (keyset), sem repetir nem pular itens, mesmo quando o `created_at` coincide. Cursor malformado retorna 400 `VALIDATION_FAILED`. O cursor não é assinado: ele só posiciona a busca, que é sempre filtrada pelo titular da sessão.
+- **Riscos:** um plano criado durante a paginação pode não aparecer nas páginas seguintes (comportamento normal de keyset).
+- **Aplica-se a:** `modules/plans/application/read-plans.ts`. O mesmo padrão deve servir às outras listas.
+
+## DC-031 — Identificador de caminho fora do formato (10/10/2026)
+
+- **Contexto:** `getPlan` e `deletePlan` não declaram 400 na OpenAPI, então um 400 sairia do contrato e viraria 500.
+- **Alternativas:** (a) 400 apenas onde o contrato declara, com comportamento diferente em cada operação; (b) 404 em todas.
+- **Decisão:** (b). Parâmetro de caminho fora do formato (por exemplo, um `plan_id` que não é UUID) retorna 404 `RESOURCE_NOT_FOUND`, indistinguível de um UUID inexistente. Todas as operações com parâmetro de caminho declaram 404.
+- **Riscos:** nenhum; a resposta não revela existência (TS-008).
+- **Aplica-se a:** `platform/http/contract-enforcement.ts`.
+
+## DC-032 — Auditoria `ownership.denied` e `audit_events` append-only (10/10/2026)
+
+- **Contexto:** CA-012 e TS-008 exigem auditar a tentativa de acesso a recurso de outro titular. ENT-013 define a trilha como append-only.
+- **Decisão:** o evento `ownership.denied` (ator, tipo e id do recurso, `DENIED` e o `correlation_id` da resposta) é registrado quando o recurso existe e pertence a outro titular. UUID inexistente não gera evento, porque não há recurso a proteger, e a resposta é idêntica nos dois casos. `audit_events` (migração `0005_plans`) rejeita UPDATE e DELETE por trigger. A retenção de 180 dias e a pseudonimização no expurgo entram com os respectivos jobs, em migração própria. O catálogo de ações fica fechado no código (`platform/audit/audit.ts`), e o banco exige o formato `dominio.acao`.
+- **Riscos:** a gravação do evento acrescenta uma escrita ao caminho negado, o que gera uma pequena diferença de tempo entre o recurso alheio e o inexistente.
+- **Aplica-se a:** `platform/audit/audit.ts` e `modules/plans/application/read-plans.ts`. As próximas rotas por id seguem o mesmo padrão.
+
+## DC-033 — Geração de ocorrências do plano pelo Outbox (10/10/2026)
+
+- **Contexto:** RN-018 determina gerar as ocorrências ao criar ou editar o plano, via Outbox.
+- **Decisão:** `createPlan` grava o evento `plans.occurrences_requested` (payload só com `plan_id`, agregado `medication_plan`) na mesma transação do plano. O worker consome a fila e chama `generateOccurrencesForHorizon` com o instante atual truncado em segundos. Como a geração é idempotente (RN-007), reentregas não duplicam ocorrências (TS-003). Até o worker processar o evento, o plano existe sem ocorrências.
+- **Riscos:** há um atraso entre a criação do plano e o aparecimento das ocorrências, limitado pelo laço do despachante (1 s por padrão) e pelo polling da fila.
+- **Aplica-se a:** `modules/plans/application/create-plan.ts`, `modules/occurrences/application/occurrences-requested.ts`, `worker.ts` e `platform/outbox/dispatcher.ts`.

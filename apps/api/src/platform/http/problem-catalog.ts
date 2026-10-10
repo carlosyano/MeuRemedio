@@ -125,6 +125,8 @@ export class ProblemError extends Error {
     public readonly fieldErrors: readonly FieldError[] = [],
     /** Cabecalhos da resposta de erro (ex.: retry-after no 429). */
     public readonly headers: Readonly<Record<string, string>> = {},
+    /** Membros extras do Problem previstos no contrato (ex.: duplicate_confirmation no 409). */
+    public readonly extensions: Readonly<Record<string, unknown>> = {},
   ) {
     super(code);
   }
@@ -135,6 +137,7 @@ export function buildProblem(
   instance: string,
   correlationId: string,
   fieldErrors: readonly FieldError[] = [],
+  extensions: Readonly<Record<string, unknown>> = {},
 ): Problem {
   const definition = PROBLEM_CATALOG[code];
   const problem: Problem = {
@@ -146,7 +149,9 @@ export function buildProblem(
     instance,
     correlation_id: correlationId,
   };
-  return fieldErrors.length === 0
-    ? problem
-    : { ...problem, field_errors: fieldErrors.slice(0, MAX_FIELD_ERRORS) };
+  const withFields =
+    fieldErrors.length === 0
+      ? problem
+      : { ...problem, field_errors: fieldErrors.slice(0, MAX_FIELD_ERRORS) };
+  return { ...extensions, ...withFields };
 }

@@ -41,6 +41,8 @@
 
 **Proibido:** 403; qualquer diferença de corpo ou cabeçalho que revele existência; efeito colateral em P1.
 
+**Estado (PR 31):** `getPlan` coberto por HTTP em `tests/integration/plans.spec.ts`: o plano de U1 acessado por U2 retorna 404 com o mesmo `status`, `code`, `title` e `detail` (e os mesmos cabeçalhos) de um UUID inexistente, sem `ETag`, com 1 `audit_events` `ownership.denied` por tentativa no recurso de U1 (DC-032) e P1 inalterado. `plan_id` fora do formato também retorna 404 (DC-031). `updatePlan` e `deletePlan` entram com a edição e a exclusão.
+
 ---
 
 ## TS-023 — BOLA/IDOR em todas as rotas privadas
@@ -53,6 +55,8 @@
 **Esperado:** `404 RESOURCE_NOT_FOUND` nas rotas por identificador; coleções sem nenhum item de U1; 1 evento `ownership.denied` por tentativa.
 
 **Falha obrigatória do teste:** se existir operação privada sem caso correspondente (cobertura medida contra a OpenAPI), o teste reprova.
+
+**Estado (PR 31):** parcial. `getPlan` (por identificador) e `listPlans` (coleção vazia para U2) estão em `tests/integration/plans.spec.ts`. O teste gerado a partir da OpenAPI, que reprova operação privada sem caso, entra quando as rotas por identificador estiverem implementadas.
 
 ---
 
@@ -71,6 +75,8 @@
 **Proibido:** segundo plano; o `409` do passo 2 sobrescrever o snapshot original.
 
 **Estado (PR 8):** a base de banco está em `tests/integration/db-platform.spec.ts` (PostgreSQL 17 real): unicidade por (operação, escopo, chave), escopo por titular (passo 4) e 10 inserções simultâneas com a mesma chave gravando um único registro (passo 5). O teste HTTP completo permanece pendente (requer a API).
+
+**Estado (PR 31):** os 5 passos estão cobertos por HTTP em `tests/integration/plans.spec.ts`. O passo 5 usa outro payload, porque repetir o payload A com chave nova exigiria a confirmação de duplicidade (RN-016). `updatePlan` entra com a edição.
 
 ---
 
@@ -91,6 +97,8 @@
 **Estado (PR 8):** a base de banco está em `tests/integration/db-platform.spec.ts`: o esquema aceita exatamente as operações que declaram `Idempotency-Key` na OpenAPI, usa escopo `public` só em `createAccount` e fixa `expires_at = created_at + 7 dias` (passo 5). Os passos HTTP permanecem pendentes.
 
 **Estado (PR 23):** `createAccount` cobre por HTTP os passos 1 a 4 (`tests/integration/create-account.spec.ts`: replay idêntico sem novo efeito, payload divergente com 409, ausência da chave com 400, concorrência com conta única); o passo 5 (expiração em 7 dias) está no serviço (`idempotency.spec.ts`). As outras 6 operações entram com seus módulos.
+
+**Estado (PR 31):** `createPlan` cobre por HTTP os passos 1 a 5 (`tests/integration/plans.spec.ts`). No passo 5, a chave expirada é tratada como nova: a requisição volta a passar pelas regras e, com o mesmo payload, recebe 409 `DUPLICATE_CONFIRMATION_REQUIRED` em vez do snapshot.
 
 ---
 
@@ -133,6 +141,8 @@ Os valores foram calculados com `zoneinfo` e o tzdata do ambiente de referência
 **Estado (PR 8):** a base de banco está em `tests/integration/db-platform.spec.ts`: plano e evento na mesma transação (ROLLBACK descarta os dois; COMMIT deixa o evento pendente) e consumidores concorrentes com `FOR UPDATE SKIP LOCKED` recebem eventos disjuntos. Despachante e pg-boss permanecem pendentes.
 
 **Estado (PR 25):** `tests/integration/ts-016.spec.ts` (PostgreSQL 17 real e pg-boss): com o pg-boss fora, `createAccount` responde 201 e o evento fica pendente, com `attempts` e `last_error_code`; a nova tentativa respeita o backoff; na retomada, o evento vira exatamente 1 job com o mesmo id; 4 despachantes concorrentes não perdem nem duplicam eventos; o job é enfileirado na mesma transação que marca `dispatched_at`. O produtor é o `createAccount`, porque os planos ainda não existem; o cenário com `POST /plans` entra com o módulo de planos.
+
+**Estado (PR 31):** o cenário com `POST /plans` está em `tests/integration/ts-016.spec.ts`. Com o despachante falhando, o plano responde 201 e o evento `plans.occurrences_requested` fica pendente; na retomada, vira 1 job, e o consumidor, mesmo reentregue, gera o horizonte da DEC-027 (62 ocorrências para 08:00 e 20:00) sem duplicata (DC-033).
 
 ---
 

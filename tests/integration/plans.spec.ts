@@ -299,11 +299,13 @@ describe('TS-015 e TS-038 idempotencia de createPlan', () => {
 
   it('apos 7 dias + 1 s a chave expirou e e tratada como nova (nao ha replay)', async () => {
     const first = await createPlan(users.ana, 'K1', PLAN_B);
+    // A sessao dura no maximo 24 h (RN-004): cada salto de relogio exige novo login.
     h.now = at(7 * DAY - 1_000);
-    expect((await createPlan(users.ana, 'K1', PLAN_B)).body).toEqual(first.body);
+    const later = await login(h, 'ana.silva@example.com');
+    expect((await createPlan(later, 'K1', PLAN_B)).body).toEqual(first.body);
     h.now = at(7 * DAY + 1_000);
     // Nova execucao: o plano anterior agora e candidato a duplicidade (RN-016).
-    const again = await createPlan(users.ana, 'K1', PLAN_B);
+    const again = await createPlan(await login(h, 'ana.silva@example.com'), 'K1', PLAN_B);
     expect(again.status).toBe(409);
     expect(again.body).toMatchObject({ code: 'DUPLICATE_CONFIRMATION_REQUIRED' });
   });
@@ -504,8 +506,11 @@ describe('getPlan e TS-008 acesso horizontal', () => {
     expect((await h.call('getPlan', 'GET', `/plans/${plan.plan_id}`)).status).toBe(401);
   });
 
-  it('identificador fora do formato UUID: 400', async () => {
-    expect((await getPlan(users.ana, 'nao-e-uuid')).status).toBe(400);
+  it('identificador fora do formato UUID: 404 como o inexistente (DC-031)', async () => {
+    const malformed = await getPlan(users.ana, 'nao-e-uuid');
+    const missing = await getPlan(users.ana, '7b0c5e2a-0d3c-4a4e-9a51-3c0b7c1f2d11');
+    expect(malformed.status).toBe(404);
+    expect(stable(malformed.body)).toEqual(stable(missing.body));
   });
 
   it.todo(
