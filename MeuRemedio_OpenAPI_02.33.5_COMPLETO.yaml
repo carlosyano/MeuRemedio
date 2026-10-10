@@ -1,14 +1,16 @@
-# MeuRemedio OpenAPI 02.33.4 - completo
-# Base: MeuRemedio_OpenAPI_02.33.3_COMPLETO.yaml
+# MeuRemedio OpenAPI 02.33.5 - completo
+# Base: MeuRemedio_OpenAPI_02.33.4_COMPLETO.yaml
 # Mudancas 02.33.3 (decisao de 04/10/2026): removido o 410 de createResponse (GAP-008); X-Correlation-ID em toda resposta, inclusive 202, 204 e getHealth (GAP-009).
 # Mudancas 02.33.4 (decisao de 06/10/2026, DEC-026, GAP-010): falha inesperada documentada em toda operacao,
 # com 500 INTERNAL_ERROR (ERR-016, resposta InternalError) e 503 DEPENDENCY_UNAVAILABLE (ERR-011).
+# Mudancas 02.33.5 (decisao de 10/10/2026, DEC-032): 400 VALIDATION_FAILED documentado em createSession,
+# revokeAllSessions e requestAccountDeletion, que validam corpo e Idempotency-Key e nao o declaravam.
 # Mantem as 27 operacoes e os operationId da 02.33.2.
 openapi: 3.1.1
 info:
   title: MeuRemedio API
-  version: 02.33.4
-  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.4
+  version: 02.33.5
+  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.5
   description: API declaratoria para conta individual, planos de medicamentos, ocorrencias, respostas, historico,
     exportacoes e privacidade. Nao prescreve, nao valida medicamentos ou interacoes e nao substitui orientacao profissional.
     Todas as mutacoes autenticadas exigem protecao CSRF (cookie mr_csrf + cabecalho X-CSRF-Token) e validacao do
@@ -268,6 +270,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Session'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '423':
@@ -1065,6 +1069,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeletionRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '409':
@@ -1234,6 +1240,8 @@ paths:
           headers:
             X-Correlation-ID:
               $ref: '#/components/headers/CorrelationId'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '409':

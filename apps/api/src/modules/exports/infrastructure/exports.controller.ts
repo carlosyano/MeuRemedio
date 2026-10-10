@@ -1,4 +1,4 @@
-// Rotas de exportacao (OpenAPI 02.33.4, tag Exports).
+// Rotas de exportacao (OpenAPI 02.33.5, tag Exports).
 import {
   Body,
   Controller,
