@@ -39,6 +39,8 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-031 | Identificador de caminho fora do formato | Vigente |
 | DC-032 | Auditoria `ownership.denied` e `audit_events` append-only | Vigente |
 | DC-033 | Geração de ocorrências do plano pelo Outbox | Vigente |
+| DC-034 | Exclusão de plano já excluído | Vigente |
+| DC-035 | Ocorrências na edição de plano | Vigente |
 
 ---
 
@@ -292,3 +294,19 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** `createPlan` grava o evento `plans.occurrences_requested` (payload só com `plan_id`, agregado `medication_plan`) na mesma transação do plano. O worker consome a fila e chama `generateOccurrencesForHorizon` com o instante atual truncado em segundos. Como a geração é idempotente (RN-007), reentregas não duplicam ocorrências (TS-003). Até o worker processar o evento, o plano existe sem ocorrências.
 - **Riscos:** há um atraso entre a criação do plano e o aparecimento das ocorrências, limitado pelo laço do despachante (1 s por padrão) e pelo polling da fila.
 - **Aplica-se a:** `modules/plans/application/create-plan.ts`, `modules/occurrences/application/occurrences-requested.ts`, `worker.ts` e `platform/outbox/dispatcher.ts`.
+
+## DC-034 — Exclusão de plano já excluído (10/10/2026)
+
+- **Contexto:** a OpenAPI descreve `deletePlan` como "exclusão lógica idempotente" (204), mas `getPlan` trata o plano DELETED como 404. Não estava definido o que responder ao excluir de novo um plano próprio já excluído.
+- **Alternativas:** (a) 404, como na leitura; (b) 204 sem alteração.
+- **Decisão:** (b). Excluir de novo um plano próprio já DELETED devolve 204 e não altera `deleted_at`, `row_version` nem as ocorrências, de modo que a repetição de uma chamada com timeout não vira erro para o cliente. Plano inexistente ou de outro titular continua com 404 (auditado no segundo caso, DC-032).
+- **Riscos:** o titular consegue saber que um id que já foi seu existe. Isso não expõe dado de outro titular.
+- **Aplica-se a:** `modules/plans/application/delete-plan.ts`.
+
+## DC-035 — Ocorrências na edição de plano (10/10/2026)
+
+- **Contexto:** TS-004 e TS-027 determinam preservar as ocorrências iniciadas (`scheduled_at <= instante da ação`) e cancelar apenas as futuras PROGRAMMED. RN-018 manda regerar pelo Outbox.
+- **Alternativas:** (a) cancelar só os slots que mudaram; (b) cancelar todas as futuras PROGRAMMED e regerar.
+- **Decisão:** (b). Toda edição, inclusive a que só muda nome ou dose, cancela as futuras PROGRAMMED do plano e grava `plans.occurrences_requested`. O worker regera o horizonte com a configuração e os snapshots novos. Futuras já respondidas ficam, e o índice de unicidade impede regerar o mesmo slot. Horários retirados recebem `removed_at` (a FK das ocorrências antigas é preservada), e os mantidos conservam o id. Pela DEC-027, um horário novo cujo prazo do dia já passou nasce NO_RESPONSE na regeração.
+- **Riscos:** cada edição produz linhas CANCELED no horizonte (até 300 por plano com 10 horários). Até o worker regerar, o plano fica sem ocorrências futuras.
+- **Aplica-se a:** `modules/plans/application/update-plan.ts` e `plan-write.ts`.

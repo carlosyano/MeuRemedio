@@ -1,12 +1,14 @@
-// Rotas de planos (OpenAPI 02.33.4, tag Plans). updatePlan e deletePlan entram em seguida.
+// Rotas de planos (OpenAPI 02.33.4, tag Plans).
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Headers,
   Inject,
   Param,
   Post,
+  Put,
   Query,
   Req,
   Res,
@@ -16,14 +18,19 @@ import { sessionOf } from '../../../platform/http/access.guard.js';
 import { correlationIdOf } from '../../../platform/http/correlation.js';
 import { OperationId } from '../../../platform/http/operation-id.js';
 import { CreatePlan, type CreatePlanRequest } from '../application/create-plan.js';
+import { DeletePlan } from '../application/delete-plan.js';
 import { DEFAULT_PAGE_LIMIT, ReadPlans, type PlanPage } from '../application/read-plans.js';
 import type { PlanView } from '../application/plan-view.js';
+import type { PlanWriteRequest } from '../application/plan-write.js';
+import { UpdatePlan } from '../application/update-plan.js';
 
 @Controller()
 export class PlansController {
   constructor(
     @Inject(CreatePlan) private readonly createPlan: CreatePlan,
     @Inject(ReadPlans) private readonly readPlans: ReadPlans,
+    @Inject(UpdatePlan) private readonly updatePlan: UpdatePlan,
+    @Inject(DeletePlan) private readonly deletePlan: DeletePlan,
   ) {}
 
   @Get('plans')
@@ -65,5 +72,42 @@ export class PlansController {
     );
     void reply.header('etag', etag);
     return plan;
+  }
+
+  @Put('plans/:plan_id')
+  @OperationId('updatePlan')
+  async update(
+    @Req() request: FastifyRequest,
+    @Param('plan_id') planId: string,
+    @Body() body: PlanWriteRequest,
+    @Headers('if-match') ifMatch: string,
+    @Headers('idempotency-key') idempotencyKey: string,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<unknown> {
+    const response = await this.updatePlan.execute({
+      userId: sessionOf(request).userId,
+      planId,
+      ifMatch,
+      idempotencyKey,
+      correlationId: correlationIdOf(request.raw),
+      request: body,
+    });
+    void reply.headers(response.headers).status(response.status);
+    return response.body;
+  }
+
+  @Delete('plans/:plan_id')
+  @OperationId('deletePlan')
+  async remove(
+    @Req() request: FastifyRequest,
+    @Param('plan_id') planId: string,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<void> {
+    await this.deletePlan.execute({
+      userId: sessionOf(request).userId,
+      planId,
+      correlationId: correlationIdOf(request.raw),
+    });
+    void reply.status(204);
   }
 }

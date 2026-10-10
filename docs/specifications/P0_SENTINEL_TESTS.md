@@ -43,6 +43,8 @@
 
 **Estado (PR 31):** `getPlan` coberto por HTTP em `tests/integration/plans.spec.ts`: o plano de U1 acessado por U2 retorna 404 com o mesmo `status`, `code`, `title` e `detail` (e os mesmos cabeçalhos) de um UUID inexistente, sem `ETag`, com 1 `audit_events` `ownership.denied` por tentativa no recurso de U1 (DC-032) e P1 inalterado. `plan_id` fora do formato também retorna 404 (DC-031). `updatePlan` e `deletePlan` entram com a edição e a exclusão.
 
+**Estado (PR 32):** `updatePlan` e `deletePlan` cobertos em `tests/integration/plans-edit.spec.ts`: 404 idêntico para o plano de U1, UUID inexistente e id malformado, 1 `ownership.denied` por tentativa no recurso de U1 e P1 inalterado. TS-008 está completo por HTTP.
+
 ---
 
 ## TS-023 — BOLA/IDOR em todas as rotas privadas
@@ -78,6 +80,8 @@
 
 **Estado (PR 31):** os 5 passos estão cobertos por HTTP em `tests/integration/plans.spec.ts`. O passo 5 usa outro payload, porque repetir o payload A com chave nova exigiria a confirmação de duplicidade (RN-016). `updatePlan` entra com a edição.
 
+**Estado (PR 32):** `updatePlan` coberto em `tests/integration/plans-edit.spec.ts`: payload ou `If-Match` divergentes com a mesma chave retornam 409 `IDEMPOTENCY_KEY_REUSED` sem nova versão.
+
 ---
 
 ## TS-038 — Matriz de idempotência
@@ -99,6 +103,8 @@
 **Estado (PR 23):** `createAccount` cobre por HTTP os passos 1 a 4 (`tests/integration/create-account.spec.ts`: replay idêntico sem novo efeito, payload divergente com 409, ausência da chave com 400, concorrência com conta única); o passo 5 (expiração em 7 dias) está no serviço (`idempotency.spec.ts`). As outras 6 operações entram com seus módulos.
 
 **Estado (PR 31):** `createPlan` cobre por HTTP os passos 1 a 5 (`tests/integration/plans.spec.ts`). No passo 5, a chave expirada é tratada como nova: a requisição volta a passar pelas regras e, com o mesmo payload, recebe 409 `DUPLICATE_CONFIRMATION_REQUIRED` em vez do snapshot.
+
+**Estado (PR 32):** `updatePlan` cobre os passos 1 a 5 (`tests/integration/plans-edit.spec.ts`), com o `If-Match` e o `plan_id` no hash da requisição. No passo 5, a chave expirada é tratada como nova, e o `If-Match` antigo passa a retornar 409 `VERSION_CONFLICT`.
 
 ---
 
