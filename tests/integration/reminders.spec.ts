@@ -1,6 +1,7 @@
-// @trace RF-005 RN-009 RN-018 TS-017 TS-034 TS-035 ENT-009 (DEC-005; ADR-001 v1.5 OA-002)
-// Lembretes por e-mail contra PostgreSQL 17 real: 1 e-mail minimizado por ocorrencia em
-// scheduled_at, sem nome, dose ou link com token (RN-018); supressao depois da resposta ou da
+// @trace RF-005 RN-009 RN-018 TS-017 TS-034 TS-035 ENT-009 DEC-031 (DEC-005; ADR-001 v1.5 OA-002)
+// Lembretes por e-mail contra PostgreSQL 17 real: 1 e-mail por ocorrencia em scheduled_at, com o
+// nome do medicamento e o horario local previsto, sem dose nem link com token (RN-018, DEC-031);
+// supressao depois da resposta ou da
 // exclusao (TS-034); entrega incerta fica DELIVERY_UNKNOWN sem reenvio cego e expira em FAILED
 // DELIVERY_UNCONFIRMED (DEC-005, TS-035); retomada do worker sem e-mail duplicado (TS-017).
 import { PgBoss } from 'pg-boss';
@@ -221,15 +222,18 @@ describe('requestDueReminders: 1 lembrete por ocorrencia em scheduled_at (RN-018
 });
 
 describe('handleReminderRequested: envio minimizado e estados (FL-004)', () => {
-  it('envia 1 e-mail sem nome, dose ou token e registra SENT com a evidencia do provedor', async () => {
+  it('DEC-031: envia 1 e-mail com nome e horario, sem dose nem token, e registra SENT', async () => {
     const id = await requestAtEight(await planWithOccurrences());
     await deliver(id);
     expect(email.sent).toHaveLength(1);
     const [message] = email.sent;
     expect(message?.to).toBe('ana.silva@example.com');
     expect(message?.reference).toBe(id);
+    expect(message?.subject).toBe('Lembrete: Losartana Sintetica às 08:00');
+    expect(message?.text).toContain('Losartana Sintetica');
+    expect(message?.text).toContain('08:00');
     const content = `${message?.subject ?? ''}\n${message?.text ?? ''}`;
-    expect(content).not.toMatch(/Losartana|50 mg|comprimido/i);
+    expect(content).not.toMatch(/50 mg|comprimido/i);
     expect(content).not.toMatch(/token|[?&]\w+=/i);
     expect(content).toContain(WEB);
     expect((await reminders())[0]).toMatchObject({
@@ -239,6 +243,17 @@ describe('handleReminderRequested: envio minimizado e estados (FL-004)', () => {
       sent_at: new Date('2026-10-05T11:00:00Z'),
       failure_code: null,
     });
+  });
+
+  it('DEC-031: usa o snapshot da ocorrencia, nao o nome atual do plano', async () => {
+    const planId = await planWithOccurrences();
+    await h.pool.query(
+      `UPDATE occurrences SET medication_name_snapshot = 'Nome Anterior Sintetico'
+        WHERE plan_id = $1 AND local_time = '08:00'`,
+      [planId],
+    );
+    await deliver(await requestAtEight(planId));
+    expect(email.sent[0]?.subject).toBe('Lembrete: Nome Anterior Sintetico às 08:00');
   });
 
   it('reentrega do evento depois do SENT nao reenvia', async () => {
