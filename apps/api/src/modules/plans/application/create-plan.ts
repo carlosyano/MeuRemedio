@@ -10,29 +10,26 @@
 //   - criacoes do mesmo titular serializam a verificacao de duplicidade (advisory lock);
 //   - plano, horarios e evento plans.occurrences_requested no Outbox na mesma transacao (RN-018).
 import { createHash, randomBytes } from 'node:crypto';
-import { normalizePlanText, planPeriodsOverlap } from '@meuremedio/domain';
+import { planPeriodsOverlap } from '@meuremedio/domain';
 import type { Pool, PoolClient } from 'pg';
 import type { Clock } from '../../../platform/clock.js';
 import { withTransaction } from '../../../platform/db/transaction.js';
-import { ProblemError, type FieldError } from '../../../platform/http/problem-catalog.js';
+import { ProblemError } from '../../../platform/http/problem-catalog.js';
 import {
   runIdempotent,
   type IdempotentResponse,
   type RequestHasher,
 } from '../../../platform/idempotency/idempotency.js';
 import { etagOf, findPlan, toPlanView } from './plan-view.js';
+import {
+  addScheduleTimes,
+  requestOccurrences,
+  validatePlanWrite,
+  type NormalizedPlanText,
+  type PlanWriteRequest,
+} from './plan-write.js';
 
-export interface CreatePlanRequest {
-  readonly medication_name: string;
-  readonly dose_text: string;
-  readonly medication_form: string;
-  readonly administration_route: string;
-  readonly instructions?: string | null;
-  readonly prescriber_name?: string | null;
-  readonly prescriber_crm?: string | null;
-  readonly start_date: string;
-  readonly end_date?: string | null;
-  readonly schedule_times: readonly string[];
+export interface CreatePlanRequest extends PlanWriteRequest {
   readonly duplicate_confirmation_token?: string;
 }
 
@@ -40,8 +37,6 @@ export interface CreatePlanRequest {
 const CONFIRMATION_TTL_MS = 10 * 60_000;
 /** Maximo de candidatos no 409 (DuplicateConfirmation.candidates.maxItems). */
 const MAX_CANDIDATES = 20;
-
-export const OCCURRENCES_REQUESTED = 'plans.occurrences_requested';
 
 const hashToken = (token: string): Buffer => createHash('sha256').update(token).digest();
 
@@ -51,13 +46,6 @@ interface Candidate {
   dose_text: string;
   start_date: string;
   end_date: string | null;
-}
-
-interface Normalized {
-  readonly medicationName: string;
-  readonly doseText: string;
-  readonly medicationNameNorm: string;
-  readonly doseTextNorm: string;
 }
 
 type Outcome =
@@ -76,7 +64,7 @@ export class CreatePlan {
     idempotencyKey: string,
     request: CreatePlanRequest,
   ): Promise<IdempotentResponse> {
-    const normalized = validate(request);
+    const normalized = validatePlanWrite(request);
     const now = this.clock.now();
     const { duplicate_confirmation_token: token, ...payload } = request;
     const payloadHash = this.hashRequest({ body: payload });
@@ -133,7 +121,7 @@ export class CreatePlan {
     input: {
       userId: string;
       request: CreatePlanRequest;
-      normalized: Normalized;
+      normalized: NormalizedPlanText;
       now: string;
       token: string | undefined;
       payloadHash: Buffer;
@@ -192,7 +180,7 @@ export class CreatePlan {
     client: PoolClient,
     userId: string,
     request: CreatePlanRequest,
-    normalized: Normalized,
+    normalized: NormalizedPlanText,
     now: string,
   ): Promise<string> {
     const inserted = await client.query<{ id: string }>(
@@ -221,17 +209,8 @@ export class CreatePlan {
     const planId = inserted.rows[0]?.id;
     if (planId === undefined) throw new Error('INSERT em medication_plans nao retornou id');
 
-    await client.query(
-      `INSERT INTO schedule_times (plan_id, time_of_day, created_at)
-       SELECT $1, t, $3 FROM unnest($2::time[]) AS t`,
-      [planId, [...request.schedule_times].sort(), now],
-    );
-    await client.query(
-      `INSERT INTO outbox_events (aggregate_type, aggregate_id, event_type, payload, available_at,
-                                  created_at)
-       VALUES ('medication_plan', $1, $2, $3, $4, $4)`,
-      [planId, OCCURRENCES_REQUESTED, JSON.stringify({ plan_id: planId }), now],
-    );
+    await addScheduleTimes(client, planId, request.schedule_times, now);
+    await requestOccurrences(client, planId, now);
     return planId;
   }
 
@@ -274,30 +253,4 @@ export class CreatePlan {
     );
     return result.rowCount === 1;
   }
-}
-
-function validate(request: CreatePlanRequest): Normalized {
-  const medicationName = request.medication_name.trim();
-  const doseText = request.dose_text.trim();
-  const medicationNameNorm = normalizePlanText(medicationName);
-  const doseTextNorm = normalizePlanText(doseText);
-  const errors: FieldError[] = [];
-  // Texto so com espacos ou marcas combinantes fica vazio depois de normalizado.
-  if (medicationNameNorm.length === 0) {
-    errors.push({ field: 'medication_name', code: 'REQUIRED', message: 'Informe o medicamento.' });
-  }
-  if (doseTextNorm.length === 0) {
-    errors.push({ field: 'dose_text', code: 'REQUIRED', message: 'Informe a dose.' });
-  }
-  if (errors.length > 0) throw new ProblemError('VALIDATION_FAILED', errors);
-  if (request.end_date != null && request.end_date < request.start_date) {
-    throw new ProblemError('BUSINESS_RULE_VIOLATION', [
-      {
-        field: 'end_date',
-        code: 'BEFORE_START_DATE',
-        message: 'A data de término deve ser igual ou posterior à data de início.',
-      },
-    ]);
-  }
-  return { medicationName, doseText, medicationNameNorm, doseTextNorm };
 }
