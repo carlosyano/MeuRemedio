@@ -35,7 +35,7 @@ export interface OccurrencePage {
   readonly page: PageMeta;
 }
 
-interface OccurrenceRow {
+export interface OccurrenceRow {
   id: string;
   plan_id: string;
   local_scheduled_date: string;
@@ -50,10 +50,17 @@ interface OccurrenceRow {
   row_version: string;
 }
 
+/** Colunas de OccurrenceRow, com a ocorrencia no alias o. */
+export const OCCURRENCE_COLUMNS = `o.id, o.plan_id,
+  to_char(o.local_scheduled_date, 'YYYY-MM-DD') AS local_scheduled_date,
+  to_char(o.local_time, 'HH24:MI') AS local_time, o.scheduled_at, o.deadline_at, o.status,
+  o.medication_name_snapshot, o.dose_text_snapshot, o.is_late, o.no_response_reached_at,
+  o.row_version`;
+
 /** Instante UTC sem a fracao vazia (.000). */
 export const instantOf = (value: Date): string => value.toISOString().replace('.000Z', 'Z');
 
-const toOccurrenceView = (row: OccurrenceRow): OccurrenceView => ({
+export const toOccurrenceView = (row: OccurrenceRow): OccurrenceView => ({
   occurrence_id: row.id,
   plan_id: row.plan_id,
   local_scheduled_date: row.local_scheduled_date,
@@ -83,10 +90,7 @@ export class ReadOccurrences {
     const after = filter.cursor === undefined ? null : decodeCursor(filter.cursor);
     const rows = (
       await this.pool.query<OccurrenceRow>(
-        `SELECT o.id, o.plan_id, to_char(o.local_scheduled_date, 'YYYY-MM-DD') AS local_scheduled_date,
-                to_char(o.local_time, 'HH24:MI') AS local_time, o.scheduled_at, o.deadline_at,
-                o.status, o.medication_name_snapshot, o.dose_text_snapshot, o.is_late,
-                o.no_response_reached_at, o.row_version
+        `SELECT ${OCCURRENCE_COLUMNS}
            FROM occurrences o
            JOIN medication_plans p ON p.id = o.plan_id AND p.status = 'ACTIVE'
           WHERE o.user_id = $1 AND o.scheduled_at <= $2

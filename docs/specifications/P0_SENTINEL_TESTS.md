@@ -66,6 +66,8 @@
 
 **Estado (PR 33):** `listOccurrences` (coleção vazia para U2) e `createResponse` (por identificador, com auditoria) estão em `tests/integration/occurrences.spec.ts`. O teste gerado a partir da OpenAPI continua pendente até as rotas de histórico, exportação e privacidade existirem.
 
+
+**Estado (PR 39):** `getHistory` (coleção vazia para U2) está em `tests/integration/history.spec.ts`. Faltam as rotas de exportação e privacidade para o teste gerado a partir da OpenAPI.
 ---
 
 ## TS-015 — Idempotência com payload divergente

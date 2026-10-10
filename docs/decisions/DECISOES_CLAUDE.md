@@ -46,6 +46,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-038 | Job de prazo NO_RESPONSE | Vigente |
 | DC-039 | Job horário do horizonte | Vigente |
 | DC-040 | Lembretes por e-mail sem reenvio cego | Vigente |
+| DC-041 | Período e conteúdo de `getHistory` | Vigente |
 
 ---
 
@@ -360,3 +361,16 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Texto:** substituído pela DEC-031 (10/10/2026). O assunto é "Lembrete: <nome> às <HH:MM>", e o corpo traz o nome do medicamento (snapshot da ocorrência), o horário local previsto e o endereço raiz da aplicação, sem dose nem token. A versão inicial era genérica, sem nome nem horário.
 - **Riscos:** a falha entre a confirmação da tentativa e o envio perde o lembrete, que fica registrado como incerto. Sem o adaptador SES (OA-004), não existe conciliação positiva, e todo envio incerto termina FAILED DELIVERY_UNCONFIRMED.
 - **Aplica-se a:** `modules/reminders/application/email-reminders.ts`, `platform/email/email-sender.ts`, `worker.ts` e `migrations/0006_reminders.sql`.
+
+## DC-041 — Período e conteúdo de `getHistory` (10/10/2026)
+
+- **Contexto:** RN-010 fixa o período civil inclusivo de até 12 meses, aplicado como intervalo semiaberto no fuso da conta, e CA-009 a ordem decrescente. Não estão definidos como contar os "12 meses", quais ocorrências entram nem o erro de período inválido (`getHistory` só documenta 400).
+- **Alternativas:** para o recorte, (a) filtrar por `local_scheduled_date` ou (b) por `scheduled_at` no intervalo `[início do dia start, início do dia seguinte a end)`, com o início do dia resolvido no fuso da conta.
+- **Decisão:**
+  - **Recorte:** (b), como manda a RN-010. A meia-noite inexistente avança, como no tempo civil (`resolveCivilInstant`).
+  - **Limite de 12 meses:** `end` vai no máximo até a véspera de `start` + 12 meses (01/01/2026 a 31/12/2026 passa; até 01/01/2027, não). Quando o dia de `start` não existe no mês de chegada, como 29/02, vale o último dia desse mês.
+  - **Erros:** `end` antes de `start` ou período maior que 12 meses retornam 400 `VALIDATION_FAILED` no campo `end`, com `code` BEFORE_START ou PERIOD_TOO_LONG. Data ausente ou inexistente é barrada pelo contrato.
+  - **Conteúdo:** entram as ocorrências do titular já alcançadas (`scheduled_at <= agora`), sem as CANCELED, com a resposta (ou `null`). As de plano excluído continuam, porque o histórico é preservado (TS-005, TS-037).
+  - **Ordem e paginação:** `(scheduled_at DESC, id DESC)`, com o cursor da DC-030.
+- **Riscos:** as ocorrências futuras do período não aparecem, porque histórico é o que já aconteceu. As CANCELED somem do histórico, mas continuam no banco.
+- **Aplica-se a:** `packages/domain/src/history-window.ts` e `modules/history/application/read-history.ts`.
