@@ -19,11 +19,18 @@ const CORRELATION_HEADER = 'x-correlation-id';
 const OPENAPI_FILE = /^MeuRemedio_OpenAPI_.*_COMPLETO\.yaml$/;
 const REPOSITORY_ROOT = new URL('../../../../../', import.meta.url);
 
+/** Valor de query em lista separada por virgula (style form, explode false). */
+export function commaSeparatedList(value: unknown): unknown {
+  return typeof value === 'string' ? value.split(',') : value;
+}
+
 interface ParameterSpec {
   readonly name: string;
   readonly in: 'path' | 'query' | 'header' | 'cookie';
   readonly required: boolean;
   readonly schema: unknown;
+  /** Lista em query com style form e explode false: chega como "A,B" (OpenAPI 3.1 §4.8.12.4). */
+  readonly commaSeparated: boolean;
 }
 
 interface ResponseSpec {
@@ -185,7 +192,8 @@ export class OpenApiContract {
               : undefined;
       if (source === undefined) continue;
       const key = parameter.in === 'header' ? parameter.name.toLowerCase() : parameter.name;
-      const value = source[key];
+      const raw = source[key];
+      const value = parameter.commaSeparated ? commaSeparatedList(raw) : raw;
       if (value === undefined) {
         if (parameter.required) {
           errors.push({ field: parameter.name, code: 'REQUIRED', message: 'Campo obrigatório.' });
@@ -315,6 +323,12 @@ export class OpenApiContract {
         in: parameter['in'] as ParameterSpec['in'],
         required: parameter['required'] === true,
         schema: parameter['schema'],
+        commaSeparated:
+          parameter['in'] === 'query' &&
+          isObject(parameter['schema']) &&
+          parameter['schema']['type'] === 'array' &&
+          (parameter['style'] ?? 'form') === 'form' &&
+          parameter['explode'] === false,
       };
     });
   }

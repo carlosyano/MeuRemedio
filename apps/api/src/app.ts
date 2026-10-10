@@ -23,11 +23,14 @@ import {
   type HealthSettings,
 } from './modules/platform/application/health.js';
 import { HealthController } from './modules/platform/infrastructure/health.controller.js';
+import { ReadOccurrences } from './modules/occurrences/application/read-occurrences.js';
+import { OccurrencesController } from './modules/occurrences/infrastructure/occurrences.controller.js';
 import { CreatePlan } from './modules/plans/application/create-plan.js';
 import { DeletePlan } from './modules/plans/application/delete-plan.js';
 import { ReadPlans } from './modules/plans/application/read-plans.js';
 import { UpdatePlan } from './modules/plans/application/update-plan.js';
 import { PlansController } from './modules/plans/infrastructure/plans.controller.js';
+import { CreateResponse } from './modules/responses/application/create-response.js';
 import { CLOCK, type Clock } from './platform/clock.js';
 import { OpenApiContract, locateNormativeOpenApi } from './platform/contract/openapi-contract.js';
 import { assertRoutesMatchContract, type DeclaredRoute } from './platform/contract/route-check.js';
@@ -47,6 +50,7 @@ const CONTROLLERS: Type[] = [
   AccountsController,
   SessionsController,
   PlansController,
+  OccurrencesController,
 ];
 
 export interface CreateAppOptions {
@@ -119,6 +123,14 @@ class AppModule {
           useValue: new UpdatePlan(options.database, options.clock, hashRequest),
         },
         { provide: DeletePlan, useValue: new DeletePlan(options.database, options.clock) },
+        {
+          provide: ReadOccurrences,
+          useValue: new ReadOccurrences(options.database, options.clock),
+        },
+        {
+          provide: CreateResponse,
+          useValue: new CreateResponse(options.database, options.clock, hashRequest),
+        },
       ],
     };
   }

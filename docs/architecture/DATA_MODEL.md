@@ -329,7 +329,7 @@ Trilha imutável e minimizada de ações críticas.
 | `occurred_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | - |
 | `actor_user_id` | uuid | não | 128 bits | UUID | null | não | - | identificação | sem FK; pseudonimizado no expurgo |
 | `action` | varchar | sim | <=80 | ex.: auth.login_failed, ownership.denied | - | não | - | operacional | catálogo fechado em código |
-| `resource_type` | varchar | não | <=40 | texto | null | não | - | operacional | - |
+| `resource_type` | varchar | não | <=40 | texto | null | não | - | operacional | `medication_plan` ou `occurrence` |
 | `resource_id` | uuid | não | 128 bits | UUID | null | não | - | operacional | - |
 | `outcome` | audit_outcome | sim | - | SUCCESS\|DENIED\|FAILED | - | não | - | operacional | - |
 | `correlation_id` | uuid | sim | 128 bits | UUID | - | não | - | operacional | - |

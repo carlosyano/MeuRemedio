@@ -28,6 +28,8 @@
 
 **Estado (PR 5):** a base de banco está em `tests/integration/db-core.spec.ts` (PostgreSQL 17 real): em 60 corridas simultâneas, exatamente uma resposta vence e a outra viola `responses_occurrence_id_key`. O teste HTTP completo permanece pendente (requer a API).
 
+**Estado (PR 33):** o teste HTTP completo está em `tests/integration/occurrences.spec.ts`: 100 iterações, cada uma com ocorrência nova, disparam TAKEN e NOT_TAKEN simultâneos com chaves distintas. Em todas, exatamente um 201 e um 409 `STATE_CONFLICT` em `application/problem+json` com `correlation_id`, 1 linha em `responses`, `occurrences.status` igual ao tipo aceito e `is_late=false`. O relógio avança 1 minuto por iteração para o limite por titular não interferir.
+
 ---
 
 ## TS-008 — Acesso horizontal (BOLA) em recurso individual
@@ -45,6 +47,8 @@
 
 **Estado (PR 32):** `updatePlan` e `deletePlan` cobertos em `tests/integration/plans-edit.spec.ts`: 404 idêntico para o plano de U1, UUID inexistente e id malformado, 1 `ownership.denied` por tentativa no recurso de U1 e P1 inalterado. TS-008 está completo por HTTP.
 
+**Estado (PR 33):** `createResponse` coberto em `tests/integration/occurrences.spec.ts`: 404 idêntico para a ocorrência de U1, UUID inexistente e id malformado, 1 `ownership.denied` com `resource_type = occurrence` e ocorrência intacta.
+
 ---
 
 ## TS-023 — BOLA/IDOR em todas as rotas privadas
@@ -59,6 +63,8 @@
 **Falha obrigatória do teste:** se existir operação privada sem caso correspondente (cobertura medida contra a OpenAPI), o teste reprova.
 
 **Estado (PR 31):** parcial. `getPlan` (por identificador) e `listPlans` (coleção vazia para U2) estão em `tests/integration/plans.spec.ts`. O teste gerado a partir da OpenAPI, que reprova operação privada sem caso, entra quando as rotas por identificador estiverem implementadas.
+
+**Estado (PR 33):** `listOccurrences` (coleção vazia para U2) e `createResponse` (por identificador, com auditoria) estão em `tests/integration/occurrences.spec.ts`. O teste gerado a partir da OpenAPI continua pendente até as rotas de histórico, exportação e privacidade existirem.
 
 ---
 
@@ -81,6 +87,8 @@
 **Estado (PR 31):** os 5 passos estão cobertos por HTTP em `tests/integration/plans.spec.ts`. O passo 5 usa outro payload, porque repetir o payload A com chave nova exigiria a confirmação de duplicidade (RN-016). `updatePlan` entra com a edição.
 
 **Estado (PR 32):** `updatePlan` coberto em `tests/integration/plans-edit.spec.ts`: payload ou `If-Match` divergentes com a mesma chave retornam 409 `IDEMPOTENCY_KEY_REUSED` sem nova versão.
+
+**Estado (PR 33):** `createResponse` coberto em `tests/integration/occurrences.spec.ts`: corpo divergente ou outra ocorrência com a mesma chave retornam 409 `IDEMPOTENCY_KEY_REUSED` sem nova resposta.
 
 ---
 
@@ -105,6 +113,8 @@
 **Estado (PR 31):** `createPlan` cobre por HTTP os passos 1 a 5 (`tests/integration/plans.spec.ts`). No passo 5, a chave expirada é tratada como nova: a requisição volta a passar pelas regras e, com o mesmo payload, recebe 409 `DUPLICATE_CONFIRMATION_REQUIRED` em vez do snapshot.
 
 **Estado (PR 32):** `updatePlan` cobre os passos 1 a 5 (`tests/integration/plans-edit.spec.ts`), com o `If-Match` e o `plan_id` no hash da requisição. No passo 5, a chave expirada é tratada como nova, e o `If-Match` antigo passa a retornar 409 `VERSION_CONFLICT`.
+
+**Estado (PR 33):** `createResponse` cobre os passos 1 a 5 (`tests/integration/occurrences.spec.ts`), com o `occurrence_id` no hash. No passo 5, a chave expirada é tratada como nova, e a ocorrência já respondida retorna 409 `STATE_CONFLICT`.
 
 ---
 

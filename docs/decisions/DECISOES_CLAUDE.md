@@ -41,6 +41,8 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-033 | Geração de ocorrências do plano pelo Outbox | Vigente |
 | DC-034 | Exclusão de plano já excluído | Vigente |
 | DC-035 | Ocorrências na edição de plano | Vigente |
+| DC-036 | Escopo e ordem de `listOccurrences` | Vigente |
+| DC-037 | Quando uma ocorrência aceita resposta | Vigente |
 
 ---
 
@@ -271,7 +273,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Contexto:** a OpenAPI fixa a paginação por cursor (padrão 20, máximo 100), mas não a ordem.
 - **Decisão:** os planos vêm do mais recente para o mais antigo, por `(created_at DESC, id DESC)`. O cursor é o base64url de `{t, i}`, com o `created_at` em microssegundos UTC e o `id` do último item entregue. A página seguinte começa depois dessa posição (keyset), sem repetir nem pular itens, mesmo quando o `created_at` coincide. Cursor malformado retorna 400 `VALIDATION_FAILED`. O cursor não é assinado: ele só posiciona a busca, que é sempre filtrada pelo titular da sessão.
 - **Riscos:** um plano criado durante a paginação pode não aparecer nas páginas seguintes (comportamento normal de keyset).
-- **Aplica-se a:** `modules/plans/application/read-plans.ts`. O mesmo padrão deve servir às outras listas.
+- **Aplica-se a:** `modules/plans/application/read-plans.ts` e `platform/http/keyset-cursor.ts`, que serve às outras listas (`listOccurrences`, DC-036).
 
 ## DC-031 — Identificador de caminho fora do formato (10/10/2026)
 
@@ -310,3 +312,19 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** (b). Toda edição, inclusive a que só muda nome ou dose, cancela as futuras PROGRAMMED do plano e grava `plans.occurrences_requested`. O worker regera o horizonte com a configuração e os snapshots novos. Futuras já respondidas ficam, e o índice de unicidade impede regerar o mesmo slot. Horários retirados recebem `removed_at` (a FK das ocorrências antigas é preservada), e os mantidos conservam o id. Pela DEC-027, um horário novo cujo prazo do dia já passou nasce NO_RESPONSE na regeração.
 - **Riscos:** cada edição produz linhas CANCELED no horizonte (até 300 por plano com 10 horários). Até o worker regerar, o plano fica sem ocorrências futuras.
 - **Aplica-se a:** `modules/plans/application/update-plan.ts` e `plan-write.ts`.
+
+## DC-036 — Escopo e ordem de `listOccurrences` (10/10/2026)
+
+- **Contexto:** a OpenAPI resume `listOccurrences` como "Listar ocorrencias acionaveis", filtrável por `status` e paginada por cursor, sem definir o recorte de tempo, o filtro padrão nem a ordem. O lembrete web consulta a rota a cada 60 s (RF-005), e o horizonte guarda até 30 dias de ocorrências futuras.
+- **Alternativas:** (a) todas as ocorrências do titular, em ordem cronológica; (b) só as já alcançadas (`scheduled_at <= agora`), da mais recente para a mais antiga.
+- **Decisão:** (b). A lista traz só as ocorrências já alcançadas de planos ACTIVE do titular, ordenadas por `(scheduled_at DESC, id DESC)`, com o cursor da DC-030. Sem `status`, vêm todos os estados menos CANCELED, porque as canceladas são resíduo das edições (DC-035). Com `status` (lista separada por vírgula, `style: form`, `explode: false`), vêm exatamente os estados pedidos. Ocorrências de plano excluído ficam fora da lista (TS-005).
+- **Riscos:** a agenda das doses futuras não sai desta rota. Se a interface precisar dela, a decisão vira proposta de DEC com um filtro de período no contrato.
+- **Aplica-se a:** `modules/occurrences/application/read-occurrences.ts` e `platform/contract/openapi-contract.ts` (lista separada por vírgula em query).
+
+## DC-037 — Quando uma ocorrência aceita resposta (10/10/2026)
+
+- **Contexto:** RN-008 aceita só a primeira resposta, e RN-009 permite a resposta tardia, mas a Especificação não diz se uma ocorrência futura pode ser respondida, nem o que fazer com a ocorrência CANCELED ou de plano excluído. `createResponse` documenta 404 e 409, sem 422.
+- **Alternativas:** (a) aceitar qualquer PROGRAMMED, mesmo futura; (b) aceitar PROGRAMMED ou NO_RESPONSE já alcançada (`scheduled_at <= agora`).
+- **Decisão:** (b), em linha com a DC-036. Ocorrência futura, já respondida ou CANCELED recebe 409 `STATE_CONFLICT`. Ocorrência de plano excluído recebe 404, como o próprio plano, sem auditoria. A de outro titular recebe 404 idêntico e gera `ownership.denied` com `resource_type = occurrence` (DC-032). `is_late` é verdadeiro quando o prazo já foi atingido (`deadline_at <= captured_at`), mesmo que o job de prazo ainda não tenha passado a ocorrência para NO_RESPONSE. Nesse caso, `no_response_reached_at` continua nulo, e quando o marco existe ele é preservado (TS-007).
+- **Riscos:** quem toma a dose alguns minutos antes do horário precisa esperar o horário para registrar. O `detail` fixo do `STATE_CONFLICT` no catálogo ("Esta ocorrência já recebeu uma resposta.") não descreve bem a ocorrência futura ou cancelada. As duas questões podem ir para uma DEC se a interface pedir.
+- **Aplica-se a:** `modules/responses/application/create-response.ts`.
