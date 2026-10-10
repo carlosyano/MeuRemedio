@@ -35,6 +35,8 @@ export interface CallOptions {
 
 export interface Harness {
   readonly pool: pg.Pool;
+  /** URL do banco isolado da suite (ex.: para o pg-boss do worker). */
+  readonly url: string;
   readonly app: NestFastifyApplication;
   readonly contract: OpenApiContract;
   now: string;
@@ -79,6 +81,7 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
 
   const harness: Harness = {
     pool,
+    url: db.url,
     app,
     contract,
     get now() {

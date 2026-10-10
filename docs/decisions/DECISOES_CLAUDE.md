@@ -43,6 +43,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-035 | Ocorrências na edição de plano | Vigente |
 | DC-036 | Escopo e ordem de `listOccurrences` | Vigente |
 | DC-037 | Quando uma ocorrência aceita resposta | Vigente |
+| DC-038 | Job de prazo NO_RESPONSE | Vigente |
 
 ---
 
@@ -328,3 +329,11 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** (b), em linha com a DC-036. Ocorrência futura, já respondida ou CANCELED recebe 409 `STATE_CONFLICT`. Ocorrência de plano excluído recebe 404, como o próprio plano, sem auditoria. A de outro titular recebe 404 idêntico e gera `ownership.denied` com `resource_type = occurrence` (DC-032). `is_late` é verdadeiro quando o prazo já foi atingido (`deadline_at <= captured_at`), mesmo que o job de prazo ainda não tenha passado a ocorrência para NO_RESPONSE. Nesse caso, `no_response_reached_at` continua nulo, e quando o marco existe ele é preservado (TS-007).
 - **Riscos:** quem toma a dose alguns minutos antes do horário precisa esperar o horário para registrar. O `detail` fixo do `STATE_CONFLICT` no catálogo ("Esta ocorrência já recebeu uma resposta.") não descreve bem a ocorrência futura ou cancelada. As duas questões podem ir para uma DEC se a interface pedir.
 - **Aplica-se a:** `modules/responses/application/create-response.ts`.
+
+## DC-038 — Job de prazo NO_RESPONSE (10/10/2026)
+
+- **Contexto:** RN-009 e CA-008 mandam passar a NO_RESPONSE, uma única vez, a ocorrência sem resposta 60 minutos após `scheduled_at`, e a Especificação (seção 6) fixa o job de prazo a cada minuto. Não estão definidos o valor do marco `no_response_reached_at`, o tratamento das passadas perdidas com o worker parado nem o das ocorrências de plano excluído.
+- **Alternativas:** para o marco, (a) o `deadline_at` ou (b) o instante da varredura. Para as passadas perdidas, (a) reexecutar todas ou (b) só a mais recente.
+- **Decisão:** o marco é o instante da varredura, como na geração tardia da DEC-027: ele registra quando o sistema percebeu o prazo. A varredura é um agendamento do pg-boss (`* * * * *`, fila `occurrences.deadline_sweep`) com `missed: 'once'`, porque uma passada alcança todos os prazos vencidos. Ela trabalha em lotes de 1.000 com `FOR UPDATE SKIP LOCKED`, e a corrida com `createResponse` termina em estado único (TS-013). As ocorrências iniciadas de plano excluído também passam a NO_RESPONSE, porque o histórico continua sendo fato.
+- **Riscos:** com o worker parado, o marco fica atrasado em relação ao prazo real. A diferença aparece no histórico como o momento em que o sistema registrou o prazo.
+- **Aplica-se a:** `modules/occurrences/application/deadline-sweep.ts` e `worker.ts`.
