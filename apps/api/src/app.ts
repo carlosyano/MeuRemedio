@@ -23,6 +23,9 @@ import {
   type HealthSettings,
 } from './modules/platform/application/health.js';
 import { HealthController } from './modules/platform/infrastructure/health.controller.js';
+import { CreatePlan } from './modules/plans/application/create-plan.js';
+import { ReadPlans } from './modules/plans/application/read-plans.js';
+import { PlansController } from './modules/plans/infrastructure/plans.controller.js';
 import { CLOCK, type Clock } from './platform/clock.js';
 import { OpenApiContract, locateNormativeOpenApi } from './platform/contract/openapi-contract.js';
 import { assertRoutesMatchContract, type DeclaredRoute } from './platform/contract/route-check.js';
@@ -37,7 +40,12 @@ import { ProblemFilter } from './platform/http/problem-filter.js';
 import { createRequestHasher } from './platform/idempotency/idempotency.js';
 import { PostgresRateLimiter } from './platform/rate-limit/rate-limiter.js';
 
-const CONTROLLERS: Type[] = [HealthController, AccountsController, SessionsController];
+const CONTROLLERS: Type[] = [
+  HealthController,
+  AccountsController,
+  SessionsController,
+  PlansController,
+];
 
 export interface CreateAppOptions {
   readonly clock: Clock;
@@ -73,6 +81,7 @@ class AppModule {
       clockSkewMaxMs: options.clockSkewMaxMs ?? DEFAULT_CLOCK_SKEW_MAX_MS,
       probeTimeoutMs: options.healthProbeTimeoutMs ?? DEFAULT_HEALTH_PROBE_TIMEOUT_MS,
     };
+    const hashRequest = createRequestHasher(options.secrets.requestHashKey);
     return {
       module: AppModule,
       imports: [DiscoveryModule],
@@ -86,7 +95,7 @@ class AppModule {
           useValue: new CreateAccount(
             options.database,
             options.clock,
-            createRequestHasher(options.secrets.requestHashKey),
+            hashRequest,
             argon2idPasswordHasher,
             loadCompromisedPasswords(),
           ),
@@ -98,6 +107,11 @@ class AppModule {
           provide: ResendVerification,
           useValue: new ResendVerification(options.database, options.clock),
         },
+        {
+          provide: CreatePlan,
+          useValue: new CreatePlan(options.database, options.clock, hashRequest),
+        },
+        { provide: ReadPlans, useValue: new ReadPlans(options.database, options.clock) },
       ],
     };
   }

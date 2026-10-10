@@ -9,7 +9,10 @@ import type { Pool, PoolClient } from 'pg';
 import type { Clock } from '../clock.js';
 
 /** Filas (event_type) conhecidas; o worker cria cada uma no pg-boss ao subir. */
-export const OUTBOX_QUEUES = ['identity.verification_requested'] as const;
+export const OUTBOX_QUEUES = [
+  'identity.verification_requested',
+  'plans.occurrences_requested',
+] as const;
 
 export interface TransactionalDb {
   executeSql(text: string, values?: unknown[]): Promise<{ rows: unknown[] }>;

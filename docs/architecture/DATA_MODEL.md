@@ -417,6 +417,7 @@ Perfil versionado e reproduzível de desempenho.
 
 - `rate_limit_counters`: UNLOGGED; (scope text, key_hash bytea, window_start timestamptz, count int); PK(scope,key_hash,window_start); limpeza por job a cada 5 min (DEC-019).
 - `login_failure_counters`: UNLOGGED; (email_hash bytea PK, window_start, failures smallint, locked_until timestamptz); chave = HMAC do e-mail normalizado, inclusive e-mails inexistentes (DEC-016).
+- `plan_duplicate_confirmations`: token de confirmação de duplicidade de plano (RN-016, DC-028); (token_hash bytea PK = SHA-256 do token, user_id FK users ON DELETE CASCADE, request_hash bytea = HMAC do payload sem o token, issued_at, expires_at = issued_at + 10 min, consumed_at < expires_at); uso único garantido pelo consumo atômico no serviço.
 - `schema pgboss`: Gerenciado pela biblioteca pg-boss (OA-002); fora do dicionário de domínio.
 
 ## 5. Regras de completude
@@ -433,7 +434,8 @@ Perfil versionado e reproduzível de desempenho.
 | `apps/api/migrations/0002_platform.sql` | ENT-011 `idempotency_records`, ENT-012 `outbox_events` | Implementada e coberta por `tests/integration/db-platform.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0003_identity.sql` | ENT-002 `verification_tokens` e a tabela de plataforma `rate_limit_counters` (UNLOGGED) | Implementada e coberta por `tests/integration/db-identity.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0004_login_failures.sql` | Tabela de plataforma `login_failure_counters` (UNLOGGED, DEC-016) | Implementada e coberta por `tests/security/ts-033.spec.ts` (PostgreSQL 17 real) |
-| Demais entidades | ENT-003, ENT-009, ENT-010, ENT-013 a ENT-017 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
+| `apps/api/migrations/0005_plans.sql` | ENT-013 `audit_events` (append-only por trigger) e a tabela de plataforma `plan_duplicate_confirmations` (DC-028) | Implementada e coberta por `tests/integration/db-plans.spec.ts` (PostgreSQL 17 real) |
+| Demais entidades | ENT-003, ENT-009, ENT-010, ENT-014 a ENT-017 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
 
 **Rollback:** as migrações criam apenas objetos novos, sem dados nem dependentes externos; o rollback é uma migração nova que remove os objetos criados (a lista está no cabeçalho de cada arquivo). Uma migração aplicada nunca é editada.
 

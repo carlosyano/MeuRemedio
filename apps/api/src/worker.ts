@@ -6,6 +6,10 @@ import {
   handleVerificationRequested,
   type VerificationRequested,
 } from './modules/identity/application/issue-verification.js';
+import {
+  handleOccurrencesRequested,
+  type OccurrencesRequested,
+} from './modules/occurrences/application/occurrences-requested.js';
 import type { Clock } from './platform/clock.js';
 import type { EmailSender } from './platform/email/email-sender.js';
 import { OUTBOX_QUEUES, OutboxDispatcher } from './platform/outbox/dispatcher.js';
@@ -44,6 +48,16 @@ export async function startWorker(options: WorkerOptions): Promise<RunningWorker
           },
           job.data,
         );
+      }
+    },
+  );
+
+  await boss.work<OccurrencesRequested>(
+    'plans.occurrences_requested',
+    { pollingIntervalSeconds: 0.5 },
+    async (jobs) => {
+      for (const job of jobs) {
+        await handleOccurrencesRequested({ pool: options.pool, clock: options.clock }, job.data);
       }
     },
   );
