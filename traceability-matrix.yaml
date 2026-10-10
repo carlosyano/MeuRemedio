@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-matrix_version: 2.1.6
+matrix_version: 2.1.7
 status: baseline-development-and-testing
 generated_from:
   functional_specification: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -15,7 +15,7 @@ generated_from:
     artifacts:
       functional_specification:
         file: MeuRemedio_Especificacao_Funcional_02.33.docx
-        sha256: 4afa6744c3aba93aacba724a6ff633df10c61e8cef2ae8455a21094c451a9f3a
+        sha256: 50b4a2735d6b3e31abcf44ad1916ff1d71b8cbb30a6e24e4e20879efbbf19594
       openapi:
         file: MeuRemedio_OpenAPI_02.33.4_COMPLETO.yaml
         sha256: c08d17fab5ace9438944d1c93e72e8619178c68206070a763f4c1667f2bfe863
@@ -5038,6 +5038,7 @@ catalog_completeness:
     - DEC-028
     - DEC-029
     - DEC-030
+    - DEC-031
     actual_ids:
     - DEC-001
     - DEC-002
@@ -5069,6 +5070,7 @@ catalog_completeness:
     - DEC-028
     - DEC-029
     - DEC-030
+    - DEC-031
     status: complete
   approved_questions:
     authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -5233,8 +5235,8 @@ business_rules:
     termo_regra: Agenda e lembretes
     defini_o_normativa: 'Ocorrências são geradas ao criar ou editar o plano (via Outbox) e por job horário que mantém o horizonte
       de 30 dias; o job de prazo executa a cada minuto. Há no máximo 1 e-mail de lembrete por ocorrência, enviado em scheduled_at,
-      sem nome do medicamento, dose ou link com token. O lembrete web consulta listOccurrences a cada 60 s. Limites do horizonte
-      e horários já vencidos na geração: DEC-027.'
+      com o nome do medicamento e o horário local previsto, sem dose nem link com token (DEC-031). O lembrete web consulta listOccurrences
+      a cada 60 s. Limites do horizonte e horários já vencidos na geração: DEC-027.'
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 3
@@ -5931,6 +5933,19 @@ decisions:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 30
+      mapping_type: explicit-catalog-row
+  DEC-031:
+    criticidade: Alta
+    problema_causa: RN-018 excluía do e-mail de lembrete o nome do medicamento e o horário, o que obrigava o titular a abrir
+      a aplicação para saber qual medicamento tomar.
+    decis_o_adotada: 'O e-mail de lembrete informa o nome do medicamento (snapshot da ocorrência) e o horário local previsto
+      (HH:MM no fuso da conta). Continuam proibidos a dose e o link com token. Risco aceito pelo mantenedor: o nome do medicamento
+      é dado de saúde e fica exposto ao provedor de e-mail e a quem acessar a caixa postal ou as notificações do aparelho; a decisão
+      fica sujeita ao parecer de privacidade (GX-001 a GX-006).'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 31
       mapping_type: explicit-catalog-row
 approved_questions:
   Q-001:
