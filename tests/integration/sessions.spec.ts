@@ -1,4 +1,4 @@
-// @trace RF-002 CA-015 RN-005 ERR-002 createSession deleteCurrentSession getCurrentAccount
+// @trace RF-002 CA-015 RN-005 ERR-001 ERR-002 DEC-032 createSession deleteCurrentSession getCurrentAccount
 // Sessao server-side (ADR-001 v1.5 secao 7 e OA-008) contra PostgreSQL 17 real: login com cookies
 // mr_session (HttpOnly) e mr_csrf, falhas indistinguiveis (401), expiracao por inatividade (30 min,
 // deslizante) e absoluta (24 h), logout que revoga e limpa os cookies, e leitura autenticada.
@@ -46,6 +46,17 @@ const stable = (body: unknown): unknown =>
   );
 
 describe('createSession', () => {
+  it.each([
+    ['sem senha', { email: 'ana.silva@example.com' }],
+    ['campo extra', { email: 'ana.silva@example.com', password: 'x', lembrar: true }],
+  ])('corpo invalido (%s): 400 VALIDATION_FAILED, sem sessao (DEC-032)', async (_caso, body) => {
+    await h.activeUser('ana.silva@example.com');
+    const response = await h.call('createSession', 'POST', '/sessions', { body });
+    expect(response.status).toBe(400);
+    expect(response.body).toMatchObject({ code: 'VALIDATION_FAILED' });
+    expect((await h.pool.query('SELECT 1 FROM sessions')).rowCount).toBe(0);
+  });
+
   it('201 com Session, expiracoes de 30 min e 24 h, e cookies com os atributos do OA-008', async () => {
     const userId = await h.activeUser('ana.silva@example.com');
     const response = await createSession('ANA.SILVA@example.com', PASSWORD);

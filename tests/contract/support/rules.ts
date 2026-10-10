@@ -554,6 +554,24 @@ export const RULES: readonly Rule[] = [
     },
   },
   {
+    id: 'R19',
+    title:
+      'operacao com corpo ou parametro de query/cabecalho declara 400 VALIDATION_FAILED (DEC-032)',
+    check: (ctx) => {
+      const out: string[] = [];
+      for (const op of operations(ctx.api)) {
+        const parameters = asArray(op.node['parameters'] ?? [], `${op.id}.parameters`).map((p) =>
+          resolve(ctx.api, p),
+        );
+        const validated =
+          'requestBody' in op.node ||
+          parameters.some((p) => p['in'] === 'query' || p['in'] === 'header');
+        if (validated && !responsesOf(ctx.api, op).has('400')) out.push(`${op.id}: sem 400`);
+      }
+      return out;
+    },
+  },
+  {
     id: 'R17',
     title: 'toda excecao do TS-040 tem lacuna registrada em known_gaps da matriz',
     check: (ctx, allowances = ALLOWANCES) => {
