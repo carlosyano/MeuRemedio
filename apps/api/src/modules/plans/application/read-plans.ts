@@ -6,6 +6,7 @@
 import type { Pool } from 'pg';
 import { recordAudit } from '../../../platform/audit/audit.js';
 import type { Clock } from '../../../platform/clock.js';
+import { decodeCursor, pageOf, type PageMeta } from '../../../platform/http/keyset-cursor.js';
 import { ProblemError } from '../../../platform/http/problem-catalog.js';
 import {
   PLAN_COLUMNS,
@@ -16,47 +17,9 @@ import {
   type PlanView,
 } from './plan-view.js';
 
-export const DEFAULT_PAGE_LIMIT = 20;
-
 export interface PlanPage {
   readonly items: PlanView[];
-  readonly page: { readonly next_cursor: string | null; readonly limit: number };
-}
-
-interface Cursor {
-  /** created_at em UTC com microssegundos. */
-  readonly t: string;
-  /** id do ultimo plano entregue. */
-  readonly i: string;
-}
-
-const CURSOR_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/;
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-
-const encodeCursor = (cursor: Cursor): string =>
-  Buffer.from(JSON.stringify(cursor)).toString('base64url');
-
-function decodeCursor(value: string): Cursor {
-  try {
-    const parsed: unknown = JSON.parse(Buffer.from(value, 'base64url').toString('utf8'));
-    if (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      't' in parsed &&
-      'i' in parsed &&
-      typeof parsed.t === 'string' &&
-      typeof parsed.i === 'string' &&
-      CURSOR_INSTANT.test(parsed.t) &&
-      UUID.test(parsed.i)
-    ) {
-      return { t: parsed.t, i: parsed.i };
-    }
-  } catch {
-    // cai no erro abaixo
-  }
-  throw new ProblemError('VALIDATION_FAILED', [
-    { field: 'cursor', code: 'INVALID', message: 'Valor inválido.' },
-  ]);
+  readonly page: PageMeta;
 }
 
 export class ReadPlans {
@@ -101,17 +64,6 @@ export class ReadPlans {
         [userId, after?.t ?? null, after?.i ?? null, limit + 1],
       )
     ).rows;
-    const items = rows.slice(0, limit);
-    const last = items[items.length - 1];
-    return {
-      items: items.map(toPlanView),
-      page: {
-        next_cursor:
-          rows.length > limit && last !== undefined
-            ? encodeCursor({ t: last.created_at_us, i: last.id })
-            : null,
-        limit,
-      },
-    };
+    return pageOf(rows, limit, toPlanView, (row) => ({ t: row.created_at_us, i: row.id }));
   }
 }

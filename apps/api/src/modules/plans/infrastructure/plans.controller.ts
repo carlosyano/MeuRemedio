@@ -16,10 +16,11 @@ import {
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { sessionOf } from '../../../platform/http/access.guard.js';
 import { correlationIdOf } from '../../../platform/http/correlation.js';
+import { DEFAULT_PAGE_LIMIT } from '../../../platform/http/keyset-cursor.js';
 import { OperationId } from '../../../platform/http/operation-id.js';
 import { CreatePlan, type CreatePlanRequest } from '../application/create-plan.js';
 import { DeletePlan } from '../application/delete-plan.js';
-import { DEFAULT_PAGE_LIMIT, ReadPlans, type PlanPage } from '../application/read-plans.js';
+import { ReadPlans, type PlanPage } from '../application/read-plans.js';
 import type { PlanView } from '../application/plan-view.js';
 import type { PlanWriteRequest } from '../application/plan-write.js';
 import { UpdatePlan } from '../application/update-plan.js';
