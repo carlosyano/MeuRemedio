@@ -1,8 +1,9 @@
-// @trace TS-041 CA-018 RF-002 RF-003 ERR-015 deleteCurrentSession createPlan updatePlan deletePlan (ADR-001 v1.5 OA-008)
+// @trace TS-041 CA-018 RF-002 RF-003 ERR-015 deleteCurrentSession createPlan updatePlan deletePlan createResponse (ADR-001 v1.5 OA-008)
 // CSRF nas mutacoes autenticadas contra PostgreSQL 17 real: double-submit (cookie mr_csrf +
 // X-CSRF-Token com HMAC vinculado a sessao) e validacao de Origin (ou Sec-Fetch-Site). Falha:
-// 403 CSRF_VALIDATION_FAILED sem efeito. Nesta etapa, deleteCurrentSession, createPlan, updatePlan
-// e deletePlan sao as mutacoes autenticadas implementadas; as demais entram com seus modulos.
+// 403 CSRF_VALIDATION_FAILED sem efeito. Nesta etapa, deleteCurrentSession, createPlan, updatePlan,
+// deletePlan e createResponse sao as mutacoes autenticadas implementadas; as demais entram com seus
+// modulos.
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { login, startHarness, type Harness, type LoggedIn } from '../integration/support/http.js';
 
@@ -99,7 +100,7 @@ describe('TS-041 CSRF em deleteCurrentSession', () => {
     expect((await logout({ origin: 'https://evil.example' })).status).toBe(401);
   });
 
-  it.todo('as demais 7 mutacoes autenticadas (CA-018) entram com seus modulos');
+  it.todo('as demais 6 mutacoes autenticadas (CA-018) entram com seus modulos');
 });
 
 describe('TS-041 CSRF em createPlan', () => {
@@ -201,5 +202,60 @@ describe('TS-041 CSRF em updatePlan e deletePlan', () => {
     expect(response.status).toBe(403);
     expect(response.body).toMatchObject({ code: 'CSRF_VALIDATION_FAILED' });
     expect(await state(planId)).toEqual({ status: 'ACTIVE', row_version: '1' });
+  });
+});
+
+describe('TS-041 CSRF em createResponse', () => {
+  it.each([
+    [
+      'sem X-CSRF-Token',
+      (s: LoggedIn) => ({ cookie: s.read['cookie'] ?? '', origin: s.mutation['origin'] ?? '' }),
+    ],
+    ['Origin nao permitida', (s: LoggedIn) => ({ ...s.mutation, origin: 'https://evil.example' })],
+  ])('%s: 403 sem registrar resposta', async (_nome, headersFor) => {
+    const s = await session();
+    const created = await h.call('createPlan', 'POST', '/plans', {
+      body: {
+        medication_name: 'Comprimido',
+        dose_text: '1 comprimido',
+        medication_form: 'TABLET',
+        administration_route: 'ORAL',
+        start_date: '2026-10-01',
+        schedule_times: ['08:00'],
+      },
+      headers: { ...s.mutation, 'idempotency-key': 'k-plano' },
+    });
+    expect(created.status).toBe(201);
+    const planId = (created.body as { plan_id: string }).plan_id;
+    // A geracao e assincrona (Outbox): a ocorrencia do fixture entra direto no banco.
+    const occurrenceId = (
+      await h.pool.query<{ id: string }>(
+        `INSERT INTO occurrences (user_id, plan_id, schedule_time_id, local_scheduled_date,
+                                 local_time, scheduled_at, deadline_at, medication_name_snapshot,
+                                 dose_text_snapshot)
+         SELECT p.user_id, p.id, t.id, DATE '2026-10-05', '08:00', '2026-10-05T11:00:00Z',
+                '2026-10-05T12:00:00Z', 'Comprimido', '1 comprimido'
+           FROM medication_plans p JOIN schedule_times t ON t.plan_id = p.id
+          WHERE p.id = $1
+         RETURNING id`,
+        [planId],
+      )
+    ).rows[0]?.id;
+    if (occurrenceId === undefined) throw new Error('ocorrencia nao criada');
+    const response = await h.call(
+      'createResponse',
+      'POST',
+      `/occurrences/${occurrenceId}/responses`,
+      {
+        body: { type: 'TAKEN', reason: null },
+        headers: { ...headersFor(s), 'idempotency-key': 'k-1' },
+      },
+    );
+    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({ code: 'CSRF_VALIDATION_FAILED' });
+    const rows = await h.pool.query('SELECT 1 FROM responses WHERE occurrence_id = $1', [
+      occurrenceId,
+    ]);
+    expect(rows.rowCount).toBe(0);
   });
 });
