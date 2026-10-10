@@ -274,9 +274,11 @@ Pedido, snapshot, arquivo privado, checksum e expiração.
 | `row_version` | bigint | sim | 64 bits | >=1 | 1 | não | - | operacional | incrementado 1x por edição; exposto como ETag |
 
 **Constraints e índices:**
-- CHECK(status<>'COMPLETED' OR (expires_at IS NOT NULL AND file_sha256 IS NOT NULL AND expires_at>completed_at))
-- CHECK(end_date>=start_date AND end_date<=start_date+INTERVAL '12 months')
+- CHECK(status<>'COMPLETED' OR (file_sha256, completed_at e expires_at preenchidos e expires_at = completed_at + 24 h)) (`export_requests_completed_chk`)
+- CHECK(end_date>=start_date AND end_date<=start_date+INTERVAL '12 months') (`export_requests_period_chk`; o serviço aplica a contagem inclusiva da DC-041)
+- CHECK: `failure_reason` só e sempre em FAILED; `canceled_at` em CANCELED; `file_sha256` de 32 bytes; `snapshot` até 5 MB
 - Índice (status,expires_at) WHERE status='COMPLETED'
+- Índice (status,updated_at) WHERE status='PROCESSING' (processamento parado, DC-042)
 
 ### ENT-011 — `idempotency_records`
 
@@ -438,7 +440,8 @@ Perfil versionado e reproduzível de desempenho.
 | `apps/api/migrations/0004_login_failures.sql` | Tabela de plataforma `login_failure_counters` (UNLOGGED, DEC-016) | Implementada e coberta por `tests/security/ts-033.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0005_plans.sql` | ENT-013 `audit_events` (append-only por trigger) e a tabela de plataforma `plan_duplicate_confirmations` (DC-028) | Implementada e coberta por `tests/integration/db-plans.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0006_reminders.sql` | ENT-009 `email_reminders` (DC-040) | Implementada e coberta por `tests/integration/db-reminders.spec.ts` (PostgreSQL 17 real) |
-| Demais entidades | ENT-003, ENT-010, ENT-014 a ENT-017 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
+| `apps/api/migrations/0007_exports.sql` | ENT-010 `export_requests` (DC-042) | Implementada e coberta por `tests/integration/db-exports.spec.ts` (PostgreSQL 17 real) |
+| Demais entidades | ENT-003, ENT-014 a ENT-017 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
 
 **Rollback:** as migrações criam apenas objetos novos, sem dados nem dependentes externos; o rollback é uma migração nova que remove os objetos criados (a lista está no cabeçalho de cada arquivo). Uma migração aplicada nunca é editada.
 

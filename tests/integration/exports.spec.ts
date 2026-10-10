@@ -336,7 +336,10 @@ describe('expiracao em 24 h (RN-011, CA-011, TS-011)', () => {
     const response = await download(ana, id);
     expect(response.status).toBe(410);
     expect(response.body).toMatchObject({ code: 'RESOURCE_EXPIRED' });
-    expect(JSON.stringify(response.body)).not.toMatch(/exports\/|s3|bucket|\.pdf/i);
+    // instance traz o caminho da requisicao; a chave do armazenamento nunca aparece.
+    expect(JSON.stringify(response.body)).not.toMatch(
+      new RegExp(`exports/${anaId}|s3|bucket|[.]pdf`, 'i'),
+    );
     expect((await getExport(ana, id)).body).toMatchObject({ status: 'EXPIRED' });
   });
 
@@ -406,7 +409,12 @@ describe('cancelExport (CA-016, TS-042)', () => {
 
   it.each([
     ['COMPLETED', async (id: string) => processExport(id)],
-    ['CANCELED', async (id: string) => void (await cancelExport(ana, id))],
+    [
+      'CANCELED',
+      async (id: string) => {
+        await cancelExport(ana, id);
+      },
+    ],
   ])('estado terminal %s: 409 STATE_CONFLICT', async (_estado, reach) => {
     await historyFixture();
     const id = await requested();

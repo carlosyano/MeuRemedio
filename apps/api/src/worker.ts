@@ -7,6 +7,13 @@ import {
   type VerificationRequested,
 } from './modules/identity/application/issue-verification.js';
 import {
+  EXPORTS_EXPIRY_CRON,
+  EXPORTS_EXPIRY_QUEUE,
+  handleExportRequested,
+  handleExportsExpiry,
+  type ExportRequested,
+} from './modules/exports/application/process-export.js';
+import {
   DEADLINE_SWEEP_CRON,
   DEADLINE_SWEEP_QUEUE,
   handleDeadlineSweep,
@@ -31,6 +38,10 @@ import {
 import type { Clock } from './platform/clock.js';
 import type { EmailSender } from './platform/email/email-sender.js';
 import { OUTBOX_QUEUES, OutboxDispatcher } from './platform/outbox/dispatcher.js';
+import {
+  unconfiguredObjectStorage,
+  type ObjectStorage,
+} from './platform/storage/object-storage.js';
 
 export interface WorkerOptions {
   readonly pool: Pool;
@@ -39,6 +50,8 @@ export interface WorkerOptions {
   readonly clock: Clock;
   readonly email: EmailSender;
   readonly webBaseUrl: string;
+  /** Armazenamento privado dos PDFs; sem ele, as exportacoes falham. */
+  readonly storage?: ObjectStorage;
   /** Intervalo do laco do despachante; padrao 1000 ms. */
   readonly pollIntervalMs?: number;
 }
@@ -118,6 +131,26 @@ export async function startWorker(options: WorkerOptions): Promise<RunningWorker
   await boss.schedule(REMINDERS_SWEEP_QUEUE, REMINDERS_SWEEP_CRON, null, { missed: 'once' });
   await boss.work(REMINDERS_SWEEP_QUEUE, { pollingIntervalSeconds: 0.5 }, async () => {
     await handleRemindersSweep({ pool: options.pool, clock: options.clock });
+  });
+
+  // Exportacoes em PDF (FL-005): processamento pelo Outbox e expiracao a cada minuto (DC-042).
+  const storage = options.storage ?? unconfiguredObjectStorage;
+  await boss.work<ExportRequested>(
+    'exports.requested',
+    { pollingIntervalSeconds: 0.5 },
+    async (jobs) => {
+      for (const job of jobs) {
+        await handleExportRequested(
+          { pool: options.pool, clock: options.clock, storage },
+          job.data,
+        );
+      }
+    },
+  );
+  await boss.createQueue(EXPORTS_EXPIRY_QUEUE);
+  await boss.schedule(EXPORTS_EXPIRY_QUEUE, EXPORTS_EXPIRY_CRON, null, { missed: 'once' });
+  await boss.work(EXPORTS_EXPIRY_QUEUE, { pollingIntervalSeconds: 0.5 }, async () => {
+    await handleExportsExpiry({ pool: options.pool, clock: options.clock, storage });
   });
 
   const dispatcher = new OutboxDispatcher(options.pool, boss, options.clock);

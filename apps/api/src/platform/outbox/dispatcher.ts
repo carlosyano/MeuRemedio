@@ -13,6 +13,7 @@ export const OUTBOX_QUEUES = [
   'identity.verification_requested',
   'plans.occurrences_requested',
   'reminders.email_requested',
+  'exports.requested',
 ] as const;
 
 export interface TransactionalDb {

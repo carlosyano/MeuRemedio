@@ -47,6 +47,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-039 | Job horário do horizonte | Vigente |
 | DC-040 | Lembretes por e-mail sem reenvio cego | Vigente |
 | DC-041 | Período e conteúdo de `getHistory` | Vigente |
+| DC-042 | Exportação em PDF | Vigente |
 
 ---
 
@@ -374,3 +375,18 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Ordem e paginação:** `(scheduled_at DESC, id DESC)`, com o cursor da DC-030.
 - **Riscos:** as ocorrências futuras do período não aparecem, porque histórico é o que já aconteceu. As CANCELED somem do histórico, mas continuam no banco.
 - **Aplica-se a:** `packages/domain/src/history-window.ts` e `modules/history/application/read-history.ts`.
+
+## DC-042 — Exportação em PDF (10/10/2026)
+
+- **Contexto:** RF-008, RN-011 e FL-005 definem o pedido assíncrono, o snapshot, o PDF privado e pesquisável com expiração em 24 h, o cancelamento e o download com 410 depois da expiração. Não estão definidos a biblioteca do PDF, o armazenamento fora da AWS, o conteúdo do documento, o tratamento das falhas nem as respostas de download para os estados sem arquivo.
+- **Decisão:**
+  - **Biblioteca:** pdfkit 0.20.2 (MIT, publicada em 30/08/2026, `npm audit` sem achados), com fonte padrão Helvetica (WinAnsi), o que deixa o texto pesquisável. O pdf-lib foi descartado por estar sem manutenção desde 2022.
+  - **Armazenamento:** porta `ObjectStorage` com chave determinística `exports/<titular>/<pedido>.pdf`, que nunca sai na API. Há um adaptador em memória (testes) e outro em disco (`EXPORT_STORAGE_DIR`, desenvolvimento). O adaptador S3 entra com a infraestrutura AWS, e sem armazenamento configurado as exportações falham.
+  - **Validação:** o período segue a regra da DC-041. Fora dela, `createExport` retorna 422 `BUSINESS_RULE_VIOLATION` em `end_date`, que é o código que a operação documenta.
+  - **Processamento:** o consumidor de `exports.requested` congela o snapshot e passa o pedido a PROCESSING antes de gerar o PDF. Na retomada, reaproveita o snapshot. Erro do armazenamento é relançado para o pg-boss refazer, e snapshot ilegível leva a FAILED TECHNICAL_FAILURE. A conclusão só acontece se o pedido continuar PROCESSING. Se ele foi cancelado no meio, o arquivo é removido. Na conclusão ficam o checksum e o tamanho, `expires_at = completed_at + 24 h`, e o snapshot é descartado.
+  - **Job a cada minuto** (`exports.expiry_sweep`): COMPLETED vencido passa a EXPIRED, com o arquivo removido. PROCESSING parado há 30 minutos ou mais passa a FAILED TECHNICAL_FAILURE.
+  - **Leitura:** COMPLETED vencido já aparece como EXPIRED, antes mesmo de o job passar.
+  - **Download:** responde só para COMPLETED dentro do prazo, com `Cache-Control: no-store`, `Content-Disposition: attachment` e checksum conferido. Arquivo expirado retorna 410 `RESOURCE_EXPIRED`. REQUESTED, PROCESSING, FAILED e CANCELED retornam 404, porque não há arquivo e o contrato não prevê outro código.
+  - **Conteúdo:** o PDF traz o período e o fuso, o instante de geração, um aviso de que é registro declaratório e não prescrição, e para cada ocorrência alcançada a data, o horário, o medicamento, a dose e a resposta (com motivo, instante e atraso). Não traz nome nem e-mail do titular, e a ordem é decrescente, como no histórico.
+- **Riscos:** o PDF contém dado de saúde. A proteção vem da sessão, da titularidade, do armazenamento privado e da expiração. Uma falha ao apagar um arquivo pode deixar o objeto órfão, sem acesso pela API porque a chave nunca sai. A política de ciclo de vida do bucket S3 deve cobrir esse caso.
+- **Aplica-se a:** `modules/exports/**`, `platform/storage/object-storage.ts`, `worker.ts`, `main.ts`, `worker-main.ts` e `migrations/0007_exports.sql`.

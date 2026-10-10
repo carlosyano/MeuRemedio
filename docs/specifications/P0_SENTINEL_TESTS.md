@@ -49,6 +49,8 @@
 
 **Estado (PR 33):** `createResponse` coberto em `tests/integration/occurrences.spec.ts`: 404 idêntico para a ocorrência de U1, UUID inexistente e id malformado, 1 `ownership.denied` com `resource_type = occurrence` e ocorrência intacta.
 
+
+**Estado (PR 40):** `getExport`, `cancelExport` e `downloadExport` estão cobertos em `tests/integration/exports.spec.ts`: 404 idêntico ao do id inexistente, 1 `ownership.denied` com `resource_type = export_request` por tentativa e exportação intacta.
 ---
 
 ## TS-023 — BOLA/IDOR em todas as rotas privadas
@@ -68,6 +70,8 @@
 
 
 **Estado (PR 39):** `getHistory` (coleção vazia para U2) está em `tests/integration/history.spec.ts`. Faltam as rotas de exportação e privacidade para o teste gerado a partir da OpenAPI.
+
+**Estado (PR 40):** as rotas de exportação por identificador (`getExport`, `cancelExport`, `downloadExport`) estão em `tests/integration/exports.spec.ts`. Falta a privacidade (`getPrivacy`, `requestAccountDeletion`) para o teste gerado a partir da OpenAPI.
 ---
 
 ## TS-015 — Idempotência com payload divergente
@@ -92,6 +96,8 @@
 
 **Estado (PR 33):** `createResponse` coberto em `tests/integration/occurrences.spec.ts`: corpo divergente ou outra ocorrência com a mesma chave retornam 409 `IDEMPOTENCY_KEY_REUSED` sem nova resposta.
 
+
+**Estado (PR 40):** `createExport` coberto em `tests/integration/exports.spec.ts`: payload divergente com a mesma chave retorna 409 `IDEMPOTENCY_KEY_REUSED` sem novo pedido.
 ---
 
 ## TS-038 — Matriz de idempotência
@@ -118,6 +124,8 @@
 
 **Estado (PR 33):** `createResponse` cobre os passos 1 a 5 (`tests/integration/occurrences.spec.ts`), com o `occurrence_id` no hash. No passo 5, a chave expirada é tratada como nova, e a ocorrência já respondida retorna 409 `STATE_CONFLICT`.
 
+
+**Estado (PR 40):** `createExport` cobre os passos 1 a 5 (`tests/integration/exports.spec.ts`). No passo 5, a chave expirada é tratada como nova e cria outro pedido.
 ---
 
 ## TS-024 — DST e tempo civil
