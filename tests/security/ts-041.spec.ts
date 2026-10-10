@@ -1,11 +1,16 @@
-// @trace TS-041 CA-018 RF-002 RF-003 ERR-015 deleteCurrentSession createPlan updatePlan deletePlan createResponse createExport cancelExport (ADR-001 v1.5 OA-008)
+// @trace TS-041 CA-018 RF-002 RF-003 ERR-015 deleteCurrentSession createPlan updatePlan deletePlan createResponse createExport cancelExport updateCurrentAccount updateAccessibilityPreferences revokeAllSessions (ADR-001 v1.5 OA-008)
 // CSRF nas mutacoes autenticadas contra PostgreSQL 17 real: double-submit (cookie mr_csrf +
 // X-CSRF-Token com HMAC vinculado a sessao) e validacao de Origin (ou Sec-Fetch-Site). Falha:
-// 403 CSRF_VALIDATION_FAILED sem efeito. Nesta etapa, deleteCurrentSession, createPlan, updatePlan,
-// deletePlan, createResponse, createExport e cancelExport sao as mutacoes autenticadas
-// implementadas; as demais entram com seus modulos.
+// 403 CSRF_VALIDATION_FAILED sem efeito. Nesta etapa, so requestAccountDeletion ainda nao esta
+// implementada entre as mutacoes autenticadas.
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { login, startHarness, type Harness, type LoggedIn } from '../integration/support/http.js';
+import {
+  PASSWORD,
+  login,
+  startHarness,
+  type Harness,
+  type LoggedIn,
+} from '../integration/support/http.js';
 
 let h: Harness;
 
@@ -100,7 +105,9 @@ describe('TS-041 CSRF em deleteCurrentSession', () => {
     expect((await logout({ origin: 'https://evil.example' })).status).toBe(401);
   });
 
-  it.todo('as demais 4 mutacoes autenticadas (CA-018) entram com seus modulos');
+  it.todo(
+    'a mutacao restante (requestAccountDeletion) autenticadas (CA-018) entram com seus modulos',
+  );
 });
 
 describe('TS-041 CSRF em createPlan', () => {
@@ -303,5 +310,55 @@ describe('TS-041 CSRF em createExport e cancelExport', () => {
       [id],
     );
     expect(status.rows[0]?.status).toBe('REQUESTED');
+  });
+});
+
+describe('TS-041 CSRF em conta, preferencias e revogacao global', () => {
+  const withoutToken = (s: LoggedIn) => ({
+    cookie: s.read['cookie'] ?? '',
+    origin: s.mutation['origin'] ?? '',
+  });
+  const evilOrigin = (s: LoggedIn) => ({ ...s.mutation, origin: 'https://evil.example' });
+  const cases = [
+    ['sem X-CSRF-Token', withoutToken],
+    ['Origin nao permitida', evilOrigin],
+  ] as const;
+
+  it.each(cases)('updateCurrentAccount %s: 403 sem alterar o nome', async (_nome, headersFor) => {
+    const s = await session();
+    const response = await h.call('updateCurrentAccount', 'PUT', '/accounts/me', {
+      body: { name: 'Nome Forjado' },
+      headers: headersFor(s),
+    });
+    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({ code: 'CSRF_VALIDATION_FAILED' });
+    const names = await h.pool.query<{ name: string }>('SELECT name FROM users');
+    expect(names.rows.some((row) => row.name === 'Nome Forjado')).toBe(false);
+  });
+
+  it.each(cases)(
+    'updateAccessibilityPreferences %s: 403 sem alterar',
+    async (_nome, headersFor) => {
+      const s = await session();
+      const response = await h.call(
+        'updateAccessibilityPreferences',
+        'PUT',
+        '/preferences/accessibility',
+        { body: { text_scale: 200, high_contrast: true }, headers: headersFor(s) },
+      );
+      expect(response.status).toBe(403);
+      const prefs = await h.pool.query('SELECT 1 FROM users WHERE text_scale = 200');
+      expect(prefs.rowCount).toBe(0);
+    },
+  );
+
+  it.each(cases)('revokeAllSessions %s: 403 sem revogar', async (_nome, headersFor) => {
+    const s = await session();
+    const response = await h.call('revokeAllSessions', 'POST', '/sessions/revocations', {
+      body: { password: PASSWORD },
+      headers: { ...headersFor(s), 'idempotency-key': 'k-1' },
+    });
+    expect(response.status).toBe(403);
+    expect(await revoked(s)).toBe(false);
   });
 });
