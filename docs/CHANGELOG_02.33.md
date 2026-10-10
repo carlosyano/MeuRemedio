@@ -115,3 +115,15 @@ Lacunas encontradas no spike S1 (esqueleto HTTP) e ao planejar o módulo `identi
 Efeitos: Especificação (tabela de decisões, RN-017, RNF-015 e notas de revisão no Anexo C), matriz `2.1.6` (hash da Especificação, RN-017, RNF-015, DEC-028 a DEC-030 e catálogo de decisões) e `maxProperties` de `decisions` no schema (27 → 30). OpenAPI, ADR e `AGENTS.md` inalterados. A implementação vem em PRs separados.
 
 **Aprovação:** escolhas feitas pelo mantenedor em 08/10/2026; aprovação formal no pull request desta revisão (AGENTS.md §19.8 e §20.1).
+
+## DEC-031: nome do medicamento e horário no e-mail de lembrete (10/10/2026)
+
+Decisão do mantenedor ao revisar a implementação dos lembretes (PR #36, DC-040):
+
+1. **DEC-031 (RN-018, DEC-017):** o e-mail de lembrete informa o nome do medicamento (snapshot da ocorrência) e o horário local previsto (HH:MM no fuso da conta). Continuam proibidos a dose e o link com token.
+2. **Risco aceito pelo mantenedor:** o nome do medicamento é dado de saúde (LGPD, art. 11) e fica exposto ao provedor de e-mail, a quem acessar a caixa postal e às notificações do aparelho, inclusive na tela bloqueada. A decisão fica sujeita ao parecer de privacidade (GX-001 a GX-006).
+3. **RN-018** passa a remeter à DEC-031. A DEC-017 continua vigente, com esse ponto alterado.
+
+Efeitos: Especificação (tabela de decisões, RN-018 e nota de revisão no Anexo C), matriz `2.1.7` (hash da Especificação, RN-018, DEC-031 e catálogo de decisões) e `maxProperties` de `decisions` no schema (30 → 31). OpenAPI, ADR e `AGENTS.md` inalterados. A implementação vem em PR separado.
+
+**Aprovação:** pedido do mantenedor em 10/10/2026; aprovação formal no pull request desta revisão.
