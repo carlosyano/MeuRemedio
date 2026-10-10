@@ -44,6 +44,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-036 | Escopo e ordem de `listOccurrences` | Vigente |
 | DC-037 | Quando uma ocorrência aceita resposta | Vigente |
 | DC-038 | Job de prazo NO_RESPONSE | Vigente |
+| DC-039 | Job horário do horizonte | Vigente |
 
 ---
 
@@ -337,3 +338,11 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** o marco é o instante da varredura, como na geração tardia da DEC-027: ele registra quando o sistema percebeu o prazo. A varredura é um agendamento do pg-boss (`* * * * *`, fila `occurrences.deadline_sweep`) com `missed: 'once'`, porque uma passada alcança todos os prazos vencidos. Ela trabalha em lotes de 1.000 com `FOR UPDATE SKIP LOCKED`, e a corrida com `createResponse` termina em estado único (TS-013). As ocorrências iniciadas de plano excluído também passam a NO_RESPONSE, porque o histórico continua sendo fato.
 - **Riscos:** com o worker parado, o marco fica atrasado em relação ao prazo real. A diferença aparece no histórico como o momento em que o sistema registrou o prazo.
 - **Aplica-se a:** `modules/occurrences/application/deadline-sweep.ts` e `worker.ts`.
+
+## DC-039 — Job horário do horizonte (10/10/2026)
+
+- **Contexto:** a Especificação (seção 6) prevê um job horário que mantém o horizonte de 30 dias, sem dizer quais planos ele cobre nem o que fazer com passadas perdidas.
+- **Alternativas:** (a) todos os planos ACTIVE; (b) só os planos ACTIVE de conta ACTIVE.
+- **Decisão:** (b). A fila `occurrences.horizon_refresh` é agendada no pg-boss em `0 * * * *` com `missed: 'once'`. Cada passada gera o horizonte da DEC-027 para cada plano ACTIVE de conta ACTIVE, um plano por transação, com a geração idempotente (RN-007). A conta em exclusão (DELETION_SCHEDULED) fica de fora, porque o acesso dela já foi bloqueado (RN-012).
+- **Riscos:** a passada percorre todos os planos em sequência, o que pede revisão quando o volume crescer, por exemplo lotes ou uma fila por plano. Uma data civil nova pode levar até 1 hora para entrar no fim do horizonte, sem efeito prático, porque esse fim fica 30 dias à frente.
+- **Aplica-se a:** `modules/occurrences/application/horizon-refresh.ts` e `worker.ts`.
