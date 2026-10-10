@@ -12,6 +12,11 @@ import {
   handleDeadlineSweep,
 } from './modules/occurrences/application/deadline-sweep.js';
 import {
+  HORIZON_REFRESH_CRON,
+  HORIZON_REFRESH_QUEUE,
+  handleHorizonRefresh,
+} from './modules/occurrences/application/horizon-refresh.js';
+import {
   handleOccurrencesRequested,
   type OccurrencesRequested,
 } from './modules/occurrences/application/occurrences-requested.js';
@@ -73,6 +78,13 @@ export async function startWorker(options: WorkerOptions): Promise<RunningWorker
   await boss.schedule(DEADLINE_SWEEP_QUEUE, DEADLINE_SWEEP_CRON, null, { missed: 'once' });
   await boss.work(DEADLINE_SWEEP_QUEUE, { pollingIntervalSeconds: 0.5 }, async () => {
     await handleDeadlineSweep({ pool: options.pool, clock: options.clock });
+  });
+
+  // Horizonte de 30 dias a cada hora (RF-004, DEC-027); a passada mais recente basta.
+  await boss.createQueue(HORIZON_REFRESH_QUEUE);
+  await boss.schedule(HORIZON_REFRESH_QUEUE, HORIZON_REFRESH_CRON, null, { missed: 'once' });
+  await boss.work(HORIZON_REFRESH_QUEUE, { pollingIntervalSeconds: 0.5 }, async () => {
+    await handleHorizonRefresh({ pool: options.pool, clock: options.clock });
   });
 
   const dispatcher = new OutboxDispatcher(options.pool, boss, options.clock);
