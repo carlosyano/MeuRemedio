@@ -1,8 +1,8 @@
-// @trace TS-041 CA-018 RF-002 RF-003 ERR-015 deleteCurrentSession createPlan (ADR-001 v1.5 OA-008)
+// @trace TS-041 CA-018 RF-002 RF-003 ERR-015 deleteCurrentSession createPlan updatePlan deletePlan (ADR-001 v1.5 OA-008)
 // CSRF nas mutacoes autenticadas contra PostgreSQL 17 real: double-submit (cookie mr_csrf +
 // X-CSRF-Token com HMAC vinculado a sessao) e validacao de Origin (ou Sec-Fetch-Site). Falha:
-// 403 CSRF_VALIDATION_FAILED sem efeito. Nesta etapa, deleteCurrentSession e createPlan sao as
-// mutacoes autenticadas implementadas; as demais entram com seus modulos.
+// 403 CSRF_VALIDATION_FAILED sem efeito. Nesta etapa, deleteCurrentSession, createPlan, updatePlan
+// e deletePlan sao as mutacoes autenticadas implementadas; as demais entram com seus modulos.
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { login, startHarness, type Harness, type LoggedIn } from '../integration/support/http.js';
 
@@ -99,7 +99,7 @@ describe('TS-041 CSRF em deleteCurrentSession', () => {
     expect((await logout({ origin: 'https://evil.example' })).status).toBe(401);
   });
 
-  it.todo('as demais 9 mutacoes autenticadas (CA-018) entram com seus modulos');
+  it.todo('as demais 7 mutacoes autenticadas (CA-018) entram com seus modulos');
 });
 
 describe('TS-041 CSRF em createPlan', () => {
@@ -138,5 +138,68 @@ describe('TS-041 CSRF em createPlan', () => {
       headers: { ...s.mutation, 'idempotency-key': 'k-1' },
     });
     expect(response.status).toBe(201);
+  });
+});
+
+describe('TS-041 CSRF em updatePlan e deletePlan', () => {
+  const PLAN = {
+    medication_name: 'Comprimido',
+    dose_text: '1 comprimido',
+    medication_form: 'TABLET',
+    administration_route: 'ORAL',
+    start_date: '2026-10-01',
+    schedule_times: ['08:00'],
+  };
+
+  async function planOf(s: LoggedIn): Promise<string> {
+    const response = await h.call('createPlan', 'POST', '/plans', {
+      body: PLAN,
+      headers: { ...s.mutation, 'idempotency-key': 'k-plano' },
+    });
+    expect(response.status).toBe(201);
+    return (response.body as { plan_id: string }).plan_id;
+  }
+
+  const state = async (planId: string) =>
+    (
+      await h.pool.query<{ status: string; row_version: string }>(
+        'SELECT status, row_version FROM medication_plans WHERE id = $1',
+        [planId],
+      )
+    ).rows[0];
+
+  const withoutToken = (s: LoggedIn) => ({
+    cookie: s.read['cookie'] ?? '',
+    origin: s.mutation['origin'] ?? '',
+  });
+  const evilOrigin = (s: LoggedIn) => ({ ...s.mutation, origin: 'https://evil.example' });
+
+  it.each([
+    ['sem X-CSRF-Token', withoutToken],
+    ['Origin nao permitida', evilOrigin],
+  ])('updatePlan %s: 403 sem editar', async (_nome, headersFor) => {
+    const s = await session();
+    const planId = await planOf(s);
+    const response = await h.call('updatePlan', 'PUT', `/plans/${planId}`, {
+      body: { ...PLAN, dose_text: '2 comprimidos' },
+      headers: { ...headersFor(s), 'idempotency-key': 'k-1', 'if-match': '"1"' },
+    });
+    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({ code: 'CSRF_VALIDATION_FAILED' });
+    expect(await state(planId)).toEqual({ status: 'ACTIVE', row_version: '1' });
+  });
+
+  it.each([
+    ['sem X-CSRF-Token', withoutToken],
+    ['Origin nao permitida', evilOrigin],
+  ])('deletePlan %s: 403 sem excluir', async (_nome, headersFor) => {
+    const s = await session();
+    const planId = await planOf(s);
+    const response = await h.call('deletePlan', 'DELETE', `/plans/${planId}`, {
+      headers: headersFor(s),
+    });
+    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({ code: 'CSRF_VALIDATION_FAILED' });
+    expect(await state(planId)).toEqual({ status: 'ACTIVE', row_version: '1' });
   });
 });
