@@ -3,6 +3,7 @@
 import pg from 'pg';
 import { createApp } from './app.js';
 import { systemClock } from './platform/clock.js';
+import { FileSystemObjectStorage } from './platform/storage/object-storage.js';
 
 const optionalNumber = (name: string): number | undefined => {
   const raw = process.env[name];
@@ -24,6 +25,7 @@ const allowedOrigins = (process.env['ALLOWED_ORIGINS'] ?? '')
   .filter((origin) => origin !== '');
 if (allowedOrigins.length === 0) throw new Error('ALLOWED_ORIGINS nao definida');
 
+const exportStorageDir = process.env['EXPORT_STORAGE_DIR'];
 const clockSkewMaxMs = optionalNumber('CLOCK_SKEW_MAX_MS');
 const healthProbeTimeoutMs = optionalNumber('HEALTH_PROBE_TIMEOUT_MS');
 const app = await createApp({
@@ -35,6 +37,10 @@ const app = await createApp({
     csrfKey: secret('CSRF_KEY'),
   },
   allowedOrigins,
+  // EXPORT_STORAGE_DIR: diretorio local dos PDFs em desenvolvimento (o S3 entra com a infraestrutura).
+  ...(exportStorageDir === undefined || exportStorageDir === ''
+    ? {}
+    : { storage: new FileSystemObjectStorage(exportStorageDir) }),
   ...(clockSkewMaxMs === undefined ? {} : { clockSkewMaxMs }),
   ...(healthProbeTimeoutMs === undefined ? {} : { healthProbeTimeoutMs }),
 });

@@ -23,6 +23,8 @@ import {
   type HealthSettings,
 } from './modules/platform/application/health.js';
 import { HealthController } from './modules/platform/infrastructure/health.controller.js';
+import { Exports } from './modules/exports/application/exports.js';
+import { ExportsController } from './modules/exports/infrastructure/exports.controller.js';
 import { ReadHistory } from './modules/history/application/read-history.js';
 import { HistoryController } from './modules/history/infrastructure/history.controller.js';
 import { ReadOccurrences } from './modules/occurrences/application/read-occurrences.js';
@@ -46,6 +48,10 @@ import { OPERATION_ID } from './platform/http/operation-id.js';
 import { ProblemFilter } from './platform/http/problem-filter.js';
 import { createRequestHasher } from './platform/idempotency/idempotency.js';
 import { PostgresRateLimiter } from './platform/rate-limit/rate-limiter.js';
+import {
+  unconfiguredObjectStorage,
+  type ObjectStorage,
+} from './platform/storage/object-storage.js';
 
 const CONTROLLERS: Type[] = [
   HealthController,
@@ -54,6 +60,7 @@ const CONTROLLERS: Type[] = [
   PlansController,
   OccurrencesController,
   HistoryController,
+  ExportsController,
 ];
 
 export interface CreateAppOptions {
@@ -71,6 +78,8 @@ export interface CreateAppOptions {
     /** Chave do HMAC do token CSRF vinculado a sessao (OA-008). */
     readonly csrfKey: Buffer;
   };
+  /** Armazenamento privado dos PDFs (ENT-010); sem ele, o download falha. */
+  readonly storage?: ObjectStorage;
   /** Origens aceitas no cabecalho Origin das mutacoes autenticadas (OA-008). */
   readonly allowedOrigins: readonly string[];
   /** CLOCK_SKEW_MAX_MS (RNF-015); padrao 5000. */
@@ -127,6 +136,15 @@ class AppModule {
         },
         { provide: DeletePlan, useValue: new DeletePlan(options.database, options.clock) },
         { provide: ReadHistory, useValue: new ReadHistory(options.database, options.clock) },
+        {
+          provide: Exports,
+          useValue: new Exports(
+            options.database,
+            options.clock,
+            hashRequest,
+            options.storage ?? unconfiguredObjectStorage,
+          ),
+        },
         {
           provide: ReadOccurrences,
           useValue: new ReadOccurrences(options.database, options.clock),

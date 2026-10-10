@@ -36,6 +36,8 @@
 | @node-rs/argon2 (em `apps/api`) | 2.2.1 | Argon2id (RN-017, OA-009): binários N-API pré-compilados, sem dependências em tempo de execução, MIT. A 2.2.2 tinha 2 dias em 08/10/2026; preferida a anterior (DC-013) |
 | pg-boss (em `apps/api`) | 12.34.0 | Filas sobre PostgreSQL (OA-002), ESM, MIT. Publicações quase diárias; fixada a versão com 2 semanas em 08/10/2026 (DC-016). O despachante enfileira na mesma transação do Outbox (opção `db`) |
 | yaml (em `apps/api`) | 2.9.1 | Leitura da OpenAPI normativa em tempo de execução |
+| pdfkit (em `apps/api`) | 0.20.2 | PDF pesquisável da exportação (RN-011) com fontes padrão; MIT, dependências MIT (fontkit, linebreak, png-js, fflate, @noble/hashes e @noble/ciphers), publicada em 30/08/2026; `npm audit` sem achados (DC-042). O pdf-lib foi descartado por estar sem manutenção desde 2022 |
+| @types/pdfkit (em `apps/api`, dev) | 0.17.6 | Tipos do pdfkit (o pacote não publica tipos); a API usada (`text`, `font`, `fontSize`, `moveDown`) não mudou entre a 0.17 e a 0.20 |
 | oasdiff (binário Go, fora do npm) | 1.33.0 | QG-001 (incompatibilidades da OpenAPI) via `tools/scripts/openapi-diff.mjs`; SHA-256 de cada plataforma fixado em `tools/scripts/oasdiff-bin.mjs` |
 
 ### Decisões de versão

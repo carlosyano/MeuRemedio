@@ -9,7 +9,7 @@ export interface AuditEvent {
   readonly occurredAt: string;
   readonly actorUserId: string | null;
   readonly action: AuditAction;
-  readonly resourceType: 'medication_plan' | 'occurrence';
+  readonly resourceType: 'medication_plan' | 'occurrence' | 'export_request';
   readonly resourceId: string | null;
   readonly outcome: 'SUCCESS' | 'DENIED' | 'FAILED';
   readonly correlationId: string;

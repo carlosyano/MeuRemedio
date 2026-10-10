@@ -1,9 +1,9 @@
-// @trace TS-041 CA-018 RF-002 RF-003 ERR-015 deleteCurrentSession createPlan updatePlan deletePlan createResponse (ADR-001 v1.5 OA-008)
+// @trace TS-041 CA-018 RF-002 RF-003 ERR-015 deleteCurrentSession createPlan updatePlan deletePlan createResponse createExport cancelExport (ADR-001 v1.5 OA-008)
 // CSRF nas mutacoes autenticadas contra PostgreSQL 17 real: double-submit (cookie mr_csrf +
 // X-CSRF-Token com HMAC vinculado a sessao) e validacao de Origin (ou Sec-Fetch-Site). Falha:
 // 403 CSRF_VALIDATION_FAILED sem efeito. Nesta etapa, deleteCurrentSession, createPlan, updatePlan,
-// deletePlan e createResponse sao as mutacoes autenticadas implementadas; as demais entram com seus
-// modulos.
+// deletePlan, createResponse, createExport e cancelExport sao as mutacoes autenticadas
+// implementadas; as demais entram com seus modulos.
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { login, startHarness, type Harness, type LoggedIn } from '../integration/support/http.js';
 
@@ -100,7 +100,7 @@ describe('TS-041 CSRF em deleteCurrentSession', () => {
     expect((await logout({ origin: 'https://evil.example' })).status).toBe(401);
   });
 
-  it.todo('as demais 6 mutacoes autenticadas (CA-018) entram com seus modulos');
+  it.todo('as demais 4 mutacoes autenticadas (CA-018) entram com seus modulos');
 });
 
 describe('TS-041 CSRF em createPlan', () => {
@@ -257,5 +257,51 @@ describe('TS-041 CSRF em createResponse', () => {
       occurrenceId,
     ]);
     expect(rows.rowCount).toBe(0);
+  });
+});
+
+describe('TS-041 CSRF em createExport e cancelExport', () => {
+  const withoutToken = (s: LoggedIn) => ({
+    cookie: s.read['cookie'] ?? '',
+    origin: s.mutation['origin'] ?? '',
+  });
+  const evilOrigin = (s: LoggedIn) => ({ ...s.mutation, origin: 'https://evil.example' });
+  const BODY = { start_date: '2026-10-01', end_date: '2026-10-31' };
+
+  it.each([
+    ['sem X-CSRF-Token', withoutToken],
+    ['Origin nao permitida', evilOrigin],
+  ])('createExport %s: 403 sem criar pedido', async (_nome, headersFor) => {
+    const s = await session();
+    const response = await h.call('createExport', 'POST', '/exports', {
+      body: BODY,
+      headers: { ...headersFor(s), 'idempotency-key': 'k-1' },
+    });
+    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({ code: 'CSRF_VALIDATION_FAILED' });
+    expect((await h.pool.query('SELECT 1 FROM export_requests')).rowCount).toBe(0);
+  });
+
+  it.each([
+    ['sem X-CSRF-Token', withoutToken],
+    ['Origin nao permitida', evilOrigin],
+  ])('cancelExport %s: 403 sem cancelar', async (_nome, headersFor) => {
+    const s = await session();
+    const created = await h.call('createExport', 'POST', '/exports', {
+      body: BODY,
+      headers: { ...s.mutation, 'idempotency-key': 'k-pedido' },
+    });
+    expect(created.status).toBe(202);
+    const id = (created.body as { export_id: string }).export_id;
+    const response = await h.call('cancelExport', 'DELETE', `/exports/${id}`, {
+      headers: headersFor(s),
+    });
+    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({ code: 'CSRF_VALIDATION_FAILED' });
+    const status = await h.pool.query<{ status: string }>(
+      'SELECT status FROM export_requests WHERE id = $1',
+      [id],
+    );
+    expect(status.rows[0]?.status).toBe('REQUESTED');
   });
 });

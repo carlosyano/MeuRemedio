@@ -5,12 +5,24 @@ import pg from 'pg';
 import { PgBoss } from 'pg-boss';
 import { systemClock } from './platform/clock.js';
 import { unconfiguredEmailSender } from './platform/email/email-sender.js';
+import {
+  FileSystemObjectStorage,
+  unconfiguredObjectStorage,
+} from './platform/storage/object-storage.js';
 import { startWorker } from './worker.js';
 
 const required = (name: string): string => {
   const value = process.env[name];
   if (value === undefined || value === '') throw new Error(`${name} nao definida`);
   return value;
+};
+
+// EXPORT_STORAGE_DIR: diretorio local dos PDFs em desenvolvimento (o S3 entra com a infraestrutura).
+const storageFromEnv = () => {
+  const dir = process.env['EXPORT_STORAGE_DIR'];
+  return dir === undefined || dir === ''
+    ? unconfiguredObjectStorage
+    : new FileSystemObjectStorage(dir);
 };
 
 const databaseUrl = required('DATABASE_URL');
@@ -21,6 +33,7 @@ const worker = await startWorker({
   clock: systemClock,
   email: unconfiguredEmailSender,
   webBaseUrl: required('WEB_BASE_URL'),
+  storage: storageFromEnv(),
 });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {

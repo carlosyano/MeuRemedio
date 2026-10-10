@@ -12,6 +12,7 @@ import {
   locateNormativeOpenApi,
 } from '../../../apps/api/src/platform/contract/openapi-contract.js';
 import { migrate } from '../../../apps/api/src/platform/migrate.js';
+import { MemoryObjectStorage } from '../../../apps/api/src/platform/storage/object-storage.js';
 import { startPostgres, type PostgresHandle } from '../../../packages/testkit/src/index.js';
 
 export const ORIGIN = 'https://app.example.invalid';
@@ -23,6 +24,8 @@ export interface HttpResult {
   /** Cada Set-Cookie separado. */
   readonly cookies: string[];
   readonly body: unknown;
+  /** Corpo bruto (ex.: o PDF de downloadExport). */
+  readonly raw: Buffer;
 }
 
 export interface CallOptions {
@@ -35,6 +38,8 @@ export interface CallOptions {
 
 export interface Harness {
   readonly pool: pg.Pool;
+  /** Armazenamento privado de arquivos em memoria, compartilhado pela API e pelo worker. */
+  readonly storage: MemoryObjectStorage;
   /** URL do banco isolado da suite (ex.: para o pg-boss do worker). */
   readonly url: string;
   readonly app: NestFastifyApplication;
@@ -67,9 +72,11 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
   await migrate(pool);
   const state = { now };
   const clock: Clock = { now: () => state.now };
+  const storage = new MemoryObjectStorage();
   const app = await createApp({
     clock,
     database: pool,
+    storage,
     logger: false,
     allowedOrigins: [ORIGIN],
     secrets: {
@@ -81,6 +88,7 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
 
   const harness: Harness = {
     pool,
+    storage,
     url: db.url,
     app,
     contract,
@@ -110,7 +118,13 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
           Object.entries(response.headers).map(([name, value]) => [name, String(value)]),
         ),
         cookies: raw === undefined ? [] : Array.isArray(raw) ? raw : [raw],
-        body: response.body === '' ? undefined : response.json<unknown>(),
+        body:
+          response.body === ''
+            ? undefined
+            : String(response.headers['content-type']).includes('json')
+              ? response.json<unknown>()
+              : response.body,
+        raw: response.rawPayload,
       };
       if (options.unchecked !== true) {
         expect(contract.validateResponse(operationId, result), JSON.stringify(result.body)).toEqual(
@@ -138,6 +152,7 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
         `TRUNCATE users, idempotency_records, outbox_events, rate_limit_counters,
                   login_failure_counters CASCADE`,
       );
+      storage.clear();
     },
     async close() {
       await app.close();
