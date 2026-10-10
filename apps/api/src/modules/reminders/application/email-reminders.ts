@@ -10,7 +10,8 @@
 //     PROVIDER_REJECTED; qualquer outro erro mantem DELIVERY_UNKNOWN;
 //   - conciliacao: evidencia positiva do provedor -> SENT; janela de 24 h encerrada -> FAILED
 //     DELIVERY_UNCONFIRMED;
-//   - o e-mail e minimizado: sem nome do medicamento, dose ou link com token (RN-018).
+//   - o e-mail informa o nome do medicamento (snapshot da ocorrencia) e o horario local previsto,
+//     sem dose nem link com token (RN-018, DEC-031).
 import type { Pool } from 'pg';
 import type { Clock } from '../../../platform/clock.js';
 import { withTransaction } from '../../../platform/db/transaction.js';
@@ -99,6 +100,8 @@ export async function handleRemindersSweep(deps: { pool: Pool; clock: Clock }): 
 
 interface Claimed {
   readonly to: string;
+  readonly medicationName: string;
+  readonly localTime: string;
 }
 
 /** Consumidor de reminders.email_requested. */
@@ -115,9 +118,13 @@ export async function handleReminderRequested(
         plan_status: string;
         user_status: string;
         email: string;
+        medication_name: string;
+        local_time: string;
       }>(
         `SELECT r.status, o.status AS occurrence_status, p.status AS plan_status,
-                u.status AS user_status, u.email_normalized AS email
+                u.status AS user_status, u.email_normalized AS email,
+                o.medication_name_snapshot AS medication_name,
+                to_char(o.local_time, 'HH24:MI') AS local_time
            FROM email_reminders r
            JOIN occurrences o ON o.id = r.occurrence_id
            JOIN medication_plans p ON p.id = o.plan_id
@@ -156,19 +163,19 @@ export async function handleReminderRequested(
         WHERE id = $1`,
       [event.reminder_id, now, new Date(Date.parse(now) + RECONCILE_WINDOW_MS).toISOString()],
     );
-    return { to: row.email };
+    return { to: row.email, medicationName: row.medication_name, localTime: row.local_time };
   });
   if (claimed === undefined) return;
 
   try {
     const receipt = await deps.email.send({
       to: claimed.to,
-      subject: 'Lembrete do MeuRemedio',
+      subject: `Lembrete: ${claimed.medicationName} às ${claimed.localTime}`,
       text: [
         'Olá!',
         '',
-        'Chegou o horário de um medicamento da sua rotina.',
-        'Abra o MeuRemedio para ver e registrar se você tomou:',
+        `Chegou o horário de ${claimed.medicationName}, previsto para as ${claimed.localTime}.`,
+        'Abra o MeuRemedio para registrar se você tomou:',
         '',
         `${deps.webBaseUrl.replace(/\/+$/, '')}/`,
         '',
