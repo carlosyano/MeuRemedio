@@ -1,5 +1,6 @@
 export * from './civil-time.js';
 export * from './generation-horizon.js';
+export * from './history-window.js';
 export * from './occurrence-slots.js';
 export * from './plan-rules.js';
 

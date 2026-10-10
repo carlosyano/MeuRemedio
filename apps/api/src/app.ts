@@ -23,6 +23,8 @@ import {
   type HealthSettings,
 } from './modules/platform/application/health.js';
 import { HealthController } from './modules/platform/infrastructure/health.controller.js';
+import { ReadHistory } from './modules/history/application/read-history.js';
+import { HistoryController } from './modules/history/infrastructure/history.controller.js';
 import { ReadOccurrences } from './modules/occurrences/application/read-occurrences.js';
 import { OccurrencesController } from './modules/occurrences/infrastructure/occurrences.controller.js';
 import { CreatePlan } from './modules/plans/application/create-plan.js';
@@ -51,6 +53,7 @@ const CONTROLLERS: Type[] = [
   SessionsController,
   PlansController,
   OccurrencesController,
+  HistoryController,
 ];
 
 export interface CreateAppOptions {
@@ -123,6 +126,7 @@ class AppModule {
           useValue: new UpdatePlan(options.database, options.clock, hashRequest),
         },
         { provide: DeletePlan, useValue: new DeletePlan(options.database, options.clock) },
+        { provide: ReadHistory, useValue: new ReadHistory(options.database, options.clock) },
         {
           provide: ReadOccurrences,
           useValue: new ReadOccurrences(options.database, options.clock),
