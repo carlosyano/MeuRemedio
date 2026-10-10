@@ -190,7 +190,7 @@ Ocorrência civil, instantes, estado, snapshots e versão.
 | `scheduled_at` | timestamptz | sim | us UTC | RFC 3339 UTC | - | não | - | saúde sensível | DST: inexistente avança; ambíguo = 1º instante (OA-003) |
 | `deadline_at` | timestamptz | sim | us UTC | RFC 3339 UTC | - | não | - | operacional | = scheduled_at + 60 min |
 | `status` | occurrence_status | sim | - | PROGRAMMED\|NO_RESPONSE\|TAKEN\|NOT_TAKEN\|CANCELED | PROGRAMMED | não | - | saúde sensível | transições fechadas (FL-003) |
-| `no_response_reached_at` | timestamptz | não | us UTC | RFC 3339 UTC | null | não | - | operacional | marco preservado na resposta tardia |
+| `no_response_reached_at` | timestamptz | não | us UTC | RFC 3339 UTC | null | não | - | operacional | instante da varredura de prazo ou da geração tardia (DC-038, DEC-027); preservado na resposta tardia |
 | `medication_name_snapshot` | varchar | sim | 1..120 | texto | - | não | - | saúde sensível | cópia imutável do plano |
 | `dose_text_snapshot` | varchar | sim | 1..80 | texto | - | não | - | saúde sensível | cópia imutável do plano |
 | `is_late` | boolean | sim | - | true\|false | false | não | - | operacional | true se resposta após deadline_at |

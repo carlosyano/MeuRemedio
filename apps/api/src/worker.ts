@@ -7,6 +7,11 @@ import {
   type VerificationRequested,
 } from './modules/identity/application/issue-verification.js';
 import {
+  DEADLINE_SWEEP_CRON,
+  DEADLINE_SWEEP_QUEUE,
+  handleDeadlineSweep,
+} from './modules/occurrences/application/deadline-sweep.js';
+import {
   handleOccurrencesRequested,
   type OccurrencesRequested,
 } from './modules/occurrences/application/occurrences-requested.js';
@@ -61,6 +66,14 @@ export async function startWorker(options: WorkerOptions): Promise<RunningWorker
       }
     },
   );
+
+  // Job de prazo a cada minuto (RN-009). Passada perdida com o worker parado: so a mais recente roda,
+  // e ela alcanca todos os prazos vencidos.
+  await boss.createQueue(DEADLINE_SWEEP_QUEUE);
+  await boss.schedule(DEADLINE_SWEEP_QUEUE, DEADLINE_SWEEP_CRON, null, { missed: 'once' });
+  await boss.work(DEADLINE_SWEEP_QUEUE, { pollingIntervalSeconds: 0.5 }, async () => {
+    await handleDeadlineSweep({ pool: options.pool, clock: options.clock });
+  });
 
   const dispatcher = new OutboxDispatcher(options.pool, boss, options.clock);
   let running = false;
