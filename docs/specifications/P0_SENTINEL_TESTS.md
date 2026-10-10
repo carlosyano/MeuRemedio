@@ -126,6 +126,8 @@
 
 
 **Estado (PR 40):** `createExport` cobre os passos 1 a 5 (`tests/integration/exports.spec.ts`). No passo 5, a chave expirada é tratada como nova e cria outro pedido.
+
+**Estado (PR 41):** `revokeAllSessions` cobre os passos 2, 3, 5 e 6 em `tests/integration/account-settings.spec.ts` (replay e payload divergente a partir de uma nova sessão do titular; replay pela sessão revogada com 401). O passo 4 aguarda a DEC-032: a OpenAPI 02.33.4 não documenta 400 na operação.
 ---
 
 ## TS-024 — DST e tempo civil

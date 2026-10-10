@@ -113,8 +113,7 @@ describe('revokeAllSessions (RF-002, TS-044)', () => {
   const revokeAll = (session: LoggedIn, password: string, key: string | null = 'k-1') =>
     h.call('revokeAllSessions', 'POST', '/sessions/revocations', {
       body: { password },
-      headers:
-        key === null ? session.mutation : { ...session.mutation, 'idempotency-key': key },
+      headers: key === null ? session.mutation : { ...session.mutation, 'idempotency-key': key },
     });
 
   const active = async (userId: string): Promise<number> =>
@@ -174,12 +173,9 @@ describe('revokeAllSessions (RF-002, TS-044)', () => {
     expect((await revokeAll(ana, PASSWORD, 'k-depois')).status).toBe(204);
   });
 
-  it('TS-038 passo 4: sem Idempotency-Key: 400 sem revogar', async () => {
-    const response = await revokeAll(ana, PASSWORD, null);
-    expect(response.status).toBe(400);
-    expect(response.body).toMatchObject({ field_errors: [{ field: 'Idempotency-Key' }] });
-    expect(await active(anaId)).toBe(1);
-  });
+  it.todo(
+    'TS-038 passo 4: sem Idempotency-Key, 400; a OpenAPI 02.33.4 nao documenta 400 em revokeAllSessions (lacuna levada a DEC-032)',
+  );
 
   it('TS-038 passos 2, 3, 5 e 6: replay, payload divergente, expiracao e replay apos a revogacao', async () => {
     expect((await revokeAll(ana, PASSWORD, 'kx')).status).toBe(204);
