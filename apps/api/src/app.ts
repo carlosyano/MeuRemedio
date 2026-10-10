@@ -7,8 +7,10 @@ import { DiscoveryModule, DiscoveryService, MetadataScanner, NestFactory } from 
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { Pool } from 'pg';
 import { CreateAccount } from './modules/identity/application/create-account.js';
+import { AccountSettings } from './modules/identity/application/account-settings.js';
 import { CurrentAccount } from './modules/identity/application/current-account.js';
 import { LoginThrottle } from './modules/identity/application/login-throttle.js';
+import { RevokeAllSessions } from './modules/identity/application/revoke-all-sessions.js';
 import { Sessions } from './modules/identity/application/sessions.js';
 import { ResendVerification } from './modules/identity/application/resend-verification.js';
 import { VerifyAccount } from './modules/identity/application/verify-account.js';
@@ -120,6 +122,24 @@ class AppModule {
         },
         { provide: VerifyAccount, useValue: new VerifyAccount(options.database, options.clock) },
         { provide: CurrentAccount, useValue: new CurrentAccount(options.database) },
+        {
+          provide: AccountSettings,
+          useValue: new AccountSettings(
+            options.database,
+            options.clock,
+            new CurrentAccount(options.database),
+          ),
+        },
+        {
+          provide: RevokeAllSessions,
+          useValue: new RevokeAllSessions(
+            options.database,
+            options.clock,
+            hashRequest,
+            argon2idPasswordHasher,
+            new LoginThrottle(options.database, options.secrets.emailPepper),
+          ),
+        },
         { provide: Sessions, useValue: sessions },
         {
           provide: ResendVerification,

@@ -48,6 +48,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-040 | Lembretes por e-mail sem reenvio cego | Vigente |
 | DC-041 | Período e conteúdo de `getHistory` | Vigente |
 | DC-042 | Exportação em PDF | Vigente |
+| DC-043 | Conta, preferências e revogação global de sessões | Vigente |
 
 ---
 
@@ -390,3 +391,15 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Conteúdo:** o PDF traz o período e o fuso, o instante de geração, um aviso de que é registro declaratório e não prescrição, e para cada ocorrência alcançada a data, o horário, o medicamento, a dose e a resposta (com motivo, instante e atraso). Não traz nome nem e-mail do titular, e a ordem é decrescente, como no histórico.
 - **Riscos:** o PDF contém dado de saúde. A proteção vem da sessão, da titularidade, do armazenamento privado e da expiração. Uma falha ao apagar um arquivo pode deixar o objeto órfão, sem acesso pela API porque a chave nunca sai. A política de ciclo de vida do bucket S3 deve cobrir esse caso.
 - **Aplica-se a:** `modules/exports/**`, `platform/storage/object-storage.ts`, `worker.ts`, `main.ts`, `worker-main.ts` e `migrations/0007_exports.sql`.
+
+## DC-043 — Conta, preferências e revogação global de sessões (10/10/2026)
+
+- **Contexto:** `updateCurrentAccount` altera só o nome, as preferências de acessibilidade são substituídas por `PUT` e `revokeAllSessions` exige senha, `Idempotency-Key` e CSRF (TS-044). Não estão definidos o tratamento de espaços no nome nem a proteção contra tentativa de senha em série na reautenticação, que hoje só teria o limite por titular de 100 requisições por minuto.
+- **Alternativas para a reautenticação:** (a) só o limite por titular; (b) contar as falhas no bloqueio do login (RN-005).
+- **Decisão:**
+  - **Nome:** gravado sem espaços nas pontas. Só espaços retorna 400 `VALIDATION_FAILED` em `name`.
+  - **Preferências:** substituídas por inteiro e devolvidas.
+  - **Reautenticação:** (b). A `Idempotency-Key` é consultada antes da senha, para o replay e o payload divergente seguirem o TS-038. Senha errada retorna 401 sem revogar e conta uma falha no mesmo contador do login (HMAC do e-mail). Com o bloqueio ativo, a reautenticação recebe 401 sem conferir a senha, porque a operação não documenta 423. Sucesso zera o contador, como no login, e revoga todas as sessões do titular com `REVOKE_ALL`, limpando os cookies.
+- **Riscos:** quem tem uma sessão roubada pode bloquear o login do titular por 15 minutos errando a senha cinco vezes. É o mesmo efeito de tentar o login com o e-mail dele, já aceito na RN-005.
+- **Lacuna normativa (DEC-032):** a OpenAPI 02.33.4 não documenta 400 em `createSession`, `revokeAllSessions` e `requestAccountDeletion`. Corpo inválido ou falta da `Idempotency-Key` nessas operações sai do contrato e vira 500. A correção vai em PR normativo, e o passo 4 do TS-038 em `revokeAllSessions` fica como `it.todo` até lá.
+- **Aplica-se a:** `modules/identity/application/account-settings.ts` e `revoke-all-sessions.ts`.

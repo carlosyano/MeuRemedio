@@ -1,8 +1,9 @@
 // Rotas de conta (OpenAPI 02.33.4, tag Accounts).
-import { Body, Controller, Get, Headers, Inject, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Inject, Post, Put, Req, Res } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { sessionOf } from '../../../platform/http/access.guard.js';
 import { OperationId } from '../../../platform/http/operation-id.js';
+import { AccountSettings, type AccessibilityPreferences } from '../application/account-settings.js';
 import { CreateAccount, type CreateAccountRequest } from '../application/create-account.js';
 import { CurrentAccount } from '../application/current-account.js';
 import { ResendVerification } from '../application/resend-verification.js';
@@ -15,7 +16,29 @@ export class AccountsController {
     @Inject(VerifyAccount) private readonly verifyAccount: VerifyAccount,
     @Inject(ResendVerification) private readonly resendVerification: ResendVerification,
     @Inject(CurrentAccount) private readonly currentAccount: CurrentAccount,
+    @Inject(AccountSettings) private readonly settings: AccountSettings,
   ) {}
+
+  @Put('accounts/me')
+  @OperationId('updateCurrentAccount')
+  async update(@Req() request: FastifyRequest, @Body() body: { name: string }): Promise<unknown> {
+    return this.settings.rename(sessionOf(request).userId, body.name);
+  }
+
+  @Get('preferences/accessibility')
+  @OperationId('getAccessibilityPreferences')
+  async preferences(@Req() request: FastifyRequest): Promise<AccessibilityPreferences> {
+    return this.settings.preferences(sessionOf(request).userId);
+  }
+
+  @Put('preferences/accessibility')
+  @OperationId('updateAccessibilityPreferences')
+  async replacePreferences(
+    @Req() request: FastifyRequest,
+    @Body() body: AccessibilityPreferences,
+  ): Promise<AccessibilityPreferences> {
+    return this.settings.replacePreferences(sessionOf(request).userId, body);
+  }
 
   @Get('accounts/me')
   @OperationId('getCurrentAccount')
