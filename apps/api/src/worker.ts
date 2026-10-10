@@ -20,6 +20,14 @@ import {
   handleOccurrencesRequested,
   type OccurrencesRequested,
 } from './modules/occurrences/application/occurrences-requested.js';
+import {
+  REMINDERS_SWEEP_CRON,
+  REMINDERS_SWEEP_QUEUE,
+  REMINDER_REQUESTED,
+  handleReminderRequested,
+  handleRemindersSweep,
+  type ReminderRequested,
+} from './modules/reminders/application/email-reminders.js';
 import type { Clock } from './platform/clock.js';
 import type { EmailSender } from './platform/email/email-sender.js';
 import { OUTBOX_QUEUES, OutboxDispatcher } from './platform/outbox/dispatcher.js';
@@ -85,6 +93,31 @@ export async function startWorker(options: WorkerOptions): Promise<RunningWorker
   await boss.schedule(HORIZON_REFRESH_QUEUE, HORIZON_REFRESH_CRON, null, { missed: 'once' });
   await boss.work(HORIZON_REFRESH_QUEUE, { pollingIntervalSeconds: 0.5 }, async () => {
     await handleHorizonRefresh({ pool: options.pool, clock: options.clock });
+  });
+
+  // Lembretes por e-mail (RN-018): a varredura do minuto solicita pelo Outbox; o consumidor envia
+  // no maximo uma vez por lembrete (DC-040).
+  await boss.work<ReminderRequested>(
+    REMINDER_REQUESTED,
+    { pollingIntervalSeconds: 0.5 },
+    async (jobs) => {
+      for (const job of jobs) {
+        await handleReminderRequested(
+          {
+            pool: options.pool,
+            clock: options.clock,
+            email: options.email,
+            webBaseUrl: options.webBaseUrl,
+          },
+          job.data,
+        );
+      }
+    },
+  );
+  await boss.createQueue(REMINDERS_SWEEP_QUEUE);
+  await boss.schedule(REMINDERS_SWEEP_QUEUE, REMINDERS_SWEEP_CRON, null, { missed: 'once' });
+  await boss.work(REMINDERS_SWEEP_QUEUE, { pollingIntervalSeconds: 0.5 }, async () => {
+    await handleRemindersSweep({ pool: options.pool, clock: options.clock });
   });
 
   const dispatcher = new OutboxDispatcher(options.pool, boss, options.clock);

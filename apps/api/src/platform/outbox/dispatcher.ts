@@ -12,6 +12,7 @@ import type { Clock } from '../clock.js';
 export const OUTBOX_QUEUES = [
   'identity.verification_requested',
   'plans.occurrences_requested',
+  'reminders.email_requested',
 ] as const;
 
 export interface TransactionalDb {

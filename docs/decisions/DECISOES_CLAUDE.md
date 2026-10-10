@@ -45,6 +45,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-037 | Quando uma ocorrência aceita resposta | Vigente |
 | DC-038 | Job de prazo NO_RESPONSE | Vigente |
 | DC-039 | Job horário do horizonte | Vigente |
+| DC-040 | Lembretes por e-mail sem reenvio cego | Vigente |
 
 ---
 
@@ -346,3 +347,16 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** (b). A fila `occurrences.horizon_refresh` é agendada no pg-boss em `0 * * * *` com `missed: 'once'`. Cada passada gera o horizonte da DEC-027 para cada plano ACTIVE de conta ACTIVE, um plano por transação, com a geração idempotente (RN-007). A conta em exclusão (DELETION_SCHEDULED) fica de fora, porque o acesso dela já foi bloqueado (RN-012).
 - **Riscos:** a passada percorre todos os planos em sequência, o que pede revisão quando o volume crescer, por exemplo lotes ou uma fila por plano. Uma data civil nova pode levar até 1 hora para entrar no fim do horizonte, sem efeito prático, porque esse fim fica 30 dias à frente.
 - **Aplica-se a:** `modules/occurrences/application/horizon-refresh.ts` e `worker.ts`.
+
+## DC-040 — Lembretes por e-mail sem reenvio cego (10/10/2026)
+
+- **Contexto:** RN-018 fixa no máximo 1 e-mail por ocorrência, em `scheduled_at`, sem nome do medicamento, dose ou link com token. A DEC-005 e o FL-004 adotam DELIVERY_UNKNOWN com conciliação e sem reenvio cego, e o TS-017 exige retomada do worker sem e-mail duplicado. Não estão definidos o disparo, a janela de conciliação, o texto do e-mail, a supressão nem o uso dos retries de RNF-007 (1 s, 2 s e 4 s, só para operações idempotentes).
+- **Alternativas:** para o disparo, (a) job agendado por ocorrência na geração ou (b) varredura a cada minuto. Para a tentativa, (a) registrar depois do envio ou (b) registrar antes, como incerta.
+- **Decisão:**
+  - **Disparo:** varredura a cada minuto (fila `reminders.sweep`, `* * * * *`, `missed: 'once'`). Ela cria o lembrete REQUESTED de cada ocorrência PROGRAMMED com `scheduled_at <= agora < deadline_at`, de plano ACTIVE e conta ACTIVE, e grava o evento `reminders.email_requested` no Outbox na mesma transação. O `UNIQUE(occurrence_id)` garante o lembrete único. Se o worker ficar parado até depois do prazo, o lembrete não sai, porque a ocorrência já está atrasada.
+  - **Envio:** o consumidor bloqueia o lembrete e, antes de chamar o provedor, confirma a tentativa como DELIVERY_UNKNOWN (`attempts = 1`, `reconcile_until = +24 h`). Só um lembrete REQUESTED é enviado. Reentrega, retomada ou erro incerto nunca reenviam, e a queda antes do envio também termina em DELIVERY_UNKNOWN, como o TS-017 admite. Aceite vira SENT com o `provider_message_id`. Recusa definitiva (`EmailRejectedError`, inclusive provedor não configurado) vira FAILED PROVIDER_REJECTED. Não há retry, porque o envio de e-mail não é idempotente (RNF-007).
+  - **Supressão:** ocorrência respondida vira FAILED SUPPRESSED_RESPONDED. Ocorrência cancelada, plano excluído ou conta em exclusão viram FAILED SUPPRESSED_DELETION (TS-034).
+  - **Conciliação:** evidência positiva dentro da janela (`confirmReminderDelivery`, para o futuro consumidor de eventos do SES, que identifica o lembrete pela `reference` enviada como tag) vira SENT. Com a janela encerrada, FAILED DELIVERY_UNCONFIRMED.
+  - **Texto:** assunto "Lembrete do MeuRemedio", aviso genérico de que chegou o horário de um medicamento da rotina e o endereço raiz da aplicação, sem horário, nome, dose ou token.
+- **Riscos:** a falha entre a confirmação da tentativa e o envio perde o lembrete, que fica registrado como incerto. Sem o adaptador SES (OA-004), não existe conciliação positiva, e todo envio incerto termina FAILED DELIVERY_UNCONFIRMED.
+- **Aplica-se a:** `modules/reminders/application/email-reminders.ts`, `platform/email/email-sender.ts`, `worker.ts` e `migrations/0006_reminders.sql`.
