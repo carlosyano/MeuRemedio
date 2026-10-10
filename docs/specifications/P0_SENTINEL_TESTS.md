@@ -171,6 +171,8 @@ Os valores foram calculados com `zoneinfo` e o tzdata do ambiente de referência
 
 **Estado (PR 8):** só a reivindicação disjunta de eventos do Outbox está coberta (`tests/integration/db-platform.spec.ts`); `email_reminders` (ENT-009), o worker e o provedor falso permanecem pendentes.
 
+
+**Estado (PR 36):** coberto em `tests/integration/reminders.spec.ts` com provedor falso que conta os envios. Queda depois do envio e antes do registro: a reentrega não reenvia (1 e-mail) e o lembrete termina DELIVERY_UNKNOWN. Queda antes do envio: termina DELIVERY_UNKNOWN sem e-mail e sem reenvio cego. Reexecutar o gerador, o job de prazo e a varredura de lembretes não altera os estados. As constraints de `email_reminders` estão em `tests/integration/db-reminders.spec.ts` (DC-040).
 ---
 
 ## TS-040 — Contrato: OpenAPI, implementação e testes não divergem

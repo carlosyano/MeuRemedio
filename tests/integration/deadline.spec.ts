@@ -225,7 +225,7 @@ describe('worker: varredura agendada a cada minuto', () => {
       pool: h.pool,
       boss,
       clock: { now: () => h.now },
-      email: { send: () => Promise.resolve() },
+      email: { send: () => Promise.resolve(undefined) },
       webBaseUrl: 'https://app.example.invalid',
       pollIntervalMs: 100,
     });

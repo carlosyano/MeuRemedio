@@ -244,7 +244,9 @@ Envio, tentativas, estado, conciliação e erro.
 | `updated_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | atualizado a cada escrita |
 
 **Constraints e índices:**
-- UNIQUE(occurrence_id)
+- UNIQUE(occurrence_id) (`email_reminders_occurrence_id_key`)
+- FK (occurrence_id, user_id) → occurrences(id, user_id) (`email_reminders_occurrence_owner_fk`)
+- CHECK: `failure_code` obrigatório e de lista fechada só em FAILED; `sent_at` em SENT; `reconcile_until` em DELIVERY_UNKNOWN
 - Índice (status,reconcile_until) WHERE status='DELIVERY_UNKNOWN'
 
 ### ENT-010 — `export_requests`
@@ -435,7 +437,8 @@ Perfil versionado e reproduzível de desempenho.
 | `apps/api/migrations/0003_identity.sql` | ENT-002 `verification_tokens` e a tabela de plataforma `rate_limit_counters` (UNLOGGED) | Implementada e coberta por `tests/integration/db-identity.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0004_login_failures.sql` | Tabela de plataforma `login_failure_counters` (UNLOGGED, DEC-016) | Implementada e coberta por `tests/security/ts-033.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0005_plans.sql` | ENT-013 `audit_events` (append-only por trigger) e a tabela de plataforma `plan_duplicate_confirmations` (DC-028) | Implementada e coberta por `tests/integration/db-plans.spec.ts` (PostgreSQL 17 real) |
-| Demais entidades | ENT-003, ENT-009, ENT-010, ENT-014 a ENT-017 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
+| `apps/api/migrations/0006_reminders.sql` | ENT-009 `email_reminders` (DC-040) | Implementada e coberta por `tests/integration/db-reminders.spec.ts` (PostgreSQL 17 real) |
+| Demais entidades | ENT-003, ENT-010, ENT-014 a ENT-017 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
 
 **Rollback:** as migrações criam apenas objetos novos, sem dados nem dependentes externos; o rollback é uma migração nova que remove os objetos criados (a lista está no cabeçalho de cada arquivo). Uma migração aplicada nunca é editada.
 

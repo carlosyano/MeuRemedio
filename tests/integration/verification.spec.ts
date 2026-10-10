@@ -29,13 +29,13 @@ const clock: Clock = { now: () => currentNow };
 class FakeEmail implements EmailSender {
   readonly sent: EmailMessage[] = [];
   failNext = false;
-  send(message: EmailMessage): Promise<void> {
+  send(message: EmailMessage): Promise<undefined> {
     if (this.failNext) {
       this.failNext = false;
       return Promise.reject(new Error('provedor indisponivel'));
     }
     this.sent.push(message);
-    return Promise.resolve();
+    return Promise.resolve(undefined);
   }
 }
 

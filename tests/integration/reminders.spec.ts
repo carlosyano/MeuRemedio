@@ -90,9 +90,9 @@ const nextKey = (): string => {
   return `k-${String(keySequence)}`;
 };
 
-async function planWithOccurrences(): Promise<string> {
+async function planWithOccurrences(medicationName: string = PLAN.medication_name): Promise<string> {
   const response = await h.call('createPlan', 'POST', '/plans', {
-    body: PLAN,
+    body: { ...PLAN, medication_name: medicationName },
     headers: { ...ana.mutation, 'idempotency-key': nextKey() },
   });
   expect(response.status).toBe(201);
@@ -201,7 +201,7 @@ describe('requestDueReminders: 1 lembrete por ocorrencia em scheduled_at (RN-018
     expect(response.status).toBe(201);
     expect(await requestDueReminders(h.pool, { now: h.now })).toEqual({ requested: 0 });
 
-    const other = await planWithOccurrences();
+    const other = await planWithOccurrences('Outro Sintetico');
     await h.pool.query(
       `UPDATE occurrences SET status = 'CANCELED'
         WHERE plan_id = $1 AND local_scheduled_date = '2026-10-05' AND local_time = '08:00'`,
@@ -209,7 +209,7 @@ describe('requestDueReminders: 1 lembrete por ocorrencia em scheduled_at (RN-018
     );
     expect(await requestDueReminders(h.pool, { now: h.now })).toEqual({ requested: 0 });
 
-    const third = await planWithOccurrences();
+    const third = await planWithOccurrences('Terceiro Sintetico');
     expect(
       (await h.call('deletePlan', 'DELETE', `/plans/${third}`, { headers: ana.mutation })).status,
     ).toBe(204);
