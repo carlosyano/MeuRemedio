@@ -1,0 +1,11 @@
+# Gitleaks (AGENTS.md QG-005; DC-049): regras padrao do Gitleaks com uma unica excecao revisada.
+# Os testes e os exemplos da OpenAPI usam senhas e tokens SINTETICOS (AGENTS.md secao 15), que a
+# regra generica generic-api-key confunde com segredo. A excecao vale so para essa regra e so
+# nesses caminhos; qualquer outra regra continua valendo neles.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Senhas e tokens sinteticos dos testes e exemplos da OpenAPI"
+targetRules = ["generic-api-key"]
+paths = ['''^tests/''', '''^MeuRemedio_OpenAPI_[0-9.]+_COMPLETO\.yaml$''']

@@ -54,6 +54,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-046 | Expurgo da conta, tombstone e reconciliação de restore | Vigente |
 | DC-047 | Schemathesis na CI e entradas que viravam 500 | Vigente |
 | DC-048 | QG-006 (SBOM e licenças) e QG-009 na CI | Vigente |
+| DC-049 | QG-005: Gitleaks, Semgrep e CodeQL; actions fixadas por SHA | Vigente |
 
 ---
 
@@ -466,3 +467,14 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - Os jobs novos não entram como obrigatórios no ruleset sem decisão do mantenedor.
 - **Riscos:** a política é provisória até existir parecer jurídico sobre licenças; ampliá-la exige nova DC. O Trivy entra quando o projeto produzir imagem de contêiner.
 - **Aplica-se a:** `tools/scripts/sbom.mjs`, `tools/scripts/license-policy.mjs`, `package.json` e `.github/workflows/ci.yml`.
+
+## DC-049 — QG-005: Gitleaks, Semgrep e CodeQL; actions fixadas por SHA (14/10/2026)
+
+- **Contexto:** o QG-005 exige CodeQL, Semgrep e Gitleaks, reprovando achado crítico ou alto sem exceção formal e qualquer segredo exposto. A primeira varredura do Gitleaks no histórico achou 12 ocorrências da regra genérica `generic-api-key`, todas senhas e tokens sintéticos dos testes e exemplos da OpenAPI. O Semgrep não achou nada de severidade `ERROR`; os avisos eram actions do GitHub fixadas por tag, que pode ser movida.
+- **Decisão:**
+  - **Gitleaks** 8.30.1 em todo o histórico, baixado da release oficial com o SHA-256 conferido. Exceção única em `.gitleaks.toml`: a regra `generic-api-key` não vale em `tests/` e nas OpenAPI da raiz, onde os dados são sintéticos por regra (AGENTS.md §15). As demais regras valem em todo o repositório.
+  - **Semgrep** 1.170.0 fixado, com os rulesets `p/default`, `p/typescript` e `p/nodejs`. Reprova achado de severidade `ERROR` (alta); os avisos ficam no log. As regras vêm do registro do Semgrep a cada execução.
+  - **CodeQL** com as consultas `security-extended`, em workflow próprio (PR, `main` e semanal), publicando o resultado na aba Security. O job reprova resultado com `security-severity` >= 7.0 (alta ou crítica).
+  - **Actions** do GitHub fixadas pelo SHA do commit, com a versão em comentário.
+- **Riscos:** as regras do registro do Semgrep e do CodeQL mudam sem PR, e um achado novo pode reprovar um PR sem relação com ele. Nesse caso, o achado é tratado ou recebe exceção formal (DC). Atualizar uma action exige trocar o SHA.
+- **Aplica-se a:** `.github/workflows/ci.yml`, `.github/workflows/codeql.yml`, `.github/workflows/traceability-validation.yml`, `.gitleaks.toml`, `tools/security/requirements.txt` e `tools/scripts/sarif-gate.mjs`.

@@ -9,3 +9,4 @@ Scripts operacionais versionados.
 | `oasdiff-bin.mjs` | Download do binário fixado do oasdiff com verificação de SHA-256 (usado pelo `openapi-diff.mjs`) |
 | `sbom.mjs` | `npm run sbom`: SBOM CycloneDX das dependências de produção em `sbom/sbom.cdx.json` e verificação da política de licenças (QG-006) |
 | `license-policy.mjs` | Política de licenças (permissivas; exceções revisadas por versão), usada pelo `sbom.mjs` (DC-048) |
+| `sarif-gate.mjs` | `node tools/scripts/sarif-gate.mjs <dir>`: reprova SARIF do CodeQL com achado de `security-severity` >= 7.0 (QG-005, DC-049) |
