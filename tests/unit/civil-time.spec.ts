@@ -372,11 +372,6 @@ describe('TS-024 resolveCivilInstant: entradas invalidas', () => {
   });
 });
 
-describe('TS-024 pendencias conhecidas (fora desta etapa)', () => {
-  it.todo(
-    'horizonte movel de 30 dias: disparo via Outbox (criar/editar plano) e job horario (requer o worker)',
-  );
-  it.todo(
-    'account_timezone aceita somente identificador IANA canonico (validacao em createAccount)',
-  );
-});
+// Fora deste arquivo: o horizonte de 30 dias pelo Outbox e pelo job horario esta em
+// tests/integration/plans.spec.ts e horizon-refresh.spec.ts; a recusa de fuso nao canonico em
+// createAccount, em tests/integration/create-account.spec.ts (DEC-023, DC-015).
