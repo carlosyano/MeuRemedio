@@ -138,3 +138,14 @@ Lacuna encontrada ao implementar `revokeAllSessions` (PR #41, DC-043): três ope
 Efeitos: OpenAPI `02.33.5` (arquivo renomeado; oasdiff sem incompatibilidade), matriz `2.1.8` (hashes das quatro fontes, `response_statuses` das três operações, ERR-001, DEC-032 e catálogo de decisões), `maxProperties` de `decisions` no schema (31 → 32), `AGENTS.md` 1.6 (referências à OpenAPI vigente), Especificação (DEC-032, referências vigentes e nota no Anexo C), ADR (referências vigentes), `validate_all.py`, workflow de rastreabilidade e `CLAUDE.md`. Notas históricas da 02.33.4 (DEC-026) preservadas.
 
 **Aprovação:** proposta em 10/10/2026; aprovação formal no pull request desta revisão.
+
+## DEC-033 e matriz 2.1.9: conta pendente antiga e artefatos de teste (14/10/2026)
+
+Lacuna encontrada ao implementar o TS-028 (PR #53, DC-051): o teste pede que a conta pendente antiga seja "removida sem órfãos", mas a Especificação não dizia a partir de quando a conta pendente é antiga.
+
+1. **DEC-033:** a conta que segue `PENDING_VERIFICATION` 30 dias após o cadastro é removida pelo job de expurgo, com tokens, eventos do Outbox, snapshot de idempotência e contador de login, sem tombstone; o e-mail fica livre para novo cadastro.
+2. **Artefatos de teste:** os `test_artifacts` dos 37 testes sentinela com implementação passam de `planned` para `implemented`, com os caminhos reais (identificados pela marca `@trace` de cada arquivo). Sem evidência de execução na matriz: a evidência é a CI. Os 7 restantes (TS-010, TS-019, TS-026, TS-030, TS-031, TS-032 e TS-039) seguem `planned`. O teste `tests/contract/test-artifacts.spec.ts` confere que todo artefato implementado existe e rastreia o seu TS.
+
+Efeitos: Especificação (DEC-033 na tabela de decisões e nota no Anexo C), matriz `2.1.9` (hash da Especificação, DEC-033, catálogo de decisões e `test_artifacts`) e `maxProperties` de `decisions` no schema (32 → 33).
+
+**Aprovação:** proposta em 14/10/2026; aprovação formal no pull request desta revisão.

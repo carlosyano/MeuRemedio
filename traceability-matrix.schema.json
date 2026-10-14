@@ -286,7 +286,7 @@
     "decisions": {
       "type": "object",
       "minProperties": 10,
-      "maxProperties": 32,
+      "maxProperties": 33,
       "propertyNames": {
         "pattern": "^DEC-\\d{3}$"
       }

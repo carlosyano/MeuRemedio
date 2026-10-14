@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-matrix_version: 2.1.8
+matrix_version: 2.1.9
 status: baseline-development-and-testing
 generated_from:
   functional_specification: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -15,7 +15,7 @@ generated_from:
     artifacts:
       functional_specification:
         file: MeuRemedio_Especificacao_Funcional_02.33.docx
-        sha256: af834b1ea1af2cb014101edd7ea33ae6970595d37921c6c4e9a0ba460519a4d9
+        sha256: cc9cabd15c03f9d4a9ae94b3faf4329666830daa2d503ca5191951247e718cbc
       openapi:
         file: MeuRemedio_OpenAPI_02.33.5_COMPLETO.yaml
         sha256: bd6338b1904d1783497a27a3624ba678da58a78d011ee8d03f3e7409b4b556d2
@@ -900,11 +900,18 @@ sentinel_tests:
     - createResponse
     priority: P0
     test_artifacts:
-    - id: TS-001-PRIMARY
-      path: tests/integration/ts-001.spec.ts
+    - id: TS-001-01
+      path: tests/integration/db-core.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-001-02
+      path: tests/integration/occurrences.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -920,11 +927,11 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-002-PRIMARY
-      path: tests/integration/ts-002.spec.ts
+    - id: TS-002-01
+      path: tests/integration/reminders.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -941,11 +948,25 @@ sentinel_tests:
     - createPlan
     priority: scope
     test_artifacts:
-    - id: TS-003-PRIMARY
-      path: tests/integration/ts-003.spec.ts
+    - id: TS-003-01
+      path: tests/integration/horizon-refresh.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-003-02
+      path: tests/integration/ts-016.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-003-03
+      path: tests/integration/ts-024.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -961,11 +982,11 @@ sentinel_tests:
     - updatePlan
     priority: scope
     test_artifacts:
-    - id: TS-004-PRIMARY
-      path: tests/integration/ts-004.spec.ts
+    - id: TS-004-01
+      path: tests/integration/plans-edit.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -981,11 +1002,18 @@ sentinel_tests:
     - deletePlan
     priority: scope
     test_artifacts:
-    - id: TS-005-PRIMARY
-      path: tests/integration/ts-005.spec.ts
+    - id: TS-005-01
+      path: tests/integration/history.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-005-02
+      path: tests/integration/plans-edit.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1001,11 +1029,11 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-006-PRIMARY
-      path: tests/integration/ts-006.spec.ts
+    - id: TS-006-01
+      path: tests/integration/deadline.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1021,11 +1049,11 @@ sentinel_tests:
     - createResponse
     priority: scope
     test_artifacts:
-    - id: TS-007-PRIMARY
-      path: tests/integration/ts-007.spec.ts
+    - id: TS-007-01
+      path: tests/integration/occurrences.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1041,11 +1069,39 @@ sentinel_tests:
     - getPlan
     priority: scope
     test_artifacts:
-    - id: TS-008-PRIMARY
-      path: tests/e2e/ts-008.spec.ts
-      level: e2e
+    - id: TS-008-01
+      path: tests/integration/exports.spec.ts
+      level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-008-02
+      path: tests/integration/occurrences.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-008-03
+      path: tests/integration/plans-edit.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-008-04
+      path: tests/integration/plans.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-008-05
+      path: tests/security/ts-023.spec.ts
+      level: security
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1063,11 +1119,18 @@ sentinel_tests:
     - verifyAccount
     priority: scope
     test_artifacts:
-    - id: TS-009-PRIMARY
-      path: tests/integration/ts-009.spec.ts
+    - id: TS-009-01
+      path: tests/integration/password-reset.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-009-02
+      path: tests/integration/verification.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1101,11 +1164,11 @@ sentinel_tests:
     - downloadExport
     priority: scope
     test_artifacts:
-    - id: TS-011-PRIMARY
-      path: tests/e2e/ts-011.spec.ts
-      level: e2e
+    - id: TS-011-01
+      path: tests/integration/exports.spec.ts
+      level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1119,11 +1182,11 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-012-PRIMARY
-      path: tests/security/ts-012.spec.ts
-      level: security
+    - id: TS-012-01
+      path: tests/integration/plans.spec.ts
+      level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1140,11 +1203,11 @@ sentinel_tests:
     - createResponse
     priority: scope
     test_artifacts:
-    - id: TS-013-PRIMARY
-      path: tests/integration/ts-013.spec.ts
+    - id: TS-013-01
+      path: tests/integration/deadline.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1161,11 +1224,11 @@ sentinel_tests:
     - updatePlan
     priority: scope
     test_artifacts:
-    - id: TS-014-PRIMARY
-      path: tests/integration/ts-014.spec.ts
+    - id: TS-014-01
+      path: tests/integration/plans-edit.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1182,11 +1245,46 @@ sentinel_tests:
     - createPlan
     priority: P0
     test_artifacts:
-    - id: TS-015-PRIMARY
-      path: tests/integration/ts-015.spec.ts
+    - id: TS-015-01
+      path: tests/integration/account-settings.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-015-02
+      path: tests/integration/db-platform.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-015-03
+      path: tests/integration/exports.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-015-04
+      path: tests/integration/idempotency.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-015-05
+      path: tests/integration/occurrences.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-015-06
+      path: tests/integration/plans.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1202,11 +1300,18 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-016-PRIMARY
+    - id: TS-016-01
+      path: tests/integration/db-platform.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-016-02
       path: tests/integration/ts-016.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1222,11 +1327,25 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-017-PRIMARY
-      path: tests/integration/ts-017.spec.ts
+    - id: TS-017-01
+      path: tests/integration/db-platform.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-017-02
+      path: tests/integration/db-reminders.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-017-03
+      path: tests/integration/reminders.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1243,11 +1362,11 @@ sentinel_tests:
     - createSession
     priority: scope
     test_artifacts:
-    - id: TS-018-PRIMARY
+    - id: TS-018-01
       path: tests/integration/ts-018.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1283,11 +1402,11 @@ sentinel_tests:
     - downloadExport
     priority: scope
     test_artifacts:
-    - id: TS-020-PRIMARY
-      path: tests/e2e/ts-020.spec.ts
-      level: e2e
+    - id: TS-020-01
+      path: tests/integration/exports.spec.ts
+      level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1304,11 +1423,11 @@ sentinel_tests:
     - resendVerification
     priority: scope
     test_artifacts:
-    - id: TS-021-PRIMARY
-      path: tests/integration/ts-021.spec.ts
+    - id: TS-021-01
+      path: tests/integration/verification.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1324,11 +1443,11 @@ sentinel_tests:
     - updateAccessibilityPreferences
     priority: scope
     test_artifacts:
-    - id: TS-022-PRIMARY
-      path: tests/e2e/ts-022.spec.ts
-      level: e2e
+    - id: TS-022-01
+      path: tests/integration/account-settings.spec.ts
+      level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1345,11 +1464,32 @@ sentinel_tests:
     - downloadExport
     priority: scope
     test_artifacts:
-    - id: TS-023-PRIMARY
-      path: tests/e2e/ts-023.spec.ts
-      level: e2e
+    - id: TS-023-01
+      path: tests/integration/exports.spec.ts
+      level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-023-02
+      path: tests/integration/history.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-023-03
+      path: tests/integration/occurrences.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-023-04
+      path: tests/security/ts-023.spec.ts
+      level: security
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1364,11 +1504,32 @@ sentinel_tests:
     operationIds: []
     priority: P0
     test_artifacts:
-    - id: TS-024-PRIMARY
+    - id: TS-024-01
       path: tests/integration/ts-024.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-024-02
+      path: tests/unit/civil-time.spec.ts
+      level: unit
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-024-03
+      path: tests/unit/generation-horizon.spec.ts
+      level: unit
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-024-04
+      path: tests/unit/occurrence-slots.spec.ts
+      level: unit
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1383,11 +1544,11 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-025-PRIMARY
-      path: tests/integration/ts-025.spec.ts
+    - id: TS-025-01
+      path: tests/integration/db-core.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1423,11 +1584,11 @@ sentinel_tests:
     - updatePlan
     priority: scope
     test_artifacts:
-    - id: TS-027-PRIMARY
-      path: tests/integration/ts-027.spec.ts
+    - id: TS-027-01
+      path: tests/integration/plans-edit.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1443,11 +1604,11 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-028-PRIMARY
+    - id: TS-028-01
       path: tests/integration/ts-028.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1463,11 +1624,18 @@ sentinel_tests:
     - requestAccountDeletion
     priority: scope
     test_artifacts:
-    - id: TS-029-PRIMARY
+    - id: TS-029-01
+      path: tests/integration/db-privacy.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-029-02
       path: tests/integration/ts-029.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1540,11 +1708,11 @@ sentinel_tests:
     - createSession
     priority: scope
     test_artifacts:
-    - id: TS-033-PRIMARY
+    - id: TS-033-01
       path: tests/security/ts-033.spec.ts
       level: security
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1561,11 +1729,11 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-034-PRIMARY
-      path: tests/integration/ts-034.spec.ts
+    - id: TS-034-01
+      path: tests/integration/reminders.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1581,11 +1749,18 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-035-PRIMARY
-      path: tests/integration/ts-035.spec.ts
+    - id: TS-035-01
+      path: tests/integration/db-reminders.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-035-02
+      path: tests/integration/reminders.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1602,11 +1777,11 @@ sentinel_tests:
     - confirmPasswordReset
     priority: scope
     test_artifacts:
-    - id: TS-036-PRIMARY
+    - id: TS-036-01
       path: tests/security/ts-036.spec.ts
       level: security
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1624,11 +1799,25 @@ sentinel_tests:
     - listPlans
     priority: scope
     test_artifacts:
-    - id: TS-037-PRIMARY
-      path: tests/integration/ts-037.spec.ts
+    - id: TS-037-01
+      path: tests/integration/history.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-037-02
+      path: tests/integration/plans-edit.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-037-03
+      path: tests/integration/plans.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1654,11 +1843,67 @@ sentinel_tests:
     - updatePlan
     priority: P0
     test_artifacts:
-    - id: TS-038-PRIMARY
-      path: tests/integration/ts-038.spec.ts
+    - id: TS-038-01
+      path: tests/integration/account-settings.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-038-02
+      path: tests/integration/create-account.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-038-03
+      path: tests/integration/db-platform.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-038-04
+      path: tests/integration/exports.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-038-05
+      path: tests/integration/idempotency.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-038-06
+      path: tests/integration/occurrences.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-038-07
+      path: tests/integration/plans-edit.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-038-08
+      path: tests/integration/plans.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-038-09
+      path: tests/integration/privacy.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1690,11 +1935,60 @@ sentinel_tests:
     operationIds: []
     priority: P0
     test_artifacts:
-    - id: TS-040-PRIMARY
+    - id: TS-040-01
+      path: tests/contract/http-foundation.spec.ts
+      level: contract
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-040-02
+      path: tests/contract/openapi-diff.spec.ts
+      level: contract
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-040-03
+      path: tests/contract/ts-040.negative.spec.ts
+      level: contract
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-040-04
       path: tests/contract/ts-040.spec.ts
       level: contract
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-040-05
+      path: tests/integration/api-health.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-040-06
+      path: tests/integration/request-hardening.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-040-07
+      path: tests/integration/routes.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-040-08
+      path: tests/schemathesis/ts-040.schemathesis.spec.ts
+      level: contract
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1726,11 +2020,11 @@ sentinel_tests:
     - updatePlan
     priority: scope
     test_artifacts:
-    - id: TS-041-PRIMARY
+    - id: TS-041-01
       path: tests/security/ts-041.spec.ts
       level: security
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1746,11 +2040,18 @@ sentinel_tests:
     - cancelExport
     priority: scope
     test_artifacts:
-    - id: TS-042-PRIMARY
-      path: tests/integration/ts-042.spec.ts
+    - id: TS-042-01
+      path: tests/integration/db-exports.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-042-02
+      path: tests/integration/exports.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1766,11 +2067,25 @@ sentinel_tests:
     - createPlan
     priority: scope
     test_artifacts:
-    - id: TS-043-PRIMARY
-      path: tests/integration/ts-043.spec.ts
+    - id: TS-043-01
+      path: tests/integration/db-plans.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-043-02
+      path: tests/integration/plans.spec.ts
+      level: integration
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-043-03
+      path: tests/unit/plan-rules.spec.ts
+      level: unit
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1786,11 +2101,11 @@ sentinel_tests:
     - revokeAllSessions
     priority: scope
     test_artifacts:
-    - id: TS-044-PRIMARY
-      path: tests/integration/ts-044.spec.ts
+    - id: TS-044-01
+      path: tests/integration/account-settings.spec.ts
       level: integration
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -5046,6 +5361,7 @@ catalog_completeness:
     - DEC-030
     - DEC-031
     - DEC-032
+    - DEC-033
     actual_ids:
     - DEC-001
     - DEC-002
@@ -5079,6 +5395,7 @@ catalog_completeness:
     - DEC-030
     - DEC-031
     - DEC-032
+    - DEC-033
     status: complete
   approved_questions:
     authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -5965,6 +6282,17 @@ decisions:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 32
+      mapping_type: explicit-catalog-row
+  DEC-033:
+    criticidade: Média
+    problema_causa: TS-028 exigia remover a conta pendente antiga sem órfãos, mas não definia a partir de quando a conta pendente
+      é antiga.
+    decis_o_adotada: A conta que segue PENDING_VERIFICATION 30 dias após o cadastro é removida pelo job de expurgo, com tokens,
+      eventos do Outbox, snapshot de idempotência e contador de login, sem tombstone; o e-mail fica livre para novo cadastro.
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 33
       mapping_type: explicit-catalog-row
 approved_questions:
   Q-001:
