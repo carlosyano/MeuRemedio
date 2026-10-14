@@ -56,6 +56,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-048 | QG-006 (SBOM e licenças) e QG-009 na CI | Vigente |
 | DC-049 | QG-005: Gitleaks, Semgrep e CodeQL; actions fixadas por SHA | Vigente |
 | DC-050 | QG-010: testes de mutação no domínio | Vigente |
+| DC-051 | Conta pendente antiga (TS-028) e cobertura de TS-002, TS-012 e TS-025 | Vigente |
 
 ---
 
@@ -491,3 +492,15 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Dependências:** só o `@stryker-mutator/core` 10.0.0. A transitiva `qs` recebe `overrides` para 6.16.0, que corrige duas vulnerabilidades moderadas.
 - **Riscos:** a execução leva de 10 a 20 minutos e roda a cada PR. Os mutantes sobreviventes listados no relatório indicam asserções a reforçar e devem ser tratados em PRs seguintes.
 - **Aplica-se a:** `stryker.config.mjs`, `vitest.mutation.config.ts`, `package.json` e `.github/workflows/ci.yml`.
+
+## DC-051 — Conta pendente antiga (TS-028) e cobertura de TS-002, TS-012 e TS-025 (14/10/2026)
+
+- **Contexto:** o TS-028 pede que a conta pendente antiga seja "removida sem órfãos", mas a Especificação não diz a partir de quando a conta pendente é antiga. O `DATA_MODEL.md` já previa o índice `(status, created_at) WHERE status = 'PENDING_VERIFICATION'` para essa limpeza. O TS-002 pede o lembrete com falha "FAILED auditado" e a ocorrência intacta; o TS-012 e o TS-025 tinham cobertura sem a marca de rastreabilidade.
+- **Alternativas para o prazo:** 7 dias (igual à idempotência), 30 dias (igual ao expurgo da conta, Q-001) ou nenhum.
+- **Decisão:**
+  - **TS-028:** a conta que segue `PENDING_VERIFICATION` 30 dias depois do cadastro é removida na passada do expurgo (DC-046), pelo mesmo caminho: tokens, eventos do Outbox, contador de login e o snapshot do `createAccount`, que tem escopo `public` e é localizado pelo `user_id` da resposta. Não grava tombstone: a conta nunca foi ativada, e uma cópia restaurada continua pendente e antiga, então a passada seguinte a remove de novo. O e-mail fica livre para novo cadastro. Como o prazo preenche lacuna da Especificação, ele vai ao PR normativo como proposta de DEC.
+  - **TS-002:** "auditado" é o próprio registro do lembrete (`email_reminders` com `FAILED`, `failure_code` e tentativas), sem evento em `audit_events`. O teste confere também que a ocorrência não muda.
+  - **TS-012:** o CRM só tem o formato validado pelo contrato (RN-001), e a criação do plano não faz chamada externa.
+  - **TS-025:** coberto pelas constraints nomeadas de `db-core.spec.ts`.
+- **Riscos:** quem cadastrar e não verificar em 30 dias precisa se cadastrar de novo; o reenvio da verificação continua disponível até lá.
+- **Aplica-se a:** `modules/privacy/application/account-purge.ts` e aos testes `ts-028.spec.ts`, `reminders.spec.ts`, `plans.spec.ts` e `db-core.spec.ts`.

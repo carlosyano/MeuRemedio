@@ -1,9 +1,9 @@
-// @trace RF-003 RN-002 RN-006 RN-016 RN-018 CA-005 CA-012 CA-013 CA-017 TS-008 TS-015 TS-037 TS-038 TS-043 ERR-006 createPlan getPlan listPlans
+// @trace RF-003 RN-001 RN-002 RN-006 RN-016 RN-018 CA-005 CA-012 CA-013 CA-017 TS-008 TS-012 TS-015 TS-037 TS-038 TS-043 ERR-006 createPlan getPlan listPlans
 // Planos por HTTP contra PostgreSQL 17 real: criacao com ETag e evento no Outbox na mesma
 // transacao, idempotencia (TS-015 e passos do TS-038 para createPlan), confirmacao de duplicidade
 // (RN-016, CA-017, TS-043), leitura com ownership (TS-008: 404 indistinguivel e auditoria
 // ownership.denied) e listagem paginada so com planos ACTIVE do titular (TS-037).
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { login, startHarness, type Harness, type LoggedIn } from './support/http.js';
 
 const NOW = '2026-10-05T11:05:15Z';
@@ -238,6 +238,20 @@ describe('createPlan', () => {
     expect(response.status).toBe(400);
     expect(response.body).toMatchObject({ code: 'VALIDATION_FAILED' });
     expect(await planCount()).toBe(0);
+  });
+
+  it('TS-012: do CRM so o formato e validado, sem consulta externa (RN-001)', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    try {
+      const response = await createPlan(users.ana, 'k-crm', {
+        ...PLAN_A,
+        prescriber_crm: 'AC-0000',
+      });
+      expect(response.status).toBe(201);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally {
+      fetchSpy.mockRestore();
+    }
   });
 
   it('sem sessao: 401', async () => {

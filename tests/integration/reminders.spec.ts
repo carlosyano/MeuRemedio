@@ -1,4 +1,4 @@
-// @trace RF-005 RN-009 RN-018 TS-017 TS-034 TS-035 ENT-009 DEC-031 (DEC-005; ADR-001 v1.5 OA-002)
+// @trace RF-004 RF-005 RN-009 RN-018 TS-002 TS-017 TS-034 TS-035 ENT-009 DEC-031 (DEC-005; ADR-001 v1.5 OA-002)
 // Lembretes por e-mail contra PostgreSQL 17 real: 1 e-mail por ocorrencia em scheduled_at, com o
 // nome do medicamento e o horario local previsto, sem dose nem link com token (RN-018, DEC-031);
 // supressao depois da resposta ou da
@@ -317,8 +317,17 @@ describe('handleReminderRequested: envio minimizado e estados (FL-004)', () => {
     },
   );
 
-  it('rejeicao definitiva do provedor: FAILED PROVIDER_REJECTED', async () => {
+  it('TS-002: rejeicao definitiva do provedor: FAILED PROVIDER_REJECTED e ocorrencia intacta', async () => {
     const id = await requestAtEight(await planWithOccurrences());
+    const occurrence = async () =>
+      (
+        await h.pool.query<{ status: string; row_version: string }>(
+          `SELECT o.status, o.row_version FROM occurrences o
+             JOIN email_reminders r ON r.occurrence_id = o.id WHERE r.id = $1`,
+          [id],
+        )
+      ).rows[0];
+    const before = await occurrence();
     email.mode = 'reject';
     await deliver(id);
     expect((await reminders())[0]).toMatchObject({
@@ -326,6 +335,7 @@ describe('handleReminderRequested: envio minimizado e estados (FL-004)', () => {
       failure_code: 'PROVIDER_REJECTED',
       attempts: 1,
     });
+    expect(await occurrence()).toEqual(before);
   });
 
   it('TS-035: timeout sem confirmacao: DELIVERY_UNKNOWN com janela de 24 h e sem reenvio cego', async () => {
