@@ -4,6 +4,7 @@ export * from '../../modules/exports/infrastructure/schema.js';
 export * from '../../modules/identity/infrastructure/schema.js';
 export * from '../../modules/occurrences/infrastructure/schema.js';
 export * from '../../modules/plans/infrastructure/schema.js';
+export * from '../../modules/privacy/infrastructure/schema.js';
 export * from '../../modules/platform/infrastructure/schema.js';
 export * from '../../modules/reminders/infrastructure/schema.js';
 export * from '../../modules/responses/infrastructure/schema.js';

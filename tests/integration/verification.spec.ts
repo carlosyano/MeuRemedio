@@ -305,6 +305,7 @@ describe('processo do worker (DC-022)', () => {
       clock,
       email,
       webBaseUrl: WEB,
+      emailPepper: Buffer.alloc(32, 7),
       pollIntervalMs: 100,
     });
     try {

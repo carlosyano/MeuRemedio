@@ -25,6 +25,10 @@ const storageFromEnv = () => {
     : new FileSystemObjectStorage(dir);
 };
 
+// EMAIL_PEPPER: o mesmo segredo da API (base64, 32+ bytes); HMAC do e-mail no tombstone (RN-019).
+const emailPepper = Buffer.from(required('EMAIL_PEPPER'), 'base64');
+if (emailPepper.length < 32) throw new Error('EMAIL_PEPPER (base64, 32+ bytes) nao definida');
+
 const databaseUrl = required('DATABASE_URL');
 const boss = new PgBoss({ connectionString: databaseUrl });
 const worker = await startWorker({
@@ -33,6 +37,7 @@ const worker = await startWorker({
   clock: systemClock,
   email: unconfiguredEmailSender,
   webBaseUrl: required('WEB_BASE_URL'),
+  emailPepper,
   storage: storageFromEnv(),
 });
 

@@ -448,6 +448,7 @@ describe('worker: varredura de lembretes a cada minuto', () => {
       clock: { now: () => h.now },
       email,
       webBaseUrl: WEB,
+      emailPepper: Buffer.alloc(32, 7),
       pollIntervalMs: 100,
     });
     try {

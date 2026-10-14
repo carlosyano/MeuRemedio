@@ -151,6 +151,7 @@ describe('worker: horizonte agendado a cada hora', () => {
       clock: { now: () => h.now },
       email: { send: () => Promise.resolve(undefined) },
       webBaseUrl: 'https://app.example.invalid',
+      emailPepper: Buffer.alloc(32, 7),
       pollIntervalMs: 100,
     });
     try {

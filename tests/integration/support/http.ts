@@ -46,6 +46,8 @@ export interface Harness {
   readonly url: string;
   readonly app: NestFastifyApplication;
   readonly contract: OpenApiContract;
+  /** Pepper do HMAC do e-mail usado pela API (bloqueio de login; tombstone no expurgo). */
+  readonly emailPepper: Buffer;
   now: string;
   call(
     operationId: string,
@@ -75,6 +77,7 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
   const state = { now };
   const clock: Clock = { now: () => state.now };
   const storage = new MemoryObjectStorage();
+  const emailPepper = randomBytes(32);
   const app = await createApp({
     clock,
     database: pool,
@@ -84,13 +87,14 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
     externalRightsChannel: RIGHTS_CHANNEL,
     secrets: {
       requestHashKey: randomBytes(32),
-      emailPepper: randomBytes(32),
+      emailPepper,
       csrfKey: randomBytes(32),
     },
   });
 
   const harness: Harness = {
     pool,
+    emailPepper,
     storage,
     url: db.url,
     app,
