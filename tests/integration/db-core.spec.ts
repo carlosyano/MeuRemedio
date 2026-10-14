@@ -1,4 +1,4 @@
-// @trace TS-001 RN-002 RN-003 RN-004 RN-006 RN-007 RN-008 RN-009 RN-013 RF-001 RF-002 RF-003 RF-004 RF-006
+// @trace TS-001 TS-025 RN-002 RN-003 RN-004 RN-006 RN-007 RN-008 RN-009 RN-013 RF-001 RF-002 RF-003 RF-004 RF-006
 // Esquema central no PostgreSQL 17 REAL (docs/architecture/DATA_MODEL.md: ENT-001 e ENT-004 a ENT-008).
 // Base de banco do TS-001 (concorrencia TAKEN x NOT_TAKEN): o teste HTTP completo vem com a API.
 import pg from 'pg';
