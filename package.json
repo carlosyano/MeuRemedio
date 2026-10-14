@@ -9,6 +9,7 @@
   },
   "workspaces": [
     "apps/api",
+    "apps/web",
     "packages/*"
   ],
   "scripts": {
@@ -27,10 +28,13 @@
     "test:schemathesis": "vitest run --project schemathesis",
     "test:ownership": "vitest run --project integration tests/security/ts-023.spec.ts",
     "sbom": "node tools/scripts/sbom.mjs",
-    "test:mutation": "stryker run"
+    "test:mutation": "stryker run",
+    "test:e2e": "playwright test -c tests/e2e/playwright.config.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
     "@stoplight/spectral-core": "1.24.0",
     "@stoplight/spectral-parsers": "1.0.5",
     "@stoplight/spectral-rulesets": "1.23.0",
