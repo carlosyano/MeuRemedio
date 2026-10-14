@@ -26,13 +26,15 @@
     "test:integration": "vitest run --project integration",
     "test:schemathesis": "vitest run --project schemathesis",
     "test:ownership": "vitest run --project integration tests/security/ts-023.spec.ts",
-    "sbom": "node tools/scripts/sbom.mjs"
+    "sbom": "node tools/scripts/sbom.mjs",
+    "test:mutation": "stryker run"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@stoplight/spectral-core": "1.24.0",
     "@stoplight/spectral-parsers": "1.0.5",
     "@stoplight/spectral-rulesets": "1.23.0",
+    "@stryker-mutator/core": "10.0.0",
     "@types/node": "24.19.1",
     "@types/pg": "8.23.1",
     "eslint": "10.12.0",
@@ -45,5 +47,8 @@
   },
   "dependencies": {
     "glob": "13.0.6"
+  },
+  "overrides": {
+    "qs": "6.16.0"
   }
 }
