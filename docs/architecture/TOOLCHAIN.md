@@ -63,9 +63,10 @@
 | `npm run openapi:diff` | QG-001 (parcial) | Implementado (oasdiff `breaking` contra a OpenAPI do merge-base com `origin/main`, ou `OPENAPI_DIFF_BASE`; aprovações em `tools/oasdiff/approved-breaking.txt`) |
 | `npm run test:ownership` | QG-009 | Implementado (TS-023 gerado da OpenAPI, que inclui o TS-008; job próprio na CI) |
 | `npm audit --audit-level=high` e `npm run sbom` | QG-006 | Implementado (SBOM CycloneDX das dependências de produção, artefato `sbom-cyclonedx` da CI, e política de licenças, DC-048); Trivy entra quando o projeto produzir imagem |
+| Gitleaks, Semgrep e CodeQL (CI) | QG-005 | Implementado (DC-049): Gitleaks 8.30.1 no histórico completo, com SHA-256 conferido e allowlist só para dados sintéticos (`.gitleaks.toml`); Semgrep 1.170.0 (`tools/security/requirements.txt`) com os rulesets `p/default`, `p/typescript` e `p/nodejs`, reprovando severidade `ERROR`; CodeQL `security-extended` em `.github/workflows/codeql.yml`, reprovando `security-severity` >= 7.0 (`tools/scripts/sarif-gate.mjs`) |
 | `npm run traceability:check` | QG-011 | Implementado (`python validate_all.py`) |
 | `npm run verify` | — | Executa typecheck, lint, format:check, test:unit, test:contract, openapi:lint e openapi:diff em sequência (a primeira execução baixa o oasdiff) |
-| `test:e2e`, `test:a11y`, `test:mutation`, `security` | QG-005, 007, 008 e 010 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (Playwright, Stryker, CodeQL, Semgrep, Gitleaks, Trivy) |
+| `test:e2e`, `test:a11y`, `test:mutation` | QG-007, 008 e 010 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (Playwright, Stryker; Trivy quando houver imagem) |
 
 ## 4. Política de atualização
 
