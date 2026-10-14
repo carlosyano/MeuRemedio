@@ -22,6 +22,17 @@ export default defineConfig({
       {
         resolve,
         test: {
+          // TS-040 com Schemathesis contra a API em execucao (QG-001); requer o Schemathesis fixado.
+          name: 'schemathesis',
+          include: ['tests/schemathesis/**/*.spec.ts'],
+          environment: 'node',
+          testTimeout: 1_800_000,
+          hookTimeout: 180_000,
+        },
+      },
+      {
+        resolve,
+        test: {
           name: 'integration',
           // tests/security: cenarios de seguranca (TS-033, TS-041...) contra PostgreSQL real.
           include: ['tests/integration/**/*.spec.ts', 'tests/security/**/*.spec.ts'],
