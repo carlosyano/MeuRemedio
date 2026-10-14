@@ -9,6 +9,11 @@ import type { Pool } from 'pg';
 import { CreateAccount } from './modules/identity/application/create-account.js';
 import { AccountSettings } from './modules/identity/application/account-settings.js';
 import { CurrentAccount } from './modules/identity/application/current-account.js';
+import { RequestAccountDeletion } from './modules/privacy/application/request-account-deletion.js';
+import {
+  PrivacyController,
+  RIGHTS_CHANNEL,
+} from './modules/privacy/infrastructure/privacy.controller.js';
 import { ConfirmPasswordReset } from './modules/identity/application/confirm-password-reset.js';
 import { LoginThrottle } from './modules/identity/application/login-throttle.js';
 import { RevokeAllSessions } from './modules/identity/application/revoke-all-sessions.js';
@@ -65,6 +70,7 @@ const CONTROLLERS: Type[] = [
   OccurrencesController,
   HistoryController,
   ExportsController,
+  PrivacyController,
 ];
 
 export interface CreateAppOptions {
@@ -84,6 +90,8 @@ export interface CreateAppOptions {
   };
   /** Armazenamento privado dos PDFs (ENT-010); sem ele, o download falha. */
   readonly storage?: ObjectStorage;
+  /** Canal externo de direitos do titular (GX-002), exposto por getPrivacy; sem ele, 503. */
+  readonly externalRightsChannel?: string;
   /** Origens aceitas no cabecalho Origin das mutacoes autenticadas (OA-008). */
   readonly allowedOrigins: readonly string[];
   /** CLOCK_SKEW_MAX_MS (RNF-015); padrao 5000. */
@@ -112,6 +120,17 @@ class AppModule {
         { provide: CLOCK, useValue: options.clock },
         { provide: DATABASE, useValue: options.healthProbeDatabase ?? options.database },
         { provide: HEALTH_SETTINGS, useValue: health },
+        { provide: RIGHTS_CHANNEL, useValue: options.externalRightsChannel },
+        {
+          provide: RequestAccountDeletion,
+          useValue: new RequestAccountDeletion(
+            options.database,
+            options.clock,
+            hashRequest,
+            argon2idPasswordHasher,
+            new LoginThrottle(options.database, options.secrets.emailPepper),
+          ),
+        },
         {
           provide: CreateAccount,
           useValue: new CreateAccount(

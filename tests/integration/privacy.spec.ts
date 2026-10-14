@@ -154,7 +154,8 @@ describe('requestAccountDeletion (RF-010, RN-012)', () => {
     }>(
       `SELECT id, actor_user_id, resource_type, resource_id, outcome,
               row_to_json(a)::text AS dump
-         FROM audit_events a WHERE action = 'account.deletion_requested'`,
+         FROM audit_events a WHERE action = 'account.deletion_requested' AND actor_user_id = $1`,
+      [anaId],
     );
     expect(audit.rows).toHaveLength(1);
     expect(audit.rows[0]).toMatchObject({
@@ -210,7 +211,8 @@ describe('requestAccountDeletion (RF-010, RN-012)', () => {
     expect((await requestDeletion(ana, undefined, 'kx')).status).toBe(202);
     expect((await requestDeletion(ana, undefined, 'kx')).status).toBe(401);
     const audit = await h.pool.query(
-      "SELECT 1 FROM audit_events WHERE action = 'account.deletion_requested'",
+      "SELECT 1 FROM audit_events WHERE action = 'account.deletion_requested' AND actor_user_id = $1",
+      [anaId],
     );
     expect(audit.rowCount).toBe(1);
   });
@@ -224,7 +226,8 @@ describe('requestAccountDeletion (RF-010, RN-012)', () => {
     expect(results.filter((r) => r.status === 202)).toHaveLength(1);
     for (const r of results.filter((x) => x.status !== 202)) expect([401, 409]).toContain(r.status);
     const audit = await h.pool.query(
-      "SELECT 1 FROM audit_events WHERE action = 'account.deletion_requested'",
+      "SELECT 1 FROM audit_events WHERE action = 'account.deletion_requested' AND actor_user_id = $1",
+      [anaId],
     );
     expect(audit.rowCount).toBe(1);
   });
@@ -248,7 +251,8 @@ describe('TS-038 passos 2, 3 e 5 no servico (o acesso HTTP termina com a exclusa
     const replay = await run('kx');
     expect(replay).toEqual(first);
     const audit = await h.pool.query(
-      "SELECT 1 FROM audit_events WHERE action = 'account.deletion_requested'",
+      "SELECT 1 FROM audit_events WHERE action = 'account.deletion_requested' AND actor_user_id = $1",
+      [anaId],
     );
     expect(audit.rowCount).toBe(1);
     // Passo 3: payload divergente.
