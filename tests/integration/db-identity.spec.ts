@@ -1,6 +1,6 @@
-// @trace ENT-002 RF-001 RN-017 RNF-006 CA-001 DEC-015 DEC-019 (docs/architecture/DATA_MODEL.md)
-// Base de banco do cadastro no PostgreSQL 17 REAL: tokens de verificacao (ENT-002) e contadores de
-// rate limit (tabela de plataforma UNLOGGED, DEC-019). Cada regra e provada pela constraint nomeada.
+// @trace ENT-002 ENT-003 RF-001 RF-002 RN-017 RNF-006 CA-001 DEC-015 DEC-019 (docs/architecture/DATA_MODEL.md)
+// Base de banco do cadastro no PostgreSQL 17 REAL: tokens de verificacao (ENT-002) e de redefinicao
+// de senha (ENT-003) e contadores de rate limit (tabela de plataforma UNLOGGED, DEC-019). Cada regra e provada pela constraint nomeada.
 import { createHash, randomBytes } from 'node:crypto';
 import pg from 'pg';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -113,6 +113,72 @@ describe('ENT-002 verification_tokens', () => {
     const result = await pool.query<{ def: string }>(
       `SELECT pg_get_indexdef(indexrelid) AS def FROM pg_index
         WHERE indexrelid = 'verification_tokens_open_idx'::regclass`,
+    );
+    expect(result.rows[0]?.def).toMatch(
+      /\(user_id\) WHERE \(\(used_at IS NULL\) AND \(superseded_at IS NULL\)\)/,
+    );
+  });
+});
+
+describe('ENT-003 password_reset_tokens', () => {
+  const insertReset = (row: { user_id: string; token_hash?: Buffer; expires_at?: string }) =>
+    pool.query(
+      `INSERT INTO password_reset_tokens (user_id, token_hash, issued_at, expires_at)
+       VALUES ($1, $2, '2026-10-05T11:05:00Z', $3)`,
+      [row.user_id, row.token_hash ?? tokenHash(), row.expires_at ?? '2026-10-05T12:05:00Z'],
+    );
+
+  it('aceita token com hash SHA-256 e validade de 60 min', async () => {
+    const user = await userId();
+    await insertReset({ user_id: user });
+    const row = (
+      await pool.query<{ used_at: Date | null; superseded_at: Date | null }>(
+        'SELECT used_at, superseded_at FROM password_reset_tokens WHERE user_id = $1',
+        [user],
+      )
+    ).rows[0];
+    expect(row).toEqual({ used_at: null, superseded_at: null });
+  });
+
+  it('token_hash tem exatamente 32 bytes', async () => {
+    await expectPgError(insertReset({ user_id: await userId(), token_hash: Buffer.alloc(16) }), {
+      code: '23514',
+      constraint: 'password_reset_tokens_token_hash_chk',
+    });
+  });
+
+  it('token_hash e unico', async () => {
+    const hash = tokenHash();
+    await insertReset({ user_id: await userId(), token_hash: hash });
+    await expectPgError(insertReset({ user_id: await userId(), token_hash: hash }), {
+      code: '23505',
+      constraint: 'password_reset_tokens_token_hash_key',
+    });
+  });
+
+  it('expires_at = issued_at + 60 minutos (RN-017)', async () => {
+    await expectPgError(
+      insertReset({ user_id: await userId(), expires_at: '2026-10-06T11:05:00Z' }),
+      { code: '23514', constraint: 'password_reset_tokens_expiry_chk' },
+    );
+  });
+
+  it('pertence a uma conta existente e sai junto com ela', async () => {
+    await expectPgError(insertReset({ user_id: '00000000-0000-4000-8000-000000000000' }), {
+      code: '23503',
+      constraint: 'password_reset_tokens_user_fk',
+    });
+    const user = await userId();
+    await insertReset({ user_id: user });
+    await pool.query('DELETE FROM users WHERE id = $1', [user]);
+    const left = await pool.query('SELECT 1 FROM password_reset_tokens WHERE user_id = $1', [user]);
+    expect(left.rowCount).toBe(0);
+  });
+
+  it('indice dos tokens em aberto por conta', async () => {
+    const result = await pool.query<{ def: string }>(
+      `SELECT pg_get_indexdef(indexrelid) AS def FROM pg_index
+        WHERE indexrelid = 'password_reset_tokens_open_idx'::regclass`,
     );
     expect(result.rows[0]?.def).toMatch(
       /\(user_id\) WHERE \(\(used_at IS NULL\) AND \(superseded_at IS NULL\)\)/,
