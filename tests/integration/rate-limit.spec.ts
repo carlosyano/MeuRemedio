@@ -49,6 +49,14 @@ describe('PostgresRateLimiter', () => {
     });
   });
 
+  it('limites configuraveis (verificacao de contrato com Schemathesis, DC-047)', async () => {
+    const relaxed = new PostgresRateLimiter(pool, { public_ip: 2, user: 100 });
+    for (let i = 0; i < 2; i += 1) {
+      expect(await relaxed.consume('public_ip', '203.0.113.9', AT)).toEqual({ allowed: true });
+    }
+    expect((await relaxed.consume('public_ip', '203.0.113.9', AT)).allowed).toBe(false);
+  });
+
   it('nova janela zera a contagem', async () => {
     for (let i = 0; i < 21; i += 1) await limiter.consume('public_ip', '203.0.113.7', AT);
     expect(await limiter.consume('public_ip', '203.0.113.7', '2026-10-05T11:06:00Z')).toEqual({

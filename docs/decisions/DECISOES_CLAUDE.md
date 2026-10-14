@@ -52,6 +52,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-044 | Redefinição de senha | Vigente |
 | DC-045 | Área de privacidade e pedido de exclusão da conta | Vigente |
 | DC-046 | Expurgo da conta, tombstone e reconciliação de restore | Vigente |
+| DC-047 | Schemathesis na CI e entradas que viravam 500 | Vigente |
 
 ---
 
@@ -440,3 +441,15 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Configuração:** o worker passa a exigir `EMAIL_PEPPER`, o mesmo segredo da API.
 - **Riscos:** entre o restore e a primeira passada (até 15 minutos) a conta restaurada pode entrar. O procedimento de restore deve rodar o job uma vez (ou manter a API fora do ar) antes de reabrir o acesso; isso entra no runbook de restore quando a infraestrutura existir (GX-003). Backups com mais de 180 dias não têm tombstone para reconciliar, o que exige retenção de backup menor que 180 dias.
 - **Aplica-se a:** `modules/privacy/application/account-purge.ts`, migração `0009_purge_tombstones.sql`, `worker.ts` e `worker-main.ts`.
+
+## DC-047 — Schemathesis na CI e entradas que viravam 500 (14/10/2026)
+
+- **Contexto:** o TS-040 exige Schemathesis sem falhas nas 27 operações. Rodar o fuzzing contra a API exige sessão válida, mas três operações encerram a sessão ou bloqueiam o login, e o rate limit de 100 requisições por minuto por titular transformaria quase tudo em 429. A primeira execução achou dois defeitos: `Content-Type` malformado em `deletePlan` e `cancelExport` virava 400 do framework, que essas operações não declaram, e por isso 500 (DC-004); e texto com o caractere NUL (U+0000), que o PostgreSQL não armazena, virava 500 no banco.
+- **Alternativas para o `Content-Type`:** (a) declarar 400 nas operações sem corpo (mudança normativa); (b) ignorar corpo e `Content-Type` nas operações sem `requestBody` no contrato, antes do parser.
+- **Decisão:**
+  - **Execução:** Schemathesis 4.29.4 fixado, em job próprio da CI (`QG-001 Schemathesis`), com fases de exemplos, cobertura e fuzzing, semente fixa e 25 exemplos por operação. A fase 1 cobre 24 operações com uma sessão válida; a fase 2 roda `deleteCurrentSession` com sessão própria e `revokeAllSessions` e `requestAccountDeletion` com a sessão da fase 1 (a senha gerada nunca é a do titular). As sessões são abertas antes do fuzzing, porque senhas erradas bloqueiam o login (RN-005). Cookie e `X-CSRF-Token` entram por cabeçalho, sem serem gerados como dado; a falta de autenticação é testada pelo check `ignored_auth`.
+  - **Rate limit:** `createApp` aceita `rateLimits`, que só esse teste eleva. Produção e os demais testes usam os limites do RNF-006.
+  - **`Content-Type`:** (b). Uma operação sem corpo não tem o que interpretar, e a correção não altera o contrato.
+  - **NUL:** texto com U+0000 no corpo, na query, no caminho ou em cabeçalho do contrato recebe 400 `VALIDATION_FAILED` no campo (`INVALID`).
+- **Riscos:** `createResponse` e `downloadExport` recebem quase só 404 no fuzzing (o Schemathesis não conhece ids válidos sem links na OpenAPI); esses caminhos são cobertos pelos testes de integração. Os 429 do rate limit não são exercitados aqui (estão em `rate-limit.spec.ts`).
+- **Aplica-se a:** `platform/contract/openapi-contract.ts`, `platform/http/contract-enforcement.ts`, `platform/rate-limit/rate-limiter.ts`, `app.ts`, `tests/schemathesis/` e `.github/workflows/ci.yml`.
