@@ -67,6 +67,8 @@ Monorepo npm workspaces (`apps/*`, `packages/*`), TypeScript strict (`tsconfig.b
 
 O agente evolui o projeto continuamente e só para quando houver um item crítico sem recomendação clara (passo 0); o resto ele decide, registra e segue. A cada PR:
 
+**Execução contínua (ordem do mantenedor, 14/10/2026):** quando o mantenedor disser "continue", o agente encadeia um PR após o outro, sem pausar para relatar ou pedir confirmação entre eles, e só para quando houver uma decisão ou ação que caiba ao mantenedor: item crítico sem recomendação clara (passo 0), merge de PR normativo do qual o próximo passo dependa, ou ação fora do alcance do agente (credencial, login, configuração externa, aprovação jurídica). PR normativo aberto não interrompe o trabalho que não depende dele. Ao parar, o agente diz exatamente o que precisa do mantenedor.
+
 0. **Dúvidas:** em dúvida não crítica, analisar a fundo as alternativas, adotar a recomendação, registrar como **Decisão Claude** em `docs/decisions/DECISOES_CLAUDE.md` (DC-NNN: contexto, alternativas, decisão, riscos, onde se aplica) e seguir. Perguntar ao mantenedor só em item crítico (segurança, privacidade, dados de saúde, mudança de comportamento normativo de alto impacto) **e** sem recomendação clara. Decisão que preenche lacuna da Especificação continua indo para o PR normativo (DEC-xxx) para o merge do mantenedor; a DC registra a escolha até lá.
 1. **Conferir antes:** CI toda verde (`gh pr checks`), PR sem conflito, diff restrito ao escopo, `python validate_all.py` e `npm run verify` locais (e `test:integration` quando tocar em persistência).
 2. **Merge:** o GitHub não deixa o autor aprovar o próprio PR, então "aprovar" significa fazer o merge (`gh pr merge --merge --delete-branch`) depois da conferência.
