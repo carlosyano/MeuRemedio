@@ -1,4 +1,4 @@
-// @trace RF-001 RF-002 RF-009 RN-005 CA-015 TS-015 TS-022 TS-038 TS-044 ERR-002 ERR-006 updateCurrentAccount getAccessibilityPreferences updateAccessibilityPreferences revokeAllSessions
+// @trace DEC-032 RF-001 RF-002 RF-009 RN-005 CA-015 TS-015 TS-022 TS-038 TS-044 ERR-002 ERR-006 updateCurrentAccount getAccessibilityPreferences updateAccessibilityPreferences revokeAllSessions
 // Conta, preferencias e revogacao global por HTTP contra PostgreSQL 17 real: so o nome da conta
 // muda (fuso imutavel, RN-013); preferencias de acessibilidade substituidas por inteiro (RF-009);
 // revokeAllSessions exige a senha e a Idempotency-Key, recusa senha errada sem revogar e revoga
@@ -173,9 +173,21 @@ describe('revokeAllSessions (RF-002, TS-044)', () => {
     expect((await revokeAll(ana, PASSWORD, 'k-depois')).status).toBe(204);
   });
 
-  it.todo(
-    'TS-038 passo 4: sem Idempotency-Key, 400; a OpenAPI 02.33.4 nao documenta 400 em revokeAllSessions (lacuna levada a DEC-032)',
-  );
+  it('TS-038 passo 4: sem Idempotency-Key: 400 sem revogar (DEC-032)', async () => {
+    const response = await revokeAll(ana, PASSWORD, null);
+    expect(response.status).toBe(400);
+    expect(response.body).toMatchObject({ field_errors: [{ field: 'Idempotency-Key' }] });
+    expect(await active(anaId)).toBe(1);
+  });
+
+  it('corpo sem senha: 400 sem revogar (DEC-032)', async () => {
+    const response = await h.call('revokeAllSessions', 'POST', '/sessions/revocations', {
+      body: {},
+      headers: { ...ana.mutation, 'idempotency-key': 'k-sem-senha' },
+    });
+    expect(response.status).toBe(400);
+    expect(await active(anaId)).toBe(1);
+  });
 
   it('TS-038 passos 2, 3, 5 e 6: replay, payload divergente, expiracao e replay apos a revogacao', async () => {
     expect((await revokeAll(ana, PASSWORD, 'kx')).status).toBe(204);

@@ -127,3 +127,14 @@ Decisão do mantenedor ao revisar a implementação dos lembretes (PR #36, DC-04
 Efeitos: Especificação (tabela de decisões, RN-018 e nota de revisão no Anexo C), matriz `2.1.7` (hash da Especificação, RN-018, DEC-031 e catálogo de decisões) e `maxProperties` de `decisions` no schema (30 → 31). OpenAPI, ADR e `AGENTS.md` inalterados. A implementação vem em PR separado.
 
 **Aprovação:** pedido do mantenedor em 10/10/2026; aprovação formal no pull request desta revisão.
+
+## DEC-032 e revisão 02.33.5 da OpenAPI: 400 em createSession, revokeAllSessions e requestAccountDeletion (10/10/2026)
+
+Lacuna encontrada ao implementar `revokeAllSessions` (PR #41, DC-043): três operações validam corpo e `Idempotency-Key`, mas a OpenAPI 02.33.4 não declarava 400. Entrada inválida saía do contrato como 500 `INTERNAL_ERROR`, e o TS-038 passo 4 já exigia 400 `VALIDATION_FAILED` sem a chave.
+
+1. **DEC-032:** `400 VALIDATION_FAILED` (ERR-001, resposta `BadRequest`) passa a ser declarado em `createSession`, `revokeAllSessions` e `requestAccountDeletion`.
+2. **TS-040, regra R19:** toda operação com corpo ou parâmetro de query ou cabeçalho validado declara 400 (caso negativo em `ts-040.negative.spec.ts`).
+
+Efeitos: OpenAPI `02.33.5` (arquivo renomeado; oasdiff sem incompatibilidade), matriz `2.1.8` (hashes das quatro fontes, `response_statuses` das três operações, ERR-001, DEC-032 e catálogo de decisões), `maxProperties` de `decisions` no schema (31 → 32), `AGENTS.md` 1.6 (referências à OpenAPI vigente), Especificação (DEC-032, referências vigentes e nota no Anexo C), ADR (referências vigentes), `validate_all.py`, workflow de rastreabilidade e `CLAUDE.md`. Notas históricas da 02.33.4 (DEC-026) preservadas.
+
+**Aprovação:** proposta em 10/10/2026; aprovação formal no pull request desta revisão.

@@ -78,6 +78,9 @@ const MUTATIONS: Readonly<Record<string, (ctx: ContractContext) => void>> = {
   R18: (c) => {
     without(dig(paths(c, '/plans', 'get'), 'responses'), '500');
   },
+  R19: (c) => {
+    without(dig(paths(c, '/plans', 'post'), 'responses'), '400');
+  },
   R17: () => undefined, // usa EXTRA_ALLOWANCES (excecao sintetica sem lacuna na matriz)
 };
 

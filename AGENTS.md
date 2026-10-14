@@ -2,12 +2,12 @@
 
 ## Política operacional para agentes de desenvolvimento, testes e integração contínua
 
-**Versão:** 1.5  
+**Versão:** 1.6  
 **Status:** Baseline operacional aprovada  
-**Baseline contratual:** OpenAPI 02.33.4  
+**Baseline contratual:** OpenAPI 02.33.5  
 **Baseline funcional:** Especificação Funcional 02.33  
 **Baseline arquitetural:** ADR-001 v1.5  
-**Última atualização:** 06/10/2026
+**Última atualização:** 10/10/2026
 
 ---
 
@@ -31,9 +31,9 @@ São requisitos obrigatórios:
 
 A prevalência deverá ser determinada de acordo com o assunto tratado.
 
-### 2.1 OpenAPI 02.33.4
+### 2.1 OpenAPI 02.33.5
 
-A OpenAPI 02.33.4 deverá prevalecer para:
+A OpenAPI 02.33.5 deverá prevalecer para:
 
 - rotas;
 - métodos HTTP;
@@ -85,10 +85,10 @@ Quando houver conflito entre documentos, deverá ser aplicada a seguinte regra:
 Para a superfície HTTP, deverá ser utilizado exclusivamente o seguinte contrato:
 
 ```text
-MeuRemedio_OpenAPI_02.33.4_COMPLETO.yaml
+MeuRemedio_OpenAPI_02.33.5_COMPLETO.yaml
 ```
 
-Reproduções históricas da OpenAPI (02.32, 02.33, 02.33.1, 02.33.2 e 02.33.3) não deverão ser utilizadas como fonte normativa para:
+Reproduções históricas da OpenAPI (02.32, 02.33, 02.33.1, 02.33.2, 02.33.3 e 02.33.4) não deverão ser utilizadas como fonte normativa para:
 
 - implementação;
 - geração de código;
@@ -439,7 +439,7 @@ Os testes sentinela não deverão ser removidos, ignorados ou marcados como inst
 
 ## 12. Concorrência
 
-Na OpenAPI 02.33.4, a operação abaixo deverá utilizar concorrência otimista:
+Na OpenAPI 02.33.5, a operação abaixo deverá utilizar concorrência otimista:
 
 ```http
 PUT /plans/{plan_id}
@@ -577,7 +577,7 @@ A implementação deverá assegurar:
 - TLS 1.3 em trânsito;
 - criptografia em repouso;
 - `correlation_id` nas respostas e registros aplicáveis;
-- proteção CSRF nas mutações autenticadas (cookie `mr_csrf` com `X-CSRF-Token` e validação de `Origin`, conforme ADR-001 v1.5 OA-008 e OpenAPI 02.33.4);
+- proteção CSRF nas mutações autenticadas (cookie `mr_csrf` com `X-CSRF-Token` e validação de `Origin`, conforme ADR-001 v1.5 OA-008 e OpenAPI 02.33.5);
 - ownership validado no servidor;
 - menor privilégio;
 - gestão segura de segredos;

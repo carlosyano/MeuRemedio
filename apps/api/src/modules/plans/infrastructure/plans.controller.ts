@@ -1,4 +1,4 @@
-// Rotas de planos (OpenAPI 02.33.4, tag Plans).
+// Rotas de planos (OpenAPI 02.33.5, tag Plans).
 import {
   Body,
   Controller,
