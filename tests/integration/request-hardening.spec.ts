@@ -1,7 +1,7 @@
 // @trace TS-040 ERR-001 ERR-016 RNF-014 createPlan deletePlan cancelExport updateCurrentAccount listPlans
-// Entradas que o Schemathesis transformou em 500 (DC-047): Content-Type malformado numa requisicao
-// sem corpo e texto com o caractere NUL (U+0000), que o PostgreSQL nao armazena. Ambas sao entrada
-// invalida: 400 VALIDATION_FAILED, sem efeito.
+// Entradas que o Schemathesis transformou em 500 (DC-047): Content-Type malformado numa operacao
+// sem corpo no contrato (corpo e Content-Type passam a ser ignorados) e texto com o caractere NUL
+// (U+0000), que o PostgreSQL nao armazena (400 VALIDATION_FAILED, sem efeito).
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { login, startHarness, type Harness, type LoggedIn } from './support/http.js';
@@ -35,16 +35,32 @@ const PLAN = {
 const plans = async (): Promise<number> =>
   (await h.pool.query('SELECT 1 FROM medication_plans')).rowCount ?? 0;
 
-describe('Content-Type malformado', () => {
+describe('operacao sem corpo no contrato: corpo e Content-Type ignorados', () => {
   it.each([
     ['deletePlan', 'DELETE', '/plans/'],
     ['cancelExport', 'DELETE', '/exports/'],
-  ] as const)('%s sem corpo com multipart sem boundary: 400', async (operationId, method, base) => {
-    const response = await h.call(operationId, method, `${base}${randomUUID()}`, {
-      headers: { ...ana.mutation, 'content-type': 'multipart/form-data' },
-    });
-    expect(response.status).toBe(400);
-    expect(response.body).toMatchObject({ code: 'VALIDATION_FAILED' });
+  ] as const)(
+    '%s com multipart sem boundary: 404 do recurso, nao 500',
+    async (operationId, method, base) => {
+      const response = await h.call(operationId, method, `${base}${randomUUID()}`, {
+        headers: { ...ana.mutation, 'content-type': 'multipart/form-data' },
+      });
+      expect(response.status).toBe(404);
+      expect(response.body).toMatchObject({ code: 'RESOURCE_NOT_FOUND' });
+    },
+  );
+
+  it('deletePlan com JSON malformado no corpo: 404 do recurso, nao 500', async () => {
+    const response = await h.app
+      .getHttpAdapter()
+      .getInstance()
+      .inject({
+        method: 'DELETE',
+        url: `/plans/${randomUUID()}`,
+        headers: { ...ana.mutation, 'content-type': 'application/json' },
+        payload: '{nao e json',
+      });
+    expect(response.statusCode).toBe(404);
   });
 });
 

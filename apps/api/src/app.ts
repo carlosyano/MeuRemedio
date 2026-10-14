@@ -56,7 +56,7 @@ import { AccessGuard } from './platform/http/access.guard.js';
 import { OPERATION_ID } from './platform/http/operation-id.js';
 import { ProblemFilter } from './platform/http/problem-filter.js';
 import { createRequestHasher } from './platform/idempotency/idempotency.js';
-import { PostgresRateLimiter } from './platform/rate-limit/rate-limiter.js';
+import { PostgresRateLimiter, type RateLimits } from './platform/rate-limit/rate-limiter.js';
 import {
   unconfiguredObjectStorage,
   type ObjectStorage,
@@ -94,6 +94,8 @@ export interface CreateAppOptions {
   readonly externalRightsChannel?: string;
   /** Origens aceitas no cabecalho Origin das mutacoes autenticadas (OA-008). */
   readonly allowedOrigins: readonly string[];
+  /** Limites do rate limit por minuto; padrao RATE_LIMITS (RNF-006). So o Schemathesis os eleva. */
+  readonly rateLimits?: RateLimits;
   /** CLOCK_SKEW_MAX_MS (RNF-015); padrao 5000. */
   readonly clockSkewMaxMs?: number;
   /** Tempo-limite da sondagem do banco em getHealth (DEC-028); padrao 2000. */
@@ -271,7 +273,7 @@ export async function createApp(options: CreateAppOptions): Promise<NestFastifyA
   app.useGlobalGuards(
     new AccessGuard(
       contract,
-      new PostgresRateLimiter(options.database),
+      new PostgresRateLimiter(options.database, options.rateLimits),
       sessions,
       options.clock,
       options.allowedOrigins,

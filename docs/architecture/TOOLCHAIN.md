@@ -10,7 +10,7 @@
 | npm | o que acompanha o Node 24 (11.x) | Lockfile v3. |
 | PostgreSQL | 17 (`postgres:17` nos testes; 17.11 validada em 04/10/2026) | Testcontainers sobe o banco real. |
 | Docker | Docker Desktop | Necessário a partir dos testes de integração. |
-| Python | o definido em `.github/workflows/traceability-validation.yml` | Só para `validate_all.py`. |
+| Python | o definido em `.github/workflows/traceability-validation.yml` | Para `validate_all.py` e para o Schemathesis. |
 
 ## 2. Dependências de desenvolvimento (fundação)
 
@@ -57,12 +57,13 @@
 | `npm run format:check` | QG-002 | Implementado |
 | `npm run test:unit` | QG-003 | Implementado (infraestrutura e domínio: TS-024 parte pura) |
 | `npm run test:integration` | QG-004 (parcial) | Implementado (esquema central no PostgreSQL 17 real; exige Docker) |
-| `npm run test:contract` | QG-001 (parcial) | Implementado (TS-040 estático e testes do `openapi:diff`; Schemathesis e rotas da API pendentes) |
+| `npm run test:contract` | QG-001 (parcial) | Implementado (TS-040 estático e testes do `openapi:diff`; rotas da API em `tests/integration/routes.spec.ts`) |
+| `npm run test:schemathesis` | QG-001 | Implementado (TS-040: Schemathesis `4.29.4`, fixado em `tools/schemathesis/requirements.txt`, contra a API em execução e o PostgreSQL 17 real; exige Docker e o Schemathesis no `PATH` ou em `SCHEMATHESIS_BIN`) |
 | `npm run openapi:lint` | QG-001 (parcial) | Implementado (Spectral) |
 | `npm run openapi:diff` | QG-001 (parcial) | Implementado (oasdiff `breaking` contra a OpenAPI do merge-base com `origin/main`, ou `OPENAPI_DIFF_BASE`; aprovações em `tools/oasdiff/approved-breaking.txt`) |
 | `npm run traceability:check` | QG-011 | Implementado (`python validate_all.py`) |
 | `npm run verify` | — | Executa typecheck, lint, format:check, test:unit, test:contract, openapi:lint e openapi:diff em sequência (a primeira execução baixa o oasdiff) |
-| `test:ownership`, `test:e2e`, `test:a11y`, `test:mutation`, `security`, `sbom` | QG-001, 004 a 010 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (Schemathesis, Playwright, Stryker, CodeQL, Semgrep, Gitleaks, Trivy) |
+| `test:ownership`, `test:e2e`, `test:a11y`, `test:mutation`, `security`, `sbom` | QG-001, 004 a 010 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (Playwright, Stryker, CodeQL, Semgrep, Gitleaks, Trivy) |
 
 ## 4. Política de atualização
 

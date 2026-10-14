@@ -10,6 +10,9 @@ export const RATE_LIMITS = { public_ip: 20, user: 100 } as const;
 
 export type RateLimitScope = keyof typeof RATE_LIMITS;
 
+/** Limites por minuto de cada escopo. */
+export type RateLimits = Readonly<Record<RateLimitScope, number>>;
+
 export type RateLimitDecision =
   { readonly allowed: true } | { readonly allowed: false; readonly retryAfterSeconds: number };
 
@@ -18,7 +21,11 @@ const WINDOW_MS = 60_000;
 const windowStartOf = (epochMs: number): number => epochMs - (epochMs % WINDOW_MS);
 
 export class PostgresRateLimiter {
-  constructor(private readonly pool: Pool) {}
+  constructor(
+    private readonly pool: Pool,
+    /** Producao usa RATE_LIMITS; so a verificacao de contrato com Schemathesis os eleva (DC-047). */
+    private readonly limits: RateLimits = RATE_LIMITS,
+  ) {}
 
   /** Conta uma requisicao de `key` no escopo e decide se ela passa. */
   async consume(scope: RateLimitScope, key: string, now: string): Promise<RateLimitDecision> {
@@ -33,7 +40,7 @@ export class PostgresRateLimiter {
       [scope, createHash('sha256').update(key).digest(), new Date(windowStart).toISOString()],
     );
     const count = result.rows[0]?.count ?? Number.POSITIVE_INFINITY;
-    if (count <= RATE_LIMITS[scope]) return { allowed: true };
+    if (count <= this.limits[scope]) return { allowed: true };
     return {
       allowed: false,
       retryAfterSeconds: Math.max(1, Math.ceil((windowStart + WINDOW_MS - nowMs) / 1_000)),

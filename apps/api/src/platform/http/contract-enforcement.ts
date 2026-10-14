@@ -1,5 +1,7 @@
 // Aplicacao do contrato em tempo de execucao:
 // - onRequest: atribui o X-Correlation-ID;
+// - preParsing: operacao sem requestBody no contrato ignora corpo e Content-Type, que nem chegam ao
+//   parser (Content-Type malformado ou corpo ilegivel nao viram erro fora do contrato, DC-047);
 // - interceptor: valida parametros, cabecalhos e corpo contra a operacao -> 400 VALIDATION_FAILED;
 // - onSend: valida status, cabecalhos e corpo da resposta; resposta fora do contrato nao sai e
 //   vira 500 INTERNAL_ERROR (o desvio vai para o log).
@@ -9,6 +11,7 @@ import {
   type ExecutionContext,
   type NestInterceptor,
 } from '@nestjs/common';
+import { Readable } from 'node:stream';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { Observable } from 'rxjs';
 import type { OpenApiContract } from '../contract/openapi-contract.js';
@@ -71,6 +74,16 @@ export function registerContractHooks(instance: FastifyInstance, contract: OpenA
 
   instance.addHook('onRequest', async (request, reply) => {
     void reply.header(CORRELATION_HEADER, assignCorrelationId(request.raw));
+  });
+
+  instance.addHook('preParsing', async (request, _reply, payload) => {
+    const operationId = operationOf(contract, request);
+    if (operationId === undefined || contract.acceptsBody(operationId)) return payload;
+    delete request.headers['content-type'];
+    delete request.headers['content-length'];
+    delete request.headers['transfer-encoding'];
+    payload.resume();
+    return Readable.from([]);
   });
 
   instance.addHook('onSend', async (request, reply, payload) => {
