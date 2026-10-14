@@ -58,6 +58,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-050 | QG-010: testes de mutação no domínio | Vigente |
 | DC-051 | Conta pendente antiga (TS-028) e cobertura de TS-002, TS-012 e TS-025 | Vigente |
 | DC-052 | Fundação da aplicação web e entrada (TL-002) | Vigente |
+| DC-053 | Cadastro (TL-001), confirmação de e-mail e redefinição de senha na web | Vigente |
 
 ---
 
@@ -520,3 +521,18 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Estilo:** neutro, com contraste AA, foco visível e respeito a `prefers-reduced-motion`.
 - **Riscos:** a URL da API fica fixada no build da aplicação. A CSP ainda não existe. As demais telas (TL-001, TL-003 a TL-008) entram em PRs seguintes.
 - **Aplica-se a:** `apps/web`, `tests/e2e`, `tools/scripts/license-policy.mjs`, `package.json`, `eslint.config.mjs` e `.github/workflows/ci.yml`.
+
+## DC-053 — Cadastro (TL-001), confirmação de e-mail e redefinição de senha na web (14/10/2026)
+
+- **Contexto:** o cadastro exige aceitar os Termos de uso e o Aviso de privacidade em versões informadas pelo cliente, mas os textos finais dependem de parecer jurídico (GX-001 a GX-006). O fuso da conta não muda depois do cadastro (RN-013). O e-mail já cadastrado responde 409 `STATE_CONFLICT` (DEC-030), cuja mensagem de catálogo ("Esta ocorrência já recebeu uma resposta.") não serve ao cadastro.
+- **Decisão:**
+  - **Textos legais:** páginas `/termos` e `/aviso-de-privacidade` com texto provisório e versão `2026-10`, marcadas como provisórias. Elas precisam ser substituídas pelos textos aprovados antes de qualquer uso com dados reais.
+  - **Fuso:** vem do navegador (`Intl`) e pode ser trocado numa lista; a tela avisa que ele não muda depois.
+  - **Validação:** a tela confere antes de enviar as mesmas regras do contrato (nome, e-mail, senha, aceites) e mostra o erro em cada campo, com o resumo do ERR-001. Os erros que só a API conhece (senha comprometida, fuso recusado) aparecem no campo com a mensagem de `field_errors`.
+  - **E-mail já cadastrado:** "Já existe uma conta com este e-mail. Entre ou redefina a senha." A DEC-030 já expõe a existência do e-mail no cadastro.
+  - **Idempotência:** a `Idempotency-Key` é a mesma enquanto o payload não muda, então repetir um envio que falhou na rede não cria conta nova, e um payload diferente usa chave nova.
+  - **Links com token:** o token é lido do fragmento e removido da URL na hora, para não ficar no histórico. Confirmação: link usado ou expirado mostra o ERR-008 e leva ao reenvio; conta fora de `PENDING_VERIFICATION` mostra "Esta conta não está aguardando confirmação.". Redefinição: o ERR-008 leva a pedir outro link, e a confirmação divergente é recusada na tela. No sucesso, a tela avisa que todas as sessões foram encerradas.
+  - **Pedidos neutros** (reenvio e esqueci a senha): a tela mostra a mensagem da própria resposta 202, sem revelar se a conta existe.
+  - **E2E:** o `global-setup` sobe também o worker, com os e-mails gravados num arquivo, para os testes lerem os links.
+- **Riscos:** os textos legais são placeholders, o que reforça que não pode haver uso com dados reais antes dos gates GX. A lista de fusos do navegador pode ter nomes que a API não aceita; nesse caso o erro aparece no campo.
+- **Aplica-se a:** `apps/web/src/app/cadastro`, `conta/*`, `termos`, `aviso-de-privacidade`, `components/fields.tsx`, `components/email-request-form.tsx`, `lib/forms.ts` e `tests/e2e`.

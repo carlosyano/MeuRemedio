@@ -109,6 +109,8 @@ test.describe('TL-001 cadastro', () => {
     await page.goto(first);
     await expect(alertIn(page)).toHaveText('Este link não pode mais ser usado. Solicite um novo.');
     await expect(page.getByRole('link', { name: 'Enviar novo link' })).toBeVisible();
+    // O link do e-mail abre numa navegacao nova (mudar so o fragmento nao recarrega a pagina).
+    await page.goto('about:blank');
     await page.goto(second);
     await expect(page.getByRole('status')).toHaveText('E-mail confirmado. Você já pode entrar.');
   });
