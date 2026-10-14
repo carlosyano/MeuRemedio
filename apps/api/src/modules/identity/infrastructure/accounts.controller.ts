@@ -3,9 +3,11 @@ import { Body, Controller, Get, Headers, Inject, Post, Put, Req, Res } from '@ne
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { sessionOf } from '../../../platform/http/access.guard.js';
 import { OperationId } from '../../../platform/http/operation-id.js';
+import { ConfirmPasswordReset } from '../application/confirm-password-reset.js';
 import { AccountSettings, type AccessibilityPreferences } from '../application/account-settings.js';
 import { CreateAccount, type CreateAccountRequest } from '../application/create-account.js';
 import { CurrentAccount } from '../application/current-account.js';
+import { RequestPasswordReset } from '../application/request-password-reset.js';
 import { ResendVerification } from '../application/resend-verification.js';
 import { VerifyAccount } from '../application/verify-account.js';
 
@@ -17,6 +19,8 @@ export class AccountsController {
     @Inject(ResendVerification) private readonly resendVerification: ResendVerification,
     @Inject(CurrentAccount) private readonly currentAccount: CurrentAccount,
     @Inject(AccountSettings) private readonly settings: AccountSettings,
+    @Inject(RequestPasswordReset) private readonly requestReset: RequestPasswordReset,
+    @Inject(ConfirmPasswordReset) private readonly confirmReset: ConfirmPasswordReset,
   ) {}
 
   @Put('accounts/me')
@@ -77,5 +81,26 @@ export class AccountsController {
     const response = await this.resendVerification.execute(body.email);
     void reply.status(202);
     return response;
+  }
+
+  @Post('password-reset-requests')
+  @OperationId('requestPasswordReset')
+  async requestPasswordReset(
+    @Body() body: { email: string },
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<{ message: string }> {
+    const response = await this.requestReset.execute(body.email);
+    void reply.status(202);
+    return response;
+  }
+
+  @Post('password-resets')
+  @OperationId('confirmPasswordReset')
+  async confirmPasswordReset(
+    @Body() body: { token: string; new_password: string },
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<void> {
+    await this.confirmReset.execute({ token: body.token, newPassword: body.new_password });
+    void reply.status(204);
   }
 }

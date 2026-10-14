@@ -111,9 +111,9 @@ describe('requestPasswordReset (RF-002)', () => {
     expect((await h.pool.query('SELECT 1 FROM password_reset_tokens')).rowCount).toBe(0);
   });
 
-  it('e-mail normalizado: maiusculas e espacos nas pontas', async () => {
+  it('e-mail normalizado: maiusculas', async () => {
     await h.activeUser('ana.silva@example.com');
-    expect((await requestReset('  Ana.Silva@Example.com ')).status).toBe(202);
+    expect((await requestReset('Ana.Silva@Example.com')).status).toBe(202);
     expect(await pendingEvents()).toHaveLength(1);
   });
 

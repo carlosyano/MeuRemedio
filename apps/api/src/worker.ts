@@ -7,6 +7,11 @@ import {
   type VerificationRequested,
 } from './modules/identity/application/issue-verification.js';
 import {
+  PASSWORD_RESET_REQUESTED,
+  handlePasswordResetRequested,
+  type PasswordResetRequested,
+} from './modules/identity/application/request-password-reset.js';
+import {
   EXPORTS_EXPIRY_CRON,
   EXPORTS_EXPIRY_QUEUE,
   handleExportRequested,
@@ -71,6 +76,24 @@ export async function startWorker(options: WorkerOptions): Promise<RunningWorker
     async (jobs) => {
       for (const job of jobs) {
         await handleVerificationRequested(
+          {
+            pool: options.pool,
+            clock: options.clock,
+            email: options.email,
+            webBaseUrl: options.webBaseUrl,
+          },
+          job.data,
+        );
+      }
+    },
+  );
+
+  await boss.work<PasswordResetRequested>(
+    PASSWORD_RESET_REQUESTED,
+    { pollingIntervalSeconds: 0.5 },
+    async (jobs) => {
+      for (const job of jobs) {
+        await handlePasswordResetRequested(
           {
             pool: options.pool,
             clock: options.clock,

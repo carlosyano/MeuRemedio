@@ -11,6 +11,7 @@ import type { Clock } from '../clock.js';
 /** Filas (event_type) conhecidas; o worker cria cada uma no pg-boss ao subir. */
 export const OUTBOX_QUEUES = [
   'identity.verification_requested',
+  'identity.password_reset_requested',
   'plans.occurrences_requested',
   'reminders.email_requested',
   'exports.requested',
