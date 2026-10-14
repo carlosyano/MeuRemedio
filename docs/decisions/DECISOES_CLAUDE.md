@@ -49,6 +49,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-041 | Período e conteúdo de `getHistory` | Vigente |
 | DC-042 | Exportação em PDF | Vigente |
 | DC-043 | Conta, preferências e revogação global de sessões | Vigente |
+| DC-044 | Redefinição de senha | Vigente |
 
 ---
 
@@ -403,3 +404,14 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Riscos:** quem tem uma sessão roubada pode bloquear o login do titular por 15 minutos errando a senha cinco vezes. É o mesmo efeito de tentar o login com o e-mail dele, já aceito na RN-005.
 - **Lacuna normativa (DEC-032):** a OpenAPI 02.33.4 não documenta 400 em `createSession`, `revokeAllSessions` e `requestAccountDeletion`. Corpo inválido ou falta da `Idempotency-Key` nessas operações sai do contrato e vira 500. A correção vai em PR normativo, e o passo 4 do TS-038 em `revokeAllSessions` fica como `it.todo` até lá.
 - **Aplica-se a:** `modules/identity/application/account-settings.ts` e `revoke-all-sessions.ts`.
+
+## DC-044 — Redefinição de senha (14/10/2026)
+
+- **Contexto:** a OpenAPI define `requestPasswordReset` (202 neutro) e `confirmPasswordReset` (204, 400, 409, 410) e a RN-017 fixa o token de 60 min, de uso único, com o novo pedido invalidando o anterior. Não estão definidos: quais estados de conta recebem o link, quando usar 409 e 410, o tratamento de token já usado, o momento da checagem da senha comprometida e o efeito no bloqueio de login.
+- **Alternativas para token já usado:** (a) 204 sem efeito, como no `verifyAccount` (DC-019); (b) 410 `TOKEN_EXPIRED`. A opção (a) diria ao usuário que uma senha diferente foi gravada sem gravar nada.
+- **Decisão:**
+  - **Pedido:** só conta `ACTIVE` recebe o link. Conta inexistente, `PENDING_VERIFICATION` ou `DELETION_SCHEDULED` recebe a mesma resposta, sem efeito. Quem não verificou a conta usa o reenvio da verificação antes. O pedido invalida os tokens abertos na própria requisição e grava `identity.password_reset_requested` no Outbox; o worker emite o token e envia o e-mail, no molde da DC-008, DC-020 e DC-021, com o link `${WEB_BASE_URL}/conta/redefinir-senha#token=<token>`.
+  - **Confirmação:** (b). Token desconhecido, usado, expirado ou substituído responde 410 `TOKEN_EXPIRED`, sem distinguir os casos. Token válido de conta fora de `ACTIVE` responde 409 `STATE_CONFLICT` e o token continua aberto. A senha da lista local é recusada antes de olhar o token (400 `PASSWORD_COMPROMISED`, TS-036), sem consumi-lo, para o usuário tentar outra senha com o mesmo link.
+  - **Efeitos do sucesso:** grava o hash Argon2id, consome o token, invalida os demais abertos, revoga todas as sessões da conta com `PASSWORD_RESET` e zera o contador de falhas de login (RN-005), como o login bem-sucedido (DC-024).
+- **Riscos:** o pedido só tem o limite por IP das rotas públicas, então alguém pode enviar vários e-mails de redefinição a um endereço alheio trocando de IP; cada pedido invalida o link anterior, sem mudar a senha. Zerar o bloqueio na redefinição é aceitável porque quem tem o link controla o e-mail da conta.
+- **Aplica-se a:** `modules/identity/application/request-password-reset.ts` e `confirm-password-reset.ts`; migração `0008_password_reset.sql`.

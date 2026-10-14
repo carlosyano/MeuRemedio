@@ -104,7 +104,9 @@ Token hash de redefinição, emissão, expiração e uso.
 | `created_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | UTC |
 
 **Constraints e índices:**
-- UNIQUE(token_hash)
+- UNIQUE(token_hash); CHECK octet_length(token_hash) = 32; CHECK expires_at = issued_at + 60 min
+- Índice (user_id) WHERE used_at IS NULL AND superseded_at IS NULL
+- Migração: `0008_password_reset.sql`
 
 ### ENT-004 — `sessions`
 

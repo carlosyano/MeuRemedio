@@ -9,9 +9,11 @@ import type { Pool } from 'pg';
 import { CreateAccount } from './modules/identity/application/create-account.js';
 import { AccountSettings } from './modules/identity/application/account-settings.js';
 import { CurrentAccount } from './modules/identity/application/current-account.js';
+import { ConfirmPasswordReset } from './modules/identity/application/confirm-password-reset.js';
 import { LoginThrottle } from './modules/identity/application/login-throttle.js';
 import { RevokeAllSessions } from './modules/identity/application/revoke-all-sessions.js';
 import { Sessions } from './modules/identity/application/sessions.js';
+import { RequestPasswordReset } from './modules/identity/application/request-password-reset.js';
 import { ResendVerification } from './modules/identity/application/resend-verification.js';
 import { VerifyAccount } from './modules/identity/application/verify-account.js';
 import { AccountsController } from './modules/identity/infrastructure/accounts.controller.js';
@@ -144,6 +146,20 @@ class AppModule {
         {
           provide: ResendVerification,
           useValue: new ResendVerification(options.database, options.clock),
+        },
+        {
+          provide: RequestPasswordReset,
+          useValue: new RequestPasswordReset(options.database, options.clock),
+        },
+        {
+          provide: ConfirmPasswordReset,
+          useValue: new ConfirmPasswordReset(
+            options.database,
+            options.clock,
+            argon2idPasswordHasher,
+            loadCompromisedPasswords(),
+            new LoginThrottle(options.database, options.secrets.emailPepper),
+          ),
         },
         {
           provide: CreatePlan,
