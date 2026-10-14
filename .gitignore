@@ -13,3 +13,5 @@ coverage/
 .schemathesis/
 schemathesis-report/
 sbom/
+.stryker-tmp/
+reports/

@@ -27,7 +27,7 @@ export default defineConfig(
     },
     languageOptions: {
       parserOptions: {
-        projectService: { allowDefaultProject: ['vitest.config.ts'] },
+        projectService: { allowDefaultProject: ['vitest.config.ts', 'vitest.mutation.config.ts'] },
         tsconfigRootDir: import.meta.dirname,
       },
     },

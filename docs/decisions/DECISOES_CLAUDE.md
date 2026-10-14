@@ -55,6 +55,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-047 | Schemathesis na CI e entradas que viravam 500 | Vigente |
 | DC-048 | QG-006 (SBOM e licenças) e QG-009 na CI | Vigente |
 | DC-049 | QG-005: Gitleaks, Semgrep e CodeQL; actions fixadas por SHA | Vigente |
+| DC-050 | QG-010: testes de mutação no domínio | Vigente |
 
 ---
 
@@ -478,3 +479,15 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Actions** do GitHub fixadas pelo SHA do commit, com a versão em comentário.
 - **Riscos:** as regras do registro do Semgrep e do CodeQL mudam sem PR, e um achado novo pode reprovar um PR sem relação com ele. Nesse caso, o achado é tratado ou recebe exceção formal (DC). Atualizar uma action exige trocar o SHA.
 - **Aplica-se a:** `.github/workflows/ci.yml`, `.github/workflows/codeql.yml`, `.github/workflows/traceability-validation.yml`, `.gitleaks.toml`, `tools/security/requirements.txt` e `tools/scripts/sarif-gate.mjs`.
+
+## DC-050 — QG-010: testes de mutação no domínio (14/10/2026)
+
+- **Contexto:** o QG-010 exige Stryker com Mutation Score de pelo menos 80% (Foundation) e trata exclusão indevida do escopo como não conformidade. O código de `apps/api` depende do PostgreSQL: mutá-lo exigiria rodar a suíte de integração por mutante, com horas por execução. Com o Vitest 5, o `@stryker-mutator/vitest-runner` 10.0.0 não ativa os mutantes: todos sobreviviam, inclusive os que os testes matam quando aplicados à mão.
+- **Alternativas para o runner:** (a) `vitest-runner`, que não funciona com o Vitest 5; (b) runner `command`, que executa o Vitest uma vez por mutante e ativa o mutante pela variável `__STRYKER_ACTIVE_MUTANT__`; (c) voltar para o Vitest 4.
+- **Decisão:**
+  - **Escopo desta etapa:** `packages/domain` inteiro (tempo civil, horizonte, janela do histórico, slots de ocorrência e regras de plano), com os testes unitários do domínio (`vitest.mutation.config.ts`). As regras de domínio que vivem em `apps/api` entram quando forem extraídas para funções puras ou quando houver orçamento de CI para mutação com banco.
+  - **Runner:** (b), com o Vitest chamado direto pelo Node, `--bail 1` e tempo-limite de 60 s por mutante, para não contar sobrevivente como timeout.
+  - **Limites:** `break` em 80% (Foundation), `low` 85% e `high` 90%. O job `QG-010 Mutation` publica o relatório HTML como artefato.
+  - **Dependências:** só o `@stryker-mutator/core` 10.0.0. A transitiva `qs` recebe `overrides` para 6.16.0, que corrige duas vulnerabilidades moderadas.
+- **Riscos:** a execução leva de 10 a 20 minutos e roda a cada PR. Os mutantes sobreviventes listados no relatório indicam asserções a reforçar e devem ser tratados em PRs seguintes.
+- **Aplica-se a:** `stryker.config.mjs`, `vitest.mutation.config.ts`, `package.json` e `.github/workflows/ci.yml`.
