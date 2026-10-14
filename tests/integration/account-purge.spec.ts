@@ -113,7 +113,18 @@ const requestDeletion = async (session: LoggedIn) => {
 const exportKey = (userId: string, exportId: string) => `exports/${userId}/${exportId}.pdf`;
 
 /** Linhas que ainda referenciam o titular, por tabela. */
-async function leftovers(userId: string): Promise<Record<string, number>> {
+type Leftovers = Record<
+  | 'users'
+  | 'sessions'
+  | 'medication_plans'
+  | 'occurrences'
+  | 'export_requests'
+  | 'idempotency_records'
+  | 'outbox_events',
+  number
+>;
+
+async function leftovers(userId: string): Promise<Leftovers> {
   const count = async (sql: string): Promise<number> =>
     Number((await h.pool.query<{ n: string }>(sql, [userId])).rows[0]?.n);
   return {

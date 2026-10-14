@@ -51,6 +51,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-043 | Conta, preferências e revogação global de sessões | Vigente |
 | DC-044 | Redefinição de senha | Vigente |
 | DC-045 | Área de privacidade e pedido de exclusão da conta | Vigente |
+| DC-046 | Expurgo da conta, tombstone e reconciliação de restore | Vigente |
 
 ---
 
@@ -427,3 +428,15 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Pedido de exclusão:** (b). O pedido grava `account.deletion_requested` (recurso `user_account`, sem e-mail nem senha) e devolve o id do evento. A reautenticação segue a DC-043: a `Idempotency-Key` é consultada antes da senha, a senha errada retorna 401 e conta no bloqueio do login, e com o bloqueio ativo a reautenticação recebe 401. A conta passa a `DELETION_SCHEDULED`, com `purge_due_at` 30 dias depois do pedido (o limite da RN-012), todas as sessões são revogadas com `ACCOUNT_DELETION` e os cookies são limpos. Conta que já não está `ACTIVE` (pedido concorrente de outra sessão) recebe 409 `STATE_CONFLICT`.
 - **Riscos:** a auditoria tem retenção provisória de 180 dias (GX-003); depois disso o id do pedido deixa de ser rastreável. O expurgo em 30 dias e o tombstone entram no próximo PR.
 - **Aplica-se a:** `modules/privacy/application/request-account-deletion.ts`, `privacy-summary.ts` e `infrastructure/privacy.controller.ts`; `platform/audit/audit.ts`; `apps/api/src/main.ts`.
+
+## DC-046 — Expurgo da conta, tombstone e reconciliação de restore (14/10/2026)
+
+- **Contexto:** a RN-012 exige o expurgo em até 30 dias e a RN-019 define o tombstone (user_id + HMAC do e-mail, 180 dias) para a reconciliação de restore (TS-029). Não estão definidos a cadência do job, o que conta como "dados do titular" fora das tabelas com FK para `users`, o tratamento dos PDFs no armazenamento e o momento da reconciliação.
+- **Alternativas para a reconciliação:** (a) script manual no procedimento de restore; (b) a mesma passada do expurgo remove toda conta cujo id está num tombstone.
+- **Decisão:**
+  - **Cadência:** job `privacy.purge_sweep` a cada 15 minutos. São expurgadas as contas `DELETION_SCHEDULED` com `purge_due_at` até 1 hora à frente, para o expurgo nunca passar dos 30 dias mesmo com uma passada perdida.
+  - **Escopo:** além das tabelas que saem por `ON DELETE CASCADE`, saem os snapshots de idempotência do titular (`scope_key`, que podem conter dados do plano), os eventos do Outbox dos agregados dele e o contador de falhas de login (cuja chave é o mesmo HMAC do e-mail do tombstone). Os PDFs são removidos do armazenamento antes de apagar as linhas; se o armazenamento falhar, nada é apagado e a passada seguinte refaz. A trilha de auditoria permanece: não tem FK e o `actor_user_id` fica pseudônimo quando a conta deixa de existir (append-only, ENT-013).
+  - **Reconciliação:** (b), antes do expurgo em cada passada. Conta restaurada de backup anterior ao expurgo é removida de novo, sem tocar em conta nova criada com o mesmo e-mail (outro `user_id`). Tombstones com 180 dias saem na mesma passada.
+  - **Configuração:** o worker passa a exigir `EMAIL_PEPPER`, o mesmo segredo da API.
+- **Riscos:** entre o restore e a primeira passada (até 15 minutos) a conta restaurada pode entrar. O procedimento de restore deve rodar o job uma vez (ou manter a API fora do ar) antes de reabrir o acesso; isso entra no runbook de restore quando a infraestrutura existir (GX-003). Backups com mais de 180 dias não têm tombstone para reconciliar, o que exige retenção de backup menor que 180 dias.
+- **Aplica-se a:** `modules/privacy/application/account-purge.ts`, migração `0009_purge_tombstones.sql`, `worker.ts` e `worker-main.ts`.

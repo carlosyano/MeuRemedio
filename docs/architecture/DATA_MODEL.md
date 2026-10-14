@@ -358,8 +358,10 @@ Impressão irreversível para impedir restauração indevida.
 | `expires_at` | timestamptz | sim | us UTC | RFC 3339 UTC | - | não | - | operacional | = purged_at + 180 dias |
 
 **Constraints e índices:**
-- UNIQUE(user_id)
+- UNIQUE(user_id); CHECK octet_length(email_hmac) = 32; CHECK expires_at = purged_at + 180 dias
+- Índice (expires_at); em `users`, índice (purge_due_at) WHERE status = 'DELETION_SCHEDULED' para o job de expurgo
 - Não bloqueia novo cadastro com o mesmo e-mail (DEC-018)
+- Migração: `0009_purge_tombstones.sql`
 
 ### ENT-015 — `incident_records`
 

@@ -40,6 +40,11 @@ import {
   handleRemindersSweep,
   type ReminderRequested,
 } from './modules/reminders/application/email-reminders.js';
+import {
+  PURGE_SWEEP_CRON,
+  PURGE_SWEEP_QUEUE,
+  handlePurgeSweep,
+} from './modules/privacy/application/account-purge.js';
 import type { Clock } from './platform/clock.js';
 import type { EmailSender } from './platform/email/email-sender.js';
 import { OUTBOX_QUEUES, OutboxDispatcher } from './platform/outbox/dispatcher.js';
@@ -55,6 +60,8 @@ export interface WorkerOptions {
   readonly clock: Clock;
   readonly email: EmailSender;
   readonly webBaseUrl: string;
+  /** Pepper do HMAC do e-mail (tombstone do expurgo, RN-019); o mesmo da API. */
+  readonly emailPepper: Buffer;
   /** Armazenamento privado dos PDFs; sem ele, as exportacoes falham. */
   readonly storage?: ObjectStorage;
   /** Intervalo do laco do despachante; padrao 1000 ms. */
@@ -122,6 +129,19 @@ export async function startWorker(options: WorkerOptions): Promise<RunningWorker
   await boss.schedule(DEADLINE_SWEEP_QUEUE, DEADLINE_SWEEP_CRON, null, { missed: 'once' });
   await boss.work(DEADLINE_SWEEP_QUEUE, { pollingIntervalSeconds: 0.5 }, async () => {
     await handleDeadlineSweep({ pool: options.pool, clock: options.clock });
+  });
+
+  // Expurgo das contas em exclusao e reconciliacao com os tombstones a cada 15 minutos (RN-012,
+  // TS-029); a passada mais recente basta.
+  await boss.createQueue(PURGE_SWEEP_QUEUE);
+  await boss.schedule(PURGE_SWEEP_QUEUE, PURGE_SWEEP_CRON, null, { missed: 'once' });
+  await boss.work(PURGE_SWEEP_QUEUE, { pollingIntervalSeconds: 0.5 }, async () => {
+    await handlePurgeSweep({
+      pool: options.pool,
+      clock: options.clock,
+      storage: options.storage ?? unconfiguredObjectStorage,
+      emailPepper: options.emailPepper,
+    });
   });
 
   // Horizonte de 30 dias a cada hora (RF-004, DEC-027); a passada mais recente basta.

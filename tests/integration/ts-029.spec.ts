@@ -41,8 +41,15 @@ interface Snapshot {
 /** Copia as linhas da conta e dos planos, como um backup logico anterior ao expurgo. */
 async function backup(userId: string): Promise<Snapshot> {
   return {
-    users: (await h.pool.query('SELECT * FROM users WHERE id = $1', [userId])).rows,
-    plans: (await h.pool.query('SELECT * FROM medication_plans WHERE user_id = $1', [userId])).rows,
+    users: (
+      await h.pool.query<Record<string, unknown>>('SELECT * FROM users WHERE id = $1', [userId])
+    ).rows,
+    plans: (
+      await h.pool.query<Record<string, unknown>>(
+        'SELECT * FROM medication_plans WHERE user_id = $1',
+        [userId],
+      )
+    ).rows,
   };
 }
 
