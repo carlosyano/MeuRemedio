@@ -1,0 +1,28 @@
+/* Estilo neutro provisorio (DC-052): a identidade visual entra com o design system. */
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #1a1a1a;
+  --color-muted: #4a4a4a;
+  --color-surface: #ffffff;
+  --color-line: #767676;
+  --color-accent: #0b57d0;
+  --color-danger: #a50e0e;
+}
+
+html {
+  color: var(--color-ink);
+  background: var(--color-surface);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

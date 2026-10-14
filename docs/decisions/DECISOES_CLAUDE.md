@@ -57,6 +57,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-049 | QG-005: Gitleaks, Semgrep e CodeQL; actions fixadas por SHA | Vigente |
 | DC-050 | QG-010: testes de mutação no domínio | Vigente |
 | DC-051 | Conta pendente antiga (TS-028) e cobertura de TS-002, TS-012 e TS-025 | Vigente |
+| DC-052 | Fundação da aplicação web e entrada (TL-002) | Vigente |
 
 ---
 
@@ -504,3 +505,18 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **TS-025:** coberto pelas constraints nomeadas de `db-core.spec.ts`.
 - **Riscos:** quem cadastrar e não verificar em 30 dias precisa se cadastrar de novo; o reenvio da verificação continua disponível até lá.
 - **Aplica-se a:** `modules/privacy/application/account-purge.ts` e aos testes `ts-028.spec.ts`, `reminders.spec.ts`, `plans.spec.ts` e `db-core.spec.ts`.
+
+## DC-052 — Fundação da aplicação web e entrada (TL-002) (14/10/2026)
+
+- **Contexto:** o mantenedor escolheu, em 14/10/2026, começar a aplicação web com estilo neutro e aplicar o design system depois. A ADR fixa Next.js, React, TypeScript strict e Tailwind e exige Playwright e axe (QG-007 e QG-008). Não estavam definidos: como o navegador chega à API com os cookies da sessão e o CSRF, a mensagem de credencial inválida no login e a forma de rodar os testes E2E.
+- **Alternativas para chegar à API:** (a) o navegador chama a API em outra origem (CORS e cookies entre sites); (b) a aplicação encaminha `/api/*` à API (mesma origem).
+- **Decisão:**
+  - **Origem única:** (b), por `rewrites` do Next com `MEUREMEDIO_API_URL` lida no build. Os cookies `mr_session` e `mr_csrf` ficam na origem da aplicação, sem CORS, e a API recebe o `Origin` dela.
+  - **Cliente da API** (`src/lib/api-client.ts`): mutações levam o `X-CSRF-Token` copiado do cookie `mr_csrf` e a `Idempotency-Key` quando exigida. Problem vira `ApiProblem`; falha de rede ou resposta sem Problem vira `ApiUnavailable`. Nada é repetido nem enfileirado offline (TS-010). As mensagens ao usuário são as do catálogo de erros da Especificação.
+  - **Entrar (TL-002):** credencial inválida, conta pendente ou e-mail inexistente mostram a mesma mensagem, "E-mail ou senha incorretos.", sem revelar se o e-mail existe. O bloqueio mostra a mensagem do ERR-004 com os minutos do `Retry-After`. Sem sessão, a área logada leva a `/entrar?proximo=<caminho>`, e o destino só é aceito se for caminho interno (sem redirecionamento aberto).
+  - **Segurança das respostas:** `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy` restrita e `Cache-Control: no-store` nas páginas. A CSP com nonce fica para um PR próprio do spike de segurança do frontend (S6).
+  - **Imagens:** otimização desligada (`images.unoptimized`). O `sharp`, dependência opcional do Next, traz binários da libvips em LGPL-3.0 e nunca é carregado. A política de licenças (DC-048) aceita a LGPL só na família `@img/sharp-*`, com esse motivo.
+  - **E2E:** Playwright com Chromium contra PostgreSQL real (Testcontainers), a API compilada e a aplicação em modo de produção (`next build` e `next start`), em série. O rate limit fica elevado só nesse ambiente. axe verifica WCAG 2.2 A e AA em cada tela. Um único job cobre o QG-007 e o QG-008.
+  - **Estilo:** neutro, com contraste AA, foco visível e respeito a `prefers-reduced-motion`.
+- **Riscos:** a URL da API fica fixada no build da aplicação. A CSP ainda não existe. As demais telas (TL-001, TL-003 a TL-008) entram em PRs seguintes.
+- **Aplica-se a:** `apps/web`, `tests/e2e`, `tools/scripts/license-policy.mjs`, `package.json`, `eslint.config.mjs` e `.github/workflows/ci.yml`.

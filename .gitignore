@@ -15,3 +15,6 @@ schemathesis-report/
 sbom/
 .stryker-tmp/
 reports/
+apps/web/.next/
+test-results/
+playwright-report/

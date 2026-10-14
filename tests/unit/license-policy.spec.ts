@@ -40,6 +40,20 @@ describe('politica de licencas (QG-006)', () => {
     ).toEqual([]);
   });
 
+  it('LGPL so e aceita na familia @img/sharp-* (opcional do Next, nunca carregada; DC-052)', () => {
+    const sharp = [{ expression: 'Apache-2.0 AND LGPL-3.0-or-later' }];
+    expect(licenseViolations([component('@img/sharp-linux-x64', '0.35.5', sharp)])).toEqual([]);
+    expect(licenseViolations([component('@img/sharp-libvips-linux-x64', '1.3.0', sharp)])).toEqual(
+      [],
+    );
+    expect(licenseViolations([component('outra-lib', '1.0.0', sharp)])).toHaveLength(1);
+    expect(
+      licenseViolations([
+        component('@img/sharp-linux-x64', '0.35.5', [{ license: { id: 'GPL-3.0-only' } }]),
+      ]),
+    ).toHaveLength(1);
+  });
+
   it('excecao revisada aceita componente sem licenca declarada, so naquela versao', () => {
     const [reviewed] = Object.keys(REVIEWED_EXCEPTIONS);
     if (reviewed === undefined) throw new Error('sem excecoes');

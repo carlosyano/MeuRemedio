@@ -21,18 +21,28 @@ export const REVIEWED_EXCEPTIONS = {
   'ssh2@1.17.0': 'MIT no campo legado licenses; o npm sbom nao o le.',
 };
 
+/** Licencas aceitas so numa familia de pacotes, com motivo revisado. */
+export const FAMILY_EXCEPTIONS = [
+  {
+    namePrefix: '@img/sharp-',
+    license: 'LGPL-3.0-or-later',
+    reason:
+      'Binarios da libvips do sharp, dependencia opcional do Next para otimizar imagens. A ' +
+      'otimizacao esta desligada (images.unoptimized) e o sharp nunca e carregado (DC-052).',
+  },
+];
+
 const WORKSPACE_PURL = 'pkg:npm/%40meuremedio/';
 
-/** A expressao SPDX e aceita pela politica? */
-function expressionAllowed(expression) {
+/** A expressao SPDX e aceita pela politica (com as licencas extras da familia do pacote)? */
+function expressionAllowed(expression, extra) {
   const text = expression.replace(/[()]/g, ' ').trim();
-  return text
-    .split(/\s+OR\s+/)
-    .some((alternative) =>
-      alternative
-        .split(/\s+AND\s+/)
-        .every((id) => ALLOWED_LICENSES.has(id.trim().replace(/\+$/, ''))),
-    );
+  return text.split(/\s+OR\s+/).some((alternative) =>
+    alternative.split(/\s+AND\s+/).every((id) => {
+      const license = id.trim().replace(/\+$/, '');
+      return ALLOWED_LICENSES.has(license) || extra.has(license);
+    }),
+  );
 }
 
 function licensesOf(component) {
@@ -54,7 +64,12 @@ export function licenseViolations(components) {
       if (!(id in REVIEWED_EXCEPTIONS)) violations.push(`${id}: sem licenca declarada`);
       continue;
     }
-    if (!licenses.every(expressionAllowed)) {
+    const extra = new Set(
+      FAMILY_EXCEPTIONS.filter((e) => component.name.startsWith(e.namePrefix)).map(
+        (e) => e.license,
+      ),
+    );
+    if (!licenses.every((expression) => expressionAllowed(expression, extra))) {
       violations.push(`${id}: licenca fora da politica (${licenses.join(', ')})`);
     }
   }

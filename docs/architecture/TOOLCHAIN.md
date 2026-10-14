@@ -40,6 +40,10 @@
 | @types/pdfkit (em `apps/api`, dev) | 0.17.6 | Tipos do pdfkit (o pacote não publica tipos); a API usada (`text`, `font`, `fontSize`, `moveDown`) não mudou entre a 0.17 e a 0.20 |
 | @stryker-mutator/core | 10.0.0 | QG-010 (testes de mutação no domínio) com o runner `command`, que executa o Vitest por mutante: o `@stryker-mutator/vitest-runner` 10.0.0 não ativa os mutantes com o Vitest 5 e não foi instalado (DC-050) |
 | qs (override) | 6.16.0 | Transitiva do Stryker (`typed-rest-client` fixa `qs` 6.15.1, com 2 vulnerabilidades moderadas); o `overrides` do `package.json` mantém o `npm audit` em 0 |
+| next, react, react-dom (em `apps/web`) | 16.3.8, 19.3.0, 19.3.0 | Aplicação web (ADR-001 v1.5 §5.3), App Router; versões com mais de 2 semanas em 14/10/2026. Otimização de imagem desligada: o `sharp`, opcional do Next, nunca é carregado (DC-052) |
+| tailwindcss, @tailwindcss/postcss (em `apps/web`, dev) | 4.3.3 | Estilos (ADR-001 v1.5); estilo neutro até o design system |
+| @types/react, @types/react-dom (em `apps/web`, dev) | 19.3.0 | Tipos do React |
+| @playwright/test, @axe-core/playwright | 1.63.0, 4.13.0 | QG-007 e QG-008; `overrides` fixa `playwright-core` em 1.63.0 para o axe usar o mesmo Playwright |
 | oasdiff (binário Go, fora do npm) | 1.33.0 | QG-001 (incompatibilidades da OpenAPI) via `tools/scripts/openapi-diff.mjs`; SHA-256 de cada plataforma fixado em `tools/scripts/oasdiff-bin.mjs` |
 
 ### Decisões de versão
@@ -69,7 +73,8 @@
 | `npm run traceability:check` | QG-011 | Implementado (`python validate_all.py`) |
 | `npm run verify` | — | Executa typecheck, lint, format:check, test:unit, test:contract, openapi:lint e openapi:diff em sequência (a primeira execução baixa o oasdiff) |
 | `npm run test:mutation` | QG-010 | Implementado (Stryker no `packages/domain`, limite Foundation de 80%, relatório HTML como artefato `mutation-report` da CI; DC-050) |
-| `test:e2e`, `test:a11y` | QG-007 e 008 | **Não implementados**: serão criados com os testes e as ferramentas correspondentes (Playwright; Trivy quando houver imagem) |
+| `npm run test:e2e` | QG-007 e QG-008 | Implementado (Playwright + axe WCAG 2.2 A/AA contra PostgreSQL, API e web reais; job próprio na CI; DC-052). A acessibilidade roda dentro das jornadas, sem script `test:a11y` separado |
+| Trivy | QG-006 | **Não implementado**: entra quando o projeto produzir imagem de contêiner |
 
 ## 4. Política de atualização
 

@@ -141,11 +141,7 @@ describe('mensagens ao usuario (catalogo de erros da Especificacao)', () => {
       503,
       'O serviço está temporariamente indisponível. Tente novamente.',
     ],
-    [
-      'SESSION_LIMIT_REACHED',
-      409,
-      'Você já tem 3 sessões ativas. Encerre uma sessão para entrar.',
-    ],
+    ['SESSION_LIMIT_REACHED', 409, 'Você já tem 3 sessões ativas. Encerre uma sessão para entrar.'],
     [
       'CSRF_VALIDATION_FAILED',
       403,

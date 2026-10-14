@@ -26,9 +26,13 @@ test.describe('TL-002 entrar', () => {
     await activeUser(email);
     await page.goto('/entrar');
     await signIn(page, email, 'Senha-Errada-2026');
-    await expect(page.getByRole('alert')).toHaveText('E-mail ou senha incorretos.');
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(
+      'E-mail ou senha incorretos.',
+    );
     await signIn(page, uniqueEmail('inexistente'), 'Senha-Errada-2026');
-    await expect(page.getByRole('alert')).toHaveText('E-mail ou senha incorretos.');
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(
+      'E-mail ou senha incorretos.',
+    );
     await expect(page).toHaveURL(/\/entrar/);
     await expectNoA11yViolations(page);
   });
@@ -41,7 +45,7 @@ test.describe('TL-002 entrar', () => {
     await page.goto('/entrar');
     for (let i = 0; i < 5; i += 1) await signIn(page, email, `Senha-Errada-${String(i)}`);
     await signIn(page, email);
-    const alert = page.getByRole('alert');
+    const alert = page.getByRole('main').getByRole('alert');
     await expect(alert).toContainText(
       'Não foi possível entrar agora. Tente novamente após o período informado.',
     );
@@ -62,7 +66,7 @@ test.describe('TL-002 entrar', () => {
     }
     await page.goto('/entrar');
     await signIn(page, email);
-    await expect(page.getByRole('alert')).toHaveText(
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(
       'Você já tem 3 sessões ativas. Encerre uma sessão para entrar.',
     );
   });
@@ -73,7 +77,7 @@ test.describe('TL-002 entrar', () => {
     await page.goto('/entrar');
     await page.route('**/api/sessions', (route) => route.abort('connectionrefused'));
     await signIn(page, email);
-    await expect(page.getByRole('alert')).toHaveText(
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(
       'O serviço está temporariamente indisponível. Tente novamente.',
     );
     await expect(page).toHaveURL(/\/entrar/);

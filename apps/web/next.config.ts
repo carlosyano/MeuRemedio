@@ -2,6 +2,7 @@
 // - /api/* e encaminhado a API (MEUREMEDIO_API_URL, lido no build): o navegador fala so com a
 //   origem da aplicacao, os cookies mr_session e mr_csrf ficam nessa origem e o Origin das
 //   mutacoes e o da aplicacao (OA-008);
+// - otimizacao de imagem desligada (o sharp, opcional do Next, nunca e carregado);
 // - cabecalhos de seguranca em todas as respostas; sem cache de paginas com dados do titular.
 import type { NextConfig } from 'next';
 
@@ -21,6 +22,8 @@ const securityHeaders = [
 const config: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  // Sem otimizacao de imagem no servidor: o sharp (LGPL na libvips) nunca e carregado (DC-052).
+  images: { unoptimized: true },
   rewrites: () => Promise.resolve([{ source: '/api/:path*', destination: `${apiUrl}/:path*` }]),
   headers: () =>
     Promise.resolve([

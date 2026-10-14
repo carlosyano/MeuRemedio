@@ -3,7 +3,18 @@ import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  { ignores: ['**/dist/**', '**/node_modules/**', 'coverage/**', 'validation-report/**'] },
+  {
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.next/**',
+      'coverage/**',
+      'validation-report/**',
+      'test-results/**',
+      'playwright-report/**',
+      'apps/web/next-env.d.ts',
+    ],
+  },
   js.configs.recommended,
   {
     files: ['tools/**/*.mjs'],
@@ -19,7 +30,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.ts'],
+    files: ['**/*.ts', '**/*.tsx'],
     extends: [tseslint.configs.strictTypeChecked],
     rules: {
       // Modulos do NestJS sao classes vazias com decorator.
