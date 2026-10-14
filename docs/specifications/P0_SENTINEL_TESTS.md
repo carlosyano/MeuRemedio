@@ -72,6 +72,8 @@
 **Estado (PR 39):** `getHistory` (coleção vazia para U2) está em `tests/integration/history.spec.ts`. Faltam as rotas de exportação e privacidade para o teste gerado a partir da OpenAPI.
 
 **Estado (PR 40):** as rotas de exportação por identificador (`getExport`, `cancelExport`, `downloadExport`) estão em `tests/integration/exports.spec.ts`. Falta a privacidade (`getPrivacy`, `requestAccountDeletion`) para o teste gerado a partir da OpenAPI.
+
+**Estado (PR 47):** completo em `tests/security/ts-023.spec.ts`, gerado a partir da OpenAPI. O teste lista as operações privadas do contrato (`security` não vazio) e reprova se alguma não tiver caso, ou se o conjunto por identificador divergir das operações com parâmetro de caminho. Por identificador (7 operações): U2 usa o id de U1 e recebe 404 `RESOURCE_NOT_FOUND` com status, `code`, `title` e `detail` iguais aos de um UUID inexistente, o estado de U1 fica intacto e há 1 `ownership.denied` por tentativa. Leituras sem identificador (6): a resposta de U2 não contém id, e-mail nem plano de U1. Mutações sem identificador (7): a chamada de U2 não altera o estado de U1. A matriz aponta `tests/e2e/ts-023.spec.ts` (nível e2e); o teste roda no nível de integração, contra a API e o PostgreSQL 17 reais, até existir a camada e2e.
 ---
 
 ## TS-015 — Idempotência com payload divergente
