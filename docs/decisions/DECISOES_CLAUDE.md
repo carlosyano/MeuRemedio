@@ -53,6 +53,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-045 | Área de privacidade e pedido de exclusão da conta | Vigente |
 | DC-046 | Expurgo da conta, tombstone e reconciliação de restore | Vigente |
 | DC-047 | Schemathesis na CI e entradas que viravam 500 | Vigente |
+| DC-048 | QG-006 (SBOM e licenças) e QG-009 na CI | Vigente |
 
 ---
 
@@ -453,3 +454,15 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **NUL:** texto com U+0000 no corpo, na query, no caminho ou em cabeçalho do contrato recebe 400 `VALIDATION_FAILED` no campo (`INVALID`).
 - **Riscos:** `createResponse` e `downloadExport` recebem quase só 404 no fuzzing (o Schemathesis não conhece ids válidos sem links na OpenAPI); esses caminhos são cobertos pelos testes de integração. Os 429 do rate limit não são exercitados aqui (estão em `rate-limit.spec.ts`).
 - **Aplica-se a:** `platform/contract/openapi-contract.ts`, `platform/http/contract-enforcement.ts`, `platform/rate-limit/rate-limiter.ts`, `app.ts`, `tests/schemathesis/` e `.github/workflows/ci.yml`.
+
+## DC-048 — QG-006 (SBOM e licenças) e QG-009 na CI (14/10/2026)
+
+- **Contexto:** o QG-006 exige `npm audit`, SBOM em SPDX ou CycloneDX e "licenças avaliadas conforme a política do projeto", mas o projeto não tem política de licenças. O QG-009 exige o TS-008 e o TS-023 como gate.
+- **Alternativas para a SBOM:** (a) ferramenta externa (CycloneDX CLI, Syft); (b) `npm sbom`, embutido no npm 11.
+- **Decisão:**
+  - **SBOM:** (b), em CycloneDX, só das dependências de produção (`--omit dev`), publicada como artefato `sbom-cyclonedx` do job `QG-006 Dependencies`. Sem dependência nova.
+  - **Política de licenças:** só licenças permissivas (0BSD, Apache-2.0, BlueOak-1.0.0, BSD-2-Clause, BSD-3-Clause, CC0-1.0, ISC, MIT, Unlicense). Em expressão SPDX, `OR` passa com uma alternativa aceita e `AND` exige todas. Componente sem licença declarada só passa com exceção revisada, presa à versão: hoje `png-js@2.0.0` (MIT no arquivo LICENSE) e `ssh2@1.17.0` (MIT no campo legado `licenses`). Os pacotes do workspace ficam fora. A lista de senhas comprometidas (MIT, DEC-029) não é pacote npm e segue documentada no próprio diretório.
+  - **QG-009:** `npm run test:ownership` roda o TS-023, que cobre todas as rotas privadas e inclui o cenário do TS-008, em job próprio.
+  - Os jobs novos não entram como obrigatórios no ruleset sem decisão do mantenedor.
+- **Riscos:** a política é provisória até existir parecer jurídico sobre licenças; ampliá-la exige nova DC. O Trivy entra quando o projeto produzir imagem de contêiner.
+- **Aplica-se a:** `tools/scripts/sbom.mjs`, `tools/scripts/license-policy.mjs`, `package.json` e `.github/workflows/ci.yml`.

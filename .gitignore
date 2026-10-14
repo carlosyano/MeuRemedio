@@ -12,3 +12,4 @@ coverage/
 !.env.example
 .schemathesis/
 schemathesis-report/
+sbom/

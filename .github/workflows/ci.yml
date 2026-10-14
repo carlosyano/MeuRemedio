@@ -102,3 +102,35 @@ jobs:
       - run: python -m pip install -r tools/schemathesis/requirements.txt
       - run: npm ci
       - run: npm run test:schemathesis
+
+  dependencies:
+    name: QG-006 Dependencies (npm audit, SBOM e licencas)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run sbom
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: sbom/sbom.cdx.json
+          if-no-files-found: error
+
+  ownership:
+    name: QG-009 Ownership (TS-008 e TS-023)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:ownership
