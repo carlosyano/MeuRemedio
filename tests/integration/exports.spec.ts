@@ -503,6 +503,7 @@ describe('worker: exportacao pelo Outbox e expiracao agendada', () => {
       email: { send: () => Promise.resolve(undefined) },
       storage: h.storage,
       webBaseUrl: 'https://app.example.invalid',
+      emailPepper: Buffer.alloc(32, 7),
       pollIntervalMs: 100,
     });
     try {
