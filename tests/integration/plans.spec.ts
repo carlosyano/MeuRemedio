@@ -513,9 +513,7 @@ describe('getPlan e TS-008 acesso horizontal', () => {
     expect(stable(malformed.body)).toEqual(stable(missing.body));
   });
 
-  it.todo(
-    'TS-008 updatePlan e deletePlan no plano de outro titular (entram com a edicao e a exclusao)',
-  );
+  // TS-008 em updatePlan e deletePlan no plano de outro titular: tests/security/ts-023.spec.ts.
 });
 
 describe('listPlans', () => {

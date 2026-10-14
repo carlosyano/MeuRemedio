@@ -209,4 +209,6 @@ Os valores foram calculados com `zoneinfo` e o tzdata do ambiente de referência
 
 **Pendentes (dependem de ferramenta externa ou da API):** verificação 2 (`oasdiff`), 3 (rotas da aplicação x OpenAPI), 4 (Schemathesis) e a emissão real dos cookies (6).
 
+**Estado (PR 48):** a verificação 2 roda em `npm run openapi:diff` (oasdiff fixado). A verificação 3 está em `tests/integration/routes.spec.ts`: a API em execução registra as 27 operações do contrato, e caminho fora dele responde 404 em `application/problem+json`; rota extra ou divergente impede a subida (`assertRoutesMatchContract`). A emissão real dos cookies (6) está em `tests/integration/sessions.spec.ts`. Falta só a verificação 4 (Schemathesis).
+
 **Decisões de 04/10/2026 (resolvidas na OpenAPI 02.33.3):** GAP-008, o 410 de `createResponse` foi removido do contrato; GAP-009, `X-Correlation-ID` é exigido em toda resposta (regra R12). Não há mais exceções registradas nas regras R05 e R12.
