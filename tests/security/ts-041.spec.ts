@@ -1,8 +1,7 @@
-// @trace TS-041 CA-018 RF-002 RF-003 ERR-015 deleteCurrentSession createPlan updatePlan deletePlan createResponse createExport cancelExport updateCurrentAccount updateAccessibilityPreferences revokeAllSessions (ADR-001 v1.5 OA-008)
+// @trace TS-041 CA-018 RF-002 RF-003 ERR-015 deleteCurrentSession createPlan updatePlan deletePlan createResponse createExport cancelExport updateCurrentAccount updateAccessibilityPreferences revokeAllSessions requestAccountDeletion (ADR-001 v1.5 OA-008)
 // CSRF nas mutacoes autenticadas contra PostgreSQL 17 real: double-submit (cookie mr_csrf +
 // X-CSRF-Token com HMAC vinculado a sessao) e validacao de Origin (ou Sec-Fetch-Site). Falha:
-// 403 CSRF_VALIDATION_FAILED sem efeito. Nesta etapa, so requestAccountDeletion ainda nao esta
-// implementada entre as mutacoes autenticadas.
+// 403 CSRF_VALIDATION_FAILED sem efeito, em todas as mutacoes autenticadas.
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   PASSWORD,
@@ -104,10 +103,6 @@ describe('TS-041 CSRF em deleteCurrentSession', () => {
   it('sem sessao, a resposta e 401 antes da verificacao de CSRF', async () => {
     expect((await logout({ origin: 'https://evil.example' })).status).toBe(401);
   });
-
-  it.todo(
-    'a mutacao restante (requestAccountDeletion) autenticadas (CA-018) entram com seus modulos',
-  );
 });
 
 describe('TS-041 CSRF em createPlan', () => {
@@ -360,5 +355,17 @@ describe('TS-041 CSRF em conta, preferencias e revogacao global', () => {
     });
     expect(response.status).toBe(403);
     expect(await revoked(s)).toBe(false);
+  });
+
+  it.each(cases)('requestAccountDeletion %s: 403 sem excluir', async (_nome, headersFor) => {
+    const s = await session();
+    const response = await h.call('requestAccountDeletion', 'POST', '/account-deletions', {
+      body: { password: PASSWORD, confirmation: 'EXCLUIR MINHA CONTA' },
+      headers: { ...headersFor(s), 'idempotency-key': 'k-1' },
+    });
+    expect(response.status).toBe(403);
+    expect(await revoked(s)).toBe(false);
+    const scheduled = await h.pool.query("SELECT 1 FROM users WHERE status = 'DELETION_SCHEDULED'");
+    expect(scheduled.rowCount).toBe(0);
   });
 });

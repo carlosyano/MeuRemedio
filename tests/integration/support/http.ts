@@ -17,6 +17,8 @@ import { startPostgres, type PostgresHandle } from '../../../packages/testkit/sr
 
 export const ORIGIN = 'https://app.example.invalid';
 export const PASSWORD = 'Senha-Sintetica-2026';
+/** Canal externo de direitos (GX-002) sintetico, exposto por getPrivacy. */
+export const RIGHTS_CHANNEL = 'https://privacidade.example.invalid/direitos';
 
 export interface HttpResult {
   readonly status: number;
@@ -79,6 +81,7 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
     storage,
     logger: false,
     allowedOrigins: [ORIGIN],
+    externalRightsChannel: RIGHTS_CHANNEL,
     secrets: {
       requestHashKey: randomBytes(32),
       emailPepper: randomBytes(32),

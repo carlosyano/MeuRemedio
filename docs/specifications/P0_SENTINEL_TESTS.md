@@ -130,6 +130,8 @@
 **Estado (PR 41):** `revokeAllSessions` cobre os passos 2, 3, 5 e 6 em `tests/integration/account-settings.spec.ts` (replay e payload divergente a partir de uma nova sessão do titular; replay pela sessão revogada com 401). O passo 4 aguarda a DEC-032: a OpenAPI 02.33.4 não documenta 400 na operação.
 
 **Estado (PR 42):** com a DEC-032 (OpenAPI 02.33.5), `revokeAllSessions` cobre também o passo 4 (sem `Idempotency-Key`, 400) em `tests/integration/account-settings.spec.ts`.
+
+**Estado (PR 45):** `requestAccountDeletion` completa as 7 operações (`tests/integration/privacy.spec.ts`). Por HTTP: passos 1, 4 (sem `Idempotency-Key`, 400) e 6 (replay após a exclusão, 401). Como a exclusão bloqueia o login da conta, não existe sessão para repetir a chamada por HTTP: os passos 2, 3 e 5 chamam o serviço da aplicação diretamente, com o mesmo registro de idempotência (snapshot no replay, 409 `IDEMPOTENCY_KEY_REUSED` no payload divergente e, no passo 5, a chave expirada tratada como nova, com 409 `STATE_CONFLICT` porque a conta já está em exclusão).
 ---
 
 ## TS-024 — DST e tempo civil

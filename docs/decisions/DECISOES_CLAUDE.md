@@ -50,6 +50,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 | DC-042 | Exportação em PDF | Vigente |
 | DC-043 | Conta, preferências e revogação global de sessões | Vigente |
 | DC-044 | Redefinição de senha | Vigente |
+| DC-045 | Área de privacidade e pedido de exclusão da conta | Vigente |
 
 ---
 
@@ -415,3 +416,14 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Efeitos do sucesso:** grava o hash Argon2id, consome o token, invalida os demais abertos, revoga todas as sessões da conta com `PASSWORD_RESET` e zera o contador de falhas de login (RN-005), como o login bem-sucedido (DC-024).
 - **Riscos:** o pedido só tem o limite por IP das rotas públicas, então alguém pode enviar vários e-mails de redefinição a um endereço alheio trocando de IP; cada pedido invalida o link anterior, sem mudar a senha. Zerar o bloqueio na redefinição é aceitável porque quem tem o link controla o e-mail da conta.
 - **Aplica-se a:** `modules/identity/application/request-password-reset.ts` e `confirm-password-reset.ts`; migração `0008_password_reset.sql`.
+
+## DC-045 — Área de privacidade e pedido de exclusão da conta (14/10/2026)
+
+- **Contexto:** `getPrivacy` precisa do canal externo de direitos, que depende do GX-002 e ainda não existe. `requestAccountDeletion` responde com `deletion_request_id`, mas o modelo de dados não tem tabela de pedidos de exclusão. A Especificação não diz como a reautenticação se protege de tentativas em série, nem quando usar o 409.
+- **Alternativas para o `deletion_request_id`:** (a) nova tabela de pedidos; (b) id do evento `account.deletion_requested` na auditoria (`audit_events`, append-only, sem FK, sobrevive ao expurgo); (c) UUID só no snapshot de idempotência, perdido em 7 dias.
+- **Decisão:**
+  - **Canal externo:** configuração da implantação (`RIGHTS_CHANNEL_URL`, opção `externalRightsChannel` do `createApp`), obrigatória no `main.ts`. Sem ela, `getPrivacy` responde 503 `DEPENDENCY_UNAVAILABLE`, porque o contrato exige `external_channel`. Os testes usam um endereço sintético `.invalid`.
+  - **Direitos e prazos:** `ACCESS_HISTORY`, `EXPORT_PDF` e `DELETE_ACCOUNT`, com os prazos fixos do contrato (Q-001).
+  - **Pedido de exclusão:** (b). O pedido grava `account.deletion_requested` (recurso `user_account`, sem e-mail nem senha) e devolve o id do evento. A reautenticação segue a DC-043: a `Idempotency-Key` é consultada antes da senha, a senha errada retorna 401 e conta no bloqueio do login, e com o bloqueio ativo a reautenticação recebe 401. A conta passa a `DELETION_SCHEDULED`, com `purge_due_at` 30 dias depois do pedido (o limite da RN-012), todas as sessões são revogadas com `ACCOUNT_DELETION` e os cookies são limpos. Conta que já não está `ACTIVE` (pedido concorrente de outra sessão) recebe 409 `STATE_CONFLICT`.
+- **Riscos:** a auditoria tem retenção provisória de 180 dias (GX-003); depois disso o id do pedido deixa de ser rastreável. O expurgo em 30 dias e o tombstone entram no próximo PR.
+- **Aplica-se a:** `modules/privacy/application/request-account-deletion.ts`, `privacy-summary.ts` e `infrastructure/privacy.controller.ts`; `platform/audit/audit.ts`; `apps/api/src/main.ts`.

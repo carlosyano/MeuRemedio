@@ -25,6 +25,12 @@ const allowedOrigins = (process.env['ALLOWED_ORIGINS'] ?? '')
   .filter((origin) => origin !== '');
 if (allowedOrigins.length === 0) throw new Error('ALLOWED_ORIGINS nao definida');
 
+// RIGHTS_CHANNEL_URL: canal externo de direitos do titular (GX-002), exposto por getPrivacy.
+const externalRightsChannel = process.env['RIGHTS_CHANNEL_URL'];
+if (externalRightsChannel === undefined || externalRightsChannel === '') {
+  throw new Error('RIGHTS_CHANNEL_URL nao definida');
+}
+
 const exportStorageDir = process.env['EXPORT_STORAGE_DIR'];
 const clockSkewMaxMs = optionalNumber('CLOCK_SKEW_MAX_MS');
 const healthProbeTimeoutMs = optionalNumber('HEALTH_PROBE_TIMEOUT_MS');
@@ -37,6 +43,7 @@ const app = await createApp({
     csrfKey: secret('CSRF_KEY'),
   },
   allowedOrigins,
+  externalRightsChannel,
   // EXPORT_STORAGE_DIR: diretorio local dos PDFs em desenvolvimento (o S3 entra com a infraestrutura).
   ...(exportStorageDir === undefined || exportStorageDir === ''
     ? {}
