@@ -1,9 +1,13 @@
 // Ambiente dos testes E2E (QG-007/QG-008; DC-052): PostgreSQL 17 real (Testcontainers), a API
 // compilada (apps/api/dist, com decorators ja transpilados) escutando em API_PORT e a aplicacao
-// web em modo de producao (next build + next start) em WEB_PORT, com /api/* encaminhado a API.
+// web em modo de producao (next build + next start) em WEB_PORT, com /api/* encaminhado a API, e
+// o worker (Outbox e filas) com os e-mails gravados em E2E_MAILBOX (um JSON por linha).
 // O rate limit fica elevado (a suite inteira sai do mesmo IP); os demais limites seguem os reais.
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
+import { appendFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 
@@ -41,6 +45,7 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
   type MigrateModule = typeof import('../../../apps/api/src/platform/migrate.js');
   type ClockModule = typeof import('../../../apps/api/src/platform/clock.js');
   type StorageModule = typeof import('../../../apps/api/src/platform/storage/object-storage.js');
+  type WorkerModule = typeof import('../../../apps/api/src/worker.js');
   const dist = (path: string) => new URL(`../../../${path}`, import.meta.url).href;
   const { startPostgres } = (await import(dist('packages/testkit/dist/index.js'))) as Testkit;
   const { createApp } = (await import(dist('apps/api/dist/app.js'))) as AppModule;
@@ -50,25 +55,51 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
     dist('apps/api/dist/platform/storage/object-storage.js')
   )) as StorageModule;
 
+  const { startWorker } = (await import(dist('apps/api/dist/worker.js'))) as WorkerModule;
+  const { PgBoss } = await import('pg-boss');
+
   const db = await startPostgres();
   const pool = new pg.Pool({ connectionString: db.url, max: 8 });
   await migrate(pool);
+  const storage = new MemoryObjectStorage();
+  const emailPepper = randomBytes(32);
   const app = await createApp({
     clock: systemClock,
     database: pool,
-    storage: new MemoryObjectStorage(),
+    storage,
     logger: false,
     allowedOrigins: [WEB_ORIGIN],
     externalRightsChannel: 'https://privacidade.example.invalid/direitos',
     rateLimits: { public_ip: 100_000, user: 100_000 },
     secrets: {
       requestHashKey: randomBytes(32),
-      emailPepper: randomBytes(32),
+      emailPepper,
       csrfKey: randomBytes(32),
     },
   });
   await app.listen({ port: API_PORT, host: '127.0.0.1' });
   process.env['E2E_DATABASE_URL'] = db.url;
+
+  const mailbox = join(mkdtempSync(join(tmpdir(), 'meuremedio-e2e-')), 'mailbox.jsonl');
+  appendFileSync(mailbox, '');
+  process.env['E2E_MAILBOX'] = mailbox;
+  const boss = new PgBoss({ connectionString: db.url });
+  boss.on('error', () => undefined);
+  const worker = await startWorker({
+    pool,
+    boss,
+    clock: systemClock,
+    storage,
+    emailPepper,
+    webBaseUrl: WEB_ORIGIN,
+    pollIntervalMs: 200,
+    email: {
+      send: (message) => {
+        appendFileSync(mailbox, JSON.stringify(message) + '\n');
+        return Promise.resolve(undefined);
+      },
+    },
+  });
 
   const webEnv = { ...process.env, MEUREMEDIO_API_URL: `http://127.0.0.1:${String(API_PORT)}` };
   const next = 'node_modules/next/dist/bin/next';
@@ -82,6 +113,7 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
 
   return async () => {
     web.kill();
+    await worker.stop();
     await app.close();
     await pool.end();
     await db.stop();
