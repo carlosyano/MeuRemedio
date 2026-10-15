@@ -10,12 +10,18 @@ export interface Account {
   readonly user_id: string;
   readonly name: string;
   readonly email: string;
+  readonly account_timezone: string;
 }
 
 export type AccountState =
   | { readonly status: 'loading' }
   | { readonly status: 'ready'; readonly account: Account }
   | { readonly status: 'error'; readonly message: string };
+
+/** Sem sessao: vai para /entrar e volta ao caminho atual depois (TS-019). */
+export function loginPath(currentPath: string): string {
+  return `/entrar?proximo=${encodeURIComponent(currentPath)}`;
+}
 
 export function useAccount(currentPath: string): AccountState {
   const router = useRouter();
@@ -31,7 +37,7 @@ export function useAccount(currentPath: string): AccountState {
       .catch((error: unknown) => {
         if (!active) return;
         if (error instanceof ApiProblem && error.status === 401) {
-          router.replace(`/entrar?proximo=${encodeURIComponent(currentPath)}`);
+          router.replace(loginPath(currentPath));
           return;
         }
         setState({ status: 'error', message: messageFor(error) });

@@ -3,6 +3,7 @@
 // entra no PR das ocorrencias.
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { AppNav } from '@/components/app-nav';
 import { messageFor } from '@/lib/api-client';
 import { api } from '@/lib/browser-api';
 import { useAccount } from '@/lib/use-account';
@@ -35,6 +36,7 @@ export function TodayScreen() {
   }
   return (
     <>
+      <AppNav />
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Hoje</h1>
         <button
