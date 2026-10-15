@@ -536,3 +536,21 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **E2E:** o `global-setup` sobe também o worker, com os e-mails gravados num arquivo, para os testes lerem os links.
 - **Riscos:** os textos legais são placeholders, o que reforça que não pode haver uso com dados reais antes dos gates GX. A lista de fusos do navegador pode ter nomes que a API não aceita; nesse caso o erro aparece no campo.
 - **Aplica-se a:** `apps/web/src/app/cadastro`, `conta/*`, `termos`, `aviso-de-privacidade`, `components/fields.tsx`, `components/email-request-form.tsx`, `lib/forms.ts` e `tests/e2e`.
+
+## DC-054 — Planos (TL-003) e editor de plano (TL-004) na web (15/10/2026)
+
+- **Contexto:** a Especificação lista os estados das telas de planos (TL-003: carregando, lista vazia, lista, erro, sem permissão, conflito de versão) e do editor (TL-004: novo, editando, validação, confirmação de possível duplicidade, salvando, sucesso, conflito, timeout), mas não diz onde a lista mostra o conflito de versão, quanto tempo o cliente espera antes do estado de timeout, como a exclusão é confirmada nem os rótulos das formas e vias.
+- **Alternativas para o timeout:** (a) sem limite no cliente, só a falha de rede; (b) 30 s, o mesmo tempo limite padrão da RNF-007; (c) um tempo menor, como 10 s, com risco de abortar requisições lentas que dariam certo.
+- **Decisão:**
+  - **Tempo limite:** (b). O cliente da API aborta a requisição sem resposta em 30 s e lança `ApiTimeout`, que também é `ApiUnavailable`. Nada é repetido automaticamente (TS-010). No editor, o estado de timeout diz que não se sabe se o plano foi salvo e que repetir o envio não cria outro plano: o mesmo payload usa a mesma `Idempotency-Key`, e a API devolve o resultado original (CA-013).
+  - **Duplicidade (RN-016):** o 409 mostra os candidatos (nome e dose) e duas ações, "Criar mesmo assim", que reenvia com o `duplicate_confirmation_token` e uma nova chave (o corpo muda, então a chave muda), e "Revisar o plano", que volta ao formulário com os valores digitados.
+  - **Conflito de versão:** a lista só lê; quem grava é o editor, com `If-Match` do ETag lido. Por isso o estado de conflito de versão do TL-003 aparece no editor aberto a partir da lista, com a mensagem do ERR-005 e o botão "Recarregar plano", que traz a versão atual e descarta a edição local. A `Idempotency-Key` da edição considera o ETag, para que o envio depois de recarregar seja um pedido novo.
+  - **Sem permissão:** sem sessão, as telas levam a `/entrar?proximo=` (TS-019); plano inexistente, excluído ou de outro titular mostra o ERR-003, sem nenhum dado do plano (TS-008).
+  - **Exclusão:** botão no editor com confirmação na própria página (sem `window.confirm`), avisando que o histórico já registrado é mantido (TS-037).
+  - **Formulário:** a tela confere antes de enviar as regras do contrato `PlanWrite` e a regra de término igual ou posterior ao início (ERR-009); o CRM só tem o formato conferido (RN-001, TS-012). A data de início padrão é hoje no fuso da conta. Os horários são de 1 a 10, únicos, no fuso da conta, e saem ordenados.
+  - **Rótulos:** formas e vias em pt-BR, na ordem dos enums da OpenAPI. Na lista, "Comprimido, via oral"; a via `OTHER` aparece como "outra via".
+  - **Sucesso:** só com a resposta da API (RN-015). O editor volta à lista, que mostra "Plano criado.", "Plano salvo." ou "Plano excluído." uma vez.
+  - **Lista:** 20 planos por página, com "Carregar mais" pelo cursor (RNF-010).
+  - **Navegação:** a área logada ganha a navegação "Hoje" e "Planos".
+- **Riscos:** os rótulos de forma e via são escolha desta DC e podem mudar com o design system ou com revisão de conteúdo. Uma requisição abortada pelo tempo limite pode ter sido gravada; o aviso orienta repetir, e a idempotência evita o efeito em dobro.
+- **Aplica-se a:** `apps/web/src/app/planos`, `components/app-nav.tsx`, `components/fields.tsx`, `lib/api-client.ts`, `lib/plan-form.ts`, `lib/use-account.ts` e aos testes `tests/e2e/plans.spec.ts`, `tests/unit/web-plan-form.spec.ts` e `tests/unit/web-api-client.spec.ts`.

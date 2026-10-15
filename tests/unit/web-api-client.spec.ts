@@ -1,11 +1,13 @@
-// @trace RNF-016 TS-010 ERR-001 ERR-004 ERR-011 ERR-013 ERR-015 ERR-016 (ADR-001 v1.5 OA-008)
+// @trace RNF-007 RNF-016 RN-016 TS-010 TS-043 ERR-001 ERR-004 ERR-011 ERR-013 ERR-014 ERR-015 ERR-016 (ADR-001 v1.5 OA-008)
 // Cliente da API usado pela aplicacao web (DC-052): mutacoes levam o X-CSRF-Token lido do cookie
 // mr_csrf e a Idempotency-Key quando a operacao exige; Problem vira ApiProblem com codigo, campos
 // e Retry-After; falha de rede ou resposta que nao e da API vira ApiUnavailable, sem fila offline
-// (TS-010); as mensagens ao usuario sao as do catalogo de erros da Especificacao.
+// (TS-010); sem resposta em 30 s vira ApiTimeout (RNF-007, DC-054); o 409 de duplicidade expoe o
+// token e os candidatos (RN-016); as mensagens ao usuario sao as do catalogo de erros.
 import { describe, expect, it, vi } from 'vitest';
 import {
   ApiProblem,
+  ApiTimeout,
   ApiUnavailable,
   createApiClient,
   messageFor,
@@ -111,6 +113,91 @@ describe('cliente da API (web)', () => {
       .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ApiUnavailable);
     expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('409 DUPLICATE_CONFIRMATION_REQUIRED expoe o token e os candidatos (RN-016)', async () => {
+    const candidate = {
+      plan_id: '22222222-2222-4222-8222-222222222222',
+      medication_name: 'Losartana',
+      dose_text: '50 mg',
+    };
+    const fetchImpl = vi.fn<typeof fetch>(() =>
+      Promise.resolve(
+        problem(409, 'DUPLICATE_CONFIRMATION_REQUIRED', {
+          duplicate_confirmation: {
+            confirmation_token: 'token-de-confirmacao-0001',
+            candidates: [candidate],
+          },
+        }),
+      ),
+    );
+    const error = await client(fetchImpl)
+      .request({ method: 'POST', path: '/plans', body: {}, idempotencyKey: 'k' })
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiProblem);
+    expect((error as ApiProblem).duplicateConfirmation).toEqual({
+      confirmationToken: 'token-de-confirmacao-0001',
+      candidates: [{ planId: candidate.plan_id, medicationName: 'Losartana', doseText: '50 mg' }],
+    });
+  });
+
+  it('Problem comum nao tem confirmacao de duplicidade', async () => {
+    const fetchImpl = vi.fn<typeof fetch>(() => Promise.resolve(problem(409, 'VERSION_CONFLICT')));
+    const error = await client(fetchImpl)
+      .request({ method: 'PUT', path: '/plans/x', body: {}, idempotencyKey: 'k' })
+      .catch((e: unknown) => e);
+    expect((error as ApiProblem).duplicateConfirmation).toBeUndefined();
+  });
+
+  it('sem resposta no tempo limite: ApiTimeout (tambem ApiUnavailable), sem nova tentativa', async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchImpl = vi.fn<typeof fetch>(
+        (_url, init) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener('abort', () => {
+              reject(new DOMException('aborted', 'AbortError'));
+            });
+          }),
+      );
+      const pending = createApiClient({
+        fetch: fetchImpl,
+        readCookies: () => '',
+        timeoutMs: 30_000,
+      })
+        .request({ method: 'POST', path: '/plans', body: {}, idempotencyKey: 'k' })
+        .catch((e: unknown) => e);
+      await vi.advanceTimersByTimeAsync(29_999);
+      expect(fetchImpl.mock.calls[0]?.[1]?.signal?.aborted).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      const error = await pending;
+      expect(error).toBeInstanceOf(ApiTimeout);
+      expect(error).toBeInstanceOf(ApiUnavailable);
+      expect(fetchImpl).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('tempo limite padrao de 30 s (RNF-007)', async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchImpl = vi.fn<typeof fetch>(
+        (_url, init) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener('abort', () => {
+              reject(new DOMException('aborted', 'AbortError'));
+            });
+          }),
+      );
+      const pending = client(fetchImpl)
+        .request({ method: 'GET', path: '/plans' })
+        .catch((e: unknown) => e);
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(await pending).toBeInstanceOf(ApiTimeout);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('mutacao sem cookie mr_csrf segue sem o cabecalho (a API responde 401 ou 403)', async () => {

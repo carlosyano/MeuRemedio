@@ -10,11 +10,12 @@ const describedBy = (...ids: (string | false | undefined)[]): string | undefined
 export function TextField(props: {
   readonly id: string;
   readonly label: string;
-  readonly type?: 'text' | 'email' | 'password';
+  readonly type?: 'text' | 'email' | 'password' | 'date';
   readonly autoComplete?: string;
   readonly description?: string;
   readonly error?: string | undefined;
   readonly maxLength?: number;
+  readonly defaultValue?: string;
 }) {
   const descriptionId = props.description === undefined ? undefined : `${props.id}-descricao`;
   const errorId = props.error === undefined ? undefined : `${props.id}-erro`;
@@ -34,10 +35,87 @@ export function TextField(props: {
         type={props.type ?? 'text'}
         autoComplete={props.autoComplete}
         maxLength={props.maxLength}
+        defaultValue={props.defaultValue}
         aria-invalid={props.error === undefined ? undefined : true}
         aria-describedby={describedBy(descriptionId, errorId)}
         className="w-full rounded border border-line p-2 aria-invalid:border-danger"
       />
+      {props.error !== undefined && (
+        <p id={errorId} className="mt-1 text-sm font-medium text-danger">
+          {props.error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function TextAreaField(props: {
+  readonly id: string;
+  readonly label: string;
+  readonly description?: string;
+  readonly error?: string | undefined;
+  readonly maxLength?: number;
+  readonly defaultValue?: string;
+}) {
+  const descriptionId = props.description === undefined ? undefined : `${props.id}-descricao`;
+  const errorId = props.error === undefined ? undefined : `${props.id}-erro`;
+  return (
+    <div className="mb-4">
+      <label htmlFor={props.id} className="mb-1 block font-medium">
+        {props.label}
+      </label>
+      {props.description !== undefined && (
+        <p id={descriptionId} className="mb-1 text-sm text-muted">
+          {props.description}
+        </p>
+      )}
+      <textarea
+        id={props.id}
+        name={props.id}
+        rows={3}
+        maxLength={props.maxLength}
+        defaultValue={props.defaultValue}
+        aria-invalid={props.error === undefined ? undefined : true}
+        aria-describedby={describedBy(descriptionId, errorId)}
+        className="w-full rounded border border-line p-2 aria-invalid:border-danger"
+      />
+      {props.error !== undefined && (
+        <p id={errorId} className="mt-1 text-sm font-medium text-danger">
+          {props.error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function SelectField(props: {
+  readonly id: string;
+  readonly label: string;
+  readonly options: readonly (readonly [value: string, label: string])[];
+  readonly error?: string | undefined;
+  readonly defaultValue?: string;
+}) {
+  const errorId = props.error === undefined ? undefined : `${props.id}-erro`;
+  return (
+    <div className="mb-4">
+      <label htmlFor={props.id} className="mb-1 block font-medium">
+        {props.label}
+      </label>
+      <select
+        id={props.id}
+        name={props.id}
+        defaultValue={props.defaultValue ?? ''}
+        aria-invalid={props.error === undefined ? undefined : true}
+        aria-describedby={errorId}
+        className="w-full rounded border border-line bg-surface p-2 aria-invalid:border-danger"
+      >
+        <option value="">Escolha</option>
+        {props.options.map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
       {props.error !== undefined && (
         <p id={errorId} className="mt-1 text-sm font-medium text-danger">
           {props.error}
