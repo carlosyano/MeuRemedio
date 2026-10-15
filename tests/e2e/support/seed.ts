@@ -56,6 +56,12 @@ export async function planWithOccurrences(
   slots: readonly {
     readonly minutesAgo: number;
     readonly status?: 'PROGRAMMED' | 'NO_RESPONSE' | 'CANCELED';
+    /** Resposta ja registrada: a ocorrencia fica TAKEN ou NOT_TAKEN. */
+    readonly response?: {
+      readonly type: 'TAKEN' | 'NOT_TAKEN';
+      readonly reason?: string;
+      readonly late?: boolean;
+    };
   }[],
 ): Promise<SeededOccurrence[]> {
   const client = await db().connect();
@@ -75,7 +81,7 @@ export async function planWithOccurrences(
     if (planId === undefined) throw new Error('INSERT em medication_plans nao retornou id');
     const seeded: SeededOccurrence[] = [];
     for (const slot of slots) {
-      const status = slot.status ?? 'PROGRAMMED';
+      const status = slot.response?.type ?? slot.status ?? 'PROGRAMMED';
       const row = (
         await client.query<{ id: string; local_time: string }>(
           `WITH slot AS (
@@ -98,6 +104,19 @@ export async function planWithOccurrences(
         )
       ).rows[0];
       if (row === undefined) throw new Error('INSERT em occurrences nao retornou id');
+      if (slot.response !== undefined) {
+        await client.query(
+          `INSERT INTO responses (occurrence_id, user_id, type, reason, captured_at, is_late)
+           VALUES ($1, $2, $3::text::response_type, $4::text::not_taken_reason, now(), $5)`,
+          [
+            row.id,
+            userId,
+            slot.response.type,
+            slot.response.reason ?? null,
+            slot.response.late ?? false,
+          ],
+        );
+      }
       seeded.push({ id: row.id, localTime: row.local_time });
     }
     await client.query('COMMIT');
@@ -108,4 +127,13 @@ export async function planWithOccurrences(
   } finally {
     client.release();
   }
+}
+
+/** Exclusao logica do plano da ocorrencia, como o deletePlan faz com o plano (TS-037). */
+export async function deletePlanOf(occurrenceId: string): Promise<void> {
+  await db().query(
+    `UPDATE medication_plans SET status = 'DELETED', deleted_at = now(), row_version = row_version + 1
+      WHERE id = (SELECT plan_id FROM occurrences WHERE id = $1)`,
+    [occurrenceId],
+  );
 }

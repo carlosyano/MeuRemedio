@@ -569,3 +569,17 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Motivos:** Esqueci; Não tinha o medicamento; Preocupação com efeito colateral; Decidi não tomar; Outro motivo.
 - **Riscos:** os rótulos dos motivos podem mudar com revisão de conteúdo. Um titular com mais de 100 ocorrências sem resposta só vê as 100 mais recentes na tela Hoje.
 - **Aplica-se a:** `apps/web/src/app/hoje/today-screen.tsx`, `lib/occurrences.ts` e aos testes `tests/e2e/occurrences.spec.ts`, `tests/e2e/support/seed.ts` e `tests/unit/web-occurrences.spec.ts`.
+
+## DC-056 — Histórico (TL-006) na web (15/10/2026)
+
+- **Contexto:** o TL-006 exige os estados filtros, carregando, vazio, resultados, período inválido e erro. A DC-041 já fixou o recorte, o limite de 12 meses e os erros de `getHistory`. Não estavam definidos o período inicial da tela nem como cada ocorrência é descrita.
+- **Alternativas para o período inicial:** (a) nenhum, com a consulta só depois de escolher as datas; (b) os últimos 30 dias, consultados ao abrir; (c) os últimos 12 meses.
+- **Decisão:**
+  - **Período inicial:** (b), de hoje menos 29 dias até hoje, no fuso da conta. A consulta roda ao abrir a tela.
+  - **Período inválido:** antes de consultar, a tela confere a mesma regra da API: datas obrigatórias, término igual ou posterior ao início e no máximo 12 meses inclusivos, com o 29/02 indo ao último dia do mês. As mensagens são as da API (DC-041). Um 400 da API com `field_errors` em `start` ou `end` aparece no campo.
+  - **Situação de cada ocorrência:** "Tomei" ou "Não tomei", com o motivo quando houver e "registrado com atraso" quando a resposta é tardia. Sem resposta, aparece "Aguardando resposta" (PROGRAMMED ainda no prazo) ou "Sem resposta" (NO_RESPONSE). As ocorrências de plano excluído continuam (TS-037).
+  - **Paginação:** 20 por página, com "Carregar mais" pelo cursor.
+  - **Erro:** a mensagem do catálogo com "Tentar de novo", sem mostrar resultado anterior como se fosse atual (TS-010).
+  - **Navegação:** "Histórico" entra na navegação da área logada.
+- **Riscos:** a regra de período fica duplicada na web (`lib/history.ts`) e no domínio (`historyWindow`). Os testes unitários dos dois lados cobrem os mesmos limites, e a API continua sendo a referência.
+- **Aplica-se a:** `apps/web/src/app/historico`, `lib/history.ts`, `components/app-nav.tsx` e aos testes `tests/e2e/history.spec.ts`, `tests/e2e/support/seed.ts` e `tests/unit/web-history.spec.ts`.
