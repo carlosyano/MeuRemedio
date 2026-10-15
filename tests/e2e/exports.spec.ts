@@ -24,7 +24,7 @@ async function signedIn(page: Page, next = '/exportacao'): Promise<string> {
   await page.getByLabel('E-mail').fill(email);
   await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Entrar' }).click();
-  await expect(page).toHaveURL(/\/exportacao/);
+  await expect(page).toHaveURL((url) => url.pathname === next);
   return userId;
 }
 

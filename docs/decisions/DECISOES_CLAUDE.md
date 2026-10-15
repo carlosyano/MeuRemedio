@@ -583,3 +583,17 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Navegação:** "Histórico" entra na navegação da área logada.
 - **Riscos:** a regra de período fica duplicada na web (`lib/history.ts`) e no domínio (`historyWindow`). Os testes unitários dos dois lados cobrem os mesmos limites, e a API continua sendo a referência.
 - **Aplica-se a:** `apps/web/src/app/historico`, `lib/history.ts`, `components/app-nav.tsx` e aos testes `tests/e2e/history.spec.ts`, `tests/e2e/support/seed.ts` e `tests/unit/web-history.spec.ts`.
+
+## DC-057 — Exportação (TL-007) na web (15/10/2026)
+
+- **Contexto:** o TL-007 exige os estados solicitando, processando, concluída, falha, expirada e sem permissão. O contrato tem `createExport`, `getExport`, `cancelExport` e `downloadExport`, mas não tem uma operação para listar as exportações do titular. Sem ela, a tela só conhece o pedido que acabou de criar.
+- **Alternativas para guardar o pedido:** (a) só na memória da página, e o pedido se perde ao recarregar; (b) no armazenamento do navegador; (c) no endereço da página (`/exportacao?pedido=<id>`), que sobrevive ao recarregamento e não guarda nada no navegador. O `getExport` continua exigindo a sessão e a titularidade.
+- **Decisão:**
+  - **Pedido no endereço:** (c). Depois do 202, a tela vai para `/exportacao?pedido=<id>`. Uma lista de exportações exigiria uma nova operação no contrato e fica como lacuna, sem urgência: o PDF expira em 24 h (RN-011).
+  - **Solicitar:** o período segue a regra do histórico (DC-041) e começa nos últimos 30 dias. A `Idempotency-Key` é estável para o mesmo período. O 422 da API em `end_date` aparece no campo da data final.
+  - **Processando:** REQUESTED e PROCESSING mostram "Gerando o PDF…", com consulta a cada 2 s e o botão "Cancelar exportação" (CA-016). Se o pedido terminou antes do cancelamento (409 `STATE_CONFLICT`), a tela avisa "Esta exportação já terminou e não pode mais ser cancelada." e mostra o estado atual. A mensagem do catálogo para o `STATE_CONFLICT` fala de ocorrência e não serve aqui (DC-037).
+  - **Concluída:** "PDF pronto." com o instante de expiração no fuso da conta e o link "Baixar PDF", que aponta para `downloadExport` na própria origem.
+  - **Falha:** a falha técnica orienta a pedir nova exportação, e a conta fora de ACTIVE tem mensagem própria. **Expirada:** ERR-012 (CA-011), sem link de download. **Sem permissão:** pedido inexistente ou de outro titular mostra o ERR-003, sem nenhum dado do pedido (TS-008).
+  - **Navegação:** "Exportar" entra na navegação da área logada.
+- **Riscos:** quem sair da página sem guardar o endereço perde o acompanhamento daquele pedido e precisa solicitar outro. O identificador do pedido fica no histórico do navegador, mas sozinho não dá acesso ao arquivo.
+- **Aplica-se a:** `apps/web/src/app/exportacao`, `lib/exports.ts`, `components/app-nav.tsx` e aos testes `tests/e2e/exports.spec.ts`, `tests/e2e/support/seed.ts` e `tests/unit/web-exports.spec.ts`.
