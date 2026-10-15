@@ -7,6 +7,7 @@ const LINKS = [
   ['/hoje', 'Hoje'],
   ['/planos', 'Planos'],
   ['/historico', 'Histórico'],
+  ['/exportacao', 'Exportar'],
 ] as const;
 
 export function AppNav() {
