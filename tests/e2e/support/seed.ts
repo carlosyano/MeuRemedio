@@ -137,3 +137,28 @@ export async function deletePlanOf(occurrenceId: string): Promise<void> {
     [occurrenceId],
   );
 }
+
+/**
+ * Pedido de exportacao gravado direto no banco, sem evento no Outbox (o worker nao o processa):
+ * REQUESTED parado, FAILED por falha tecnica ou COMPLETED ja vencido (lido como EXPIRED).
+ */
+export async function seedExport(
+  userId: string,
+  state: 'REQUESTED' | 'FAILED' | 'EXPIRED',
+): Promise<string> {
+  const result = await db().query<{ id: string }>(
+    `INSERT INTO export_requests (user_id, status, start_date, end_date, failure_reason,
+       file_sha256, completed_at, expires_at)
+     SELECT $1, s.status::export_status, current_date - 29, current_date,
+       CASE WHEN $2::text = 'FAILED' THEN 'TECHNICAL_FAILURE'::export_failure_reason END,
+       CASE WHEN $2::text = 'EXPIRED' THEN decode(repeat('ab', 32), 'hex') END,
+       CASE WHEN $2::text = 'EXPIRED' THEN now() - interval '25 hours' END,
+       CASE WHEN $2::text = 'EXPIRED' THEN now() - interval '1 hour' END
+       FROM (SELECT CASE WHEN $2::text = 'EXPIRED' THEN 'COMPLETED' ELSE $2::text END AS status) s
+     RETURNING id`,
+    [userId, state],
+  );
+  const id = result.rows[0]?.id;
+  if (id === undefined) throw new Error('INSERT em export_requests nao retornou id');
+  return id;
+}
