@@ -8,12 +8,16 @@ const LINKS = [
   ['/planos', 'Planos'],
   ['/historico', 'Histórico'],
   ['/exportacao', 'Exportar'],
+  ['/privacidade', 'Privacidade'],
 ] as const;
 
 export function AppNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Principal" className="mb-6 flex gap-4 border-b border-line pb-2">
+    <nav
+      aria-label="Principal"
+      className="mb-6 flex flex-wrap gap-x-4 gap-y-1 border-b border-line pb-2"
+    >
       {LINKS.map(([href, label]) => (
         <Link
           key={href}
