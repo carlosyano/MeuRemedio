@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 const LINKS = [
   ['/hoje', 'Hoje'],
   ['/planos', 'Planos'],
+  ['/historico', 'Histórico'],
 ] as const;
 
 export function AppNav() {
