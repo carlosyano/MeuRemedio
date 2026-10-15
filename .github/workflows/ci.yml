@@ -206,3 +206,25 @@ jobs:
           name: playwright-traces
           path: test-results/
           if-no-files-found: ignore
+
+  traceability:
+    name: QG-011 Traceability (matriz, testes e contrato)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements-validation.txt
+      - run: python -m pip install -r requirements-validation.txt
+      - run: npm ci
+      # Matriz: schema, integridade das fontes e catalogos (validate_all.py).
+      - run: npm run traceability:check
+      # Testes: @trace com IDs validos, toda operacao com teste, RF e TS sem teste so se planejados.
+      - run: npm run trace:check

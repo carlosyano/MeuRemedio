@@ -22,6 +22,7 @@ npm run test:e2e            # Playwright + axe contra PostgreSQL, API e web reai
 npm run openapi:lint        # Spectral na OpenAPI normativa
 npm run openapi:diff        # oasdiff contra o merge-base com origin/main (ou OPENAPI_DIFF_BASE)
 python validate_all.py      # matriz de rastreabilidade (= npm run traceability:check); relatórios em validation-report/
+npm run trace:check         # QG-011: @trace dos testes contra a matriz e o contrato (tools/scripts/trace-check.mjs)
 ```
 
 Um único arquivo ou teste:
@@ -61,7 +62,7 @@ Monorepo npm workspaces (`apps/*`, `packages/*`), TypeScript strict (`tsconfig.b
 ## Convenções do repositório
 
 - Test-First em commits separados: `test: ... (etapa vermelha)` seguido de `feat: ... (etapa verde)`. Mensagens em português, sem acentos.
-- Todo arquivo de teste começa com `// @trace TS-xxx RN-xxx RF-xxx ...` (IDs que existem na matriz). Pendências conhecidas ficam como `it.todo(...)` com a razão.
+- Todo arquivo de teste começa com `// @trace TS-xxx RN-xxx RF-xxx ...` (IDs que existem na matriz ou operationIds; o que vem depois do primeiro `(` é comentário livre). Teste de infraestrutura sem ID normativo usa `// @trace-exempt <motivo>`. O `npm run trace:check` (QG-011) confere isso, exige teste para toda operação e só aceita RF ou TS sem teste quando a matriz os marca como `planned`. Pendências conhecidas ficam como `it.todo(...)` com a razão.
 - Identificadores e código em inglês; comentários de código em português sem acentos; documentação e textos de interface em pt-BR.
 - Fixtures só com dados sintéticos (`ana.silva@example.com`, `bruno.costa@example.com`).
 - Comportamento não definido na Especificação não é suprido por suposição: registre a lacuna e peça a decisão (AGENTS.md §18).
