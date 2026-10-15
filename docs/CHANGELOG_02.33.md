@@ -149,3 +149,17 @@ Lacuna encontrada ao implementar o TS-028 (PR #53, DC-051): o teste pede que a c
 Efeitos: Especificação (DEC-033 na tabela de decisões e nota no Anexo C), matriz `2.1.9` (hash da Especificação, DEC-033, catálogo de decisões e `test_artifacts`) e `maxProperties` de `decisions` no schema (32 → 33).
 
 **Aprovação:** proposta em 14/10/2026; aprovação formal no pull request desta revisão.
+
+## Matriz 2.1.10: artefatos de TS-010, TS-019 e TS-026 (15/10/2026)
+
+As telas da aplicação web (PRs #55 a #61) passaram a cobrir três testes sentinela que a matriz 2.1.9 ainda listava como `planned`, em caminhos que não existem:
+
+1. **TS-010 (servidor indisponível):** `tests/unit/web-api-client.spec.ts` e os E2E de entrada, cadastro, planos, ocorrências, histórico, exportação e privacidade, que provam que nenhuma tela declara sucesso nem enfileira quando a API não responde.
+2. **TS-019 (link de área logada sem sessão):** os E2E de entrada e de planos.
+3. **TS-026 (exclusão de conta):** o E2E de privacidade, com a exclusão agendada e o acesso encerrado na hora.
+
+Os artefatos passam a `implemented`, com os caminhos reais. Seguem `planned` o TS-030, o TS-031, o TS-032 e o TS-039. O `tests/contract/test-artifacts.spec.ts` confere que cada novo artefato existe e rastreia o seu TS, e o gate QG-011 (DC-060) lista os planejados como pendência.
+
+Efeitos: matriz `2.1.10` (`matrix_version` e `test_artifacts` de TS-010, TS-019 e TS-026). Especificação, OpenAPI, ADR, AGENTS.md e schema não mudam.
+
+**Aprovação:** proposta em 15/10/2026; aprovação formal no pull request desta revisão.

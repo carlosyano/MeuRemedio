@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-matrix_version: 2.1.9
+matrix_version: 2.1.10
 status: baseline-development-and-testing
 generated_from:
   functional_specification: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -1144,11 +1144,60 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-010-PRIMARY
-      path: tests/e2e/ts-010.spec.ts
+    - id: TS-010-01
+      path: tests/unit/web-api-client.spec.ts
+      level: unit
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-010-02
+      path: tests/e2e/login.spec.ts
       level: e2e
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-010-03
+      path: tests/e2e/signup.spec.ts
+      level: e2e
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-010-04
+      path: tests/e2e/plans.spec.ts
+      level: e2e
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-010-05
+      path: tests/e2e/occurrences.spec.ts
+      level: e2e
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-010-06
+      path: tests/e2e/history.spec.ts
+      level: e2e
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-010-07
+      path: tests/e2e/exports.spec.ts
+      level: e2e
+      owner: '@carlosyano'
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-010-08
+      path: tests/e2e/privacy.spec.ts
+      level: e2e
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1381,11 +1430,18 @@ sentinel_tests:
     operationIds: []
     priority: scope
     test_artifacts:
-    - id: TS-019-PRIMARY
-      path: tests/e2e/ts-019.spec.ts
+    - id: TS-019-01
+      path: tests/e2e/login.spec.ts
       level: e2e
       owner: '@carlosyano'
-      status: planned
+      status: implemented
+      evidence: null
+      last_execution: null
+    - id: TS-019-02
+      path: tests/e2e/plans.spec.ts
+      level: e2e
+      owner: '@carlosyano'
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1564,11 +1620,11 @@ sentinel_tests:
     - requestAccountDeletion
     priority: scope
     test_artifacts:
-    - id: TS-026-PRIMARY
-      path: tests/e2e/ts-026.spec.ts
+    - id: TS-026-01
+      path: tests/e2e/privacy.spec.ts
       level: e2e
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
