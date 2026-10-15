@@ -26,3 +26,16 @@ html {
     transition: none !important;
   }
 }
+
+/* Alto contraste (RF-009, DC-061): preto sobre branco, contornos e links reforcados. */
+html[data-contrast='alto'] {
+  --color-ink: #000000;
+  --color-muted: #000000;
+  --color-line: #000000;
+  --color-accent: #0033a0;
+  --color-danger: #8b0000;
+}
+
+html[data-contrast='alto'] a {
+  text-decoration: underline;
+}
