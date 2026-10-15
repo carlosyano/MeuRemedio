@@ -1,4 +1,4 @@
-// Runner de migracoes (infraestrutura de banco; ADR-001 v1.5 OA-001). Sem ID normativo proprio.
+// @trace-exempt runner de migracoes (infraestrutura de banco; ADR-001 v1.5 OA-001), sem ID normativo proprio
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';

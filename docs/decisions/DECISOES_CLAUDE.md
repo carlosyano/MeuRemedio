@@ -623,3 +623,16 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Prova:** um E2E confere o cabeçalho, o nonce novo a cada requisição, o nonce em todos os scripts e a ausência de violação de CSP numa jornada autenticada por todas as telas. Um teste unitário fixa a política.
 - **Riscos:** a renderização por requisição aumenta o custo de servidor por página. Uma biblioteca futura que injete estilo ou script inline vai ser bloqueada, e o E2E de CSP acusa isso.
 - **Aplica-se a:** `apps/web/src/proxy.ts`, `lib/csp.ts`, `app/layout.tsx` e aos testes `tests/e2e/csp.spec.ts` e `tests/unit/web-csp.spec.ts`.
+
+## DC-060 — QG-011: rastreabilidade dos testes na CI (15/10/2026)
+
+- **Contexto:** o QG-011 (AGENTS.md) reprova requisito sem teste, teste sem requisito, endpoint sem rastreabilidade e identificador inexistente, e exige verificação automática na pipeline. O `validate_all.py` confere a matriz e as fontes, mas não lê os testes, e roda só quando um documento normativo muda. A convenção `// @trace` na primeira linha de cada teste já existia sem verificação: dois testes de infraestrutura não a seguiam, e o `getHealth` aparecia só num comentário.
+- **Alternativas:** (a) estender o `validate_all.py`, que é ferramenta da baseline documental e normativa; (b) um script Node próprio (`tools/scripts/trace-check.mjs`), testado como os outros gates, e um job `QG-011 Traceability` na CI que roda os dois.
+- **Decisão:**
+  - **Ferramenta:** (b). Todo `*.spec.ts` em `tests/` começa com `// @trace <IDs>`, com IDs dos catálogos da matriz (RF, RNF, CA, TS, ERR, RN, ENT, FL, TL, US, DEC e os QG) ou operationIds. O texto depois do primeiro `(` é comentário livre.
+  - **Isenção:** teste de infraestrutura sem ID normativo começa com `// @trace-exempt <motivo>`. O motivo é obrigatório e fica visível na revisão. Hoje são dois: o runner de migrações e as premissas da toolchain.
+  - **Reprova:** arquivo sem cabeçalho, identificador inexistente, `@trace` vazio, operação do contrato sem nenhum teste, e RF ou TS sem teste quando a matriz não os marca como `planned`.
+  - **Pendência sem reprovar:** RF ou TS sem teste cujos artefatos na matriz estão `planned`. Hoje são RF-012 e TS-030 (incidente, procedimento operacional, GAP-004), TS-031 (rotação de chave), TS-032 (direito externo) e TS-039 (desempenho). O job lista esses itens a cada execução.
+  - **CI:** o job `QG-011 Traceability (matriz, testes e contrato)` roda o `validate_all.py` e o `trace:check` em todo PR e na `main`. Ele ainda não é check obrigatório no ruleset: incluí-lo é decisão do mantenedor.
+- **Riscos:** o gate confere a presença e a validade dos IDs, não se o teste de fato prova o requisito. Isso continua na revisão e nos testes sentinela.
+- **Aplica-se a:** `tools/scripts/trace-check.mjs`, `package.json`, `.github/workflows/ci.yml`, `CLAUDE.md` e aos cabeçalhos de `tests/integration/migrate.spec.ts`, `tests/unit/toolchain.spec.ts` e `tests/integration/api-health.spec.ts`.

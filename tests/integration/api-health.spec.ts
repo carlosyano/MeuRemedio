@@ -1,4 +1,4 @@
-// @trace TS-040 RNF-015 DEC-028 ERR-003 ERR-016 (ADR-001 v1.5 secao 12, spike S1; OpenAPI getHealth)
+// @trace TS-040 RNF-015 DEC-028 ERR-003 ERR-016 getHealth (ADR-001 v1.5 secao 12, spike S1)
 // Esqueleto HTTP (NestJS + Fastify) exercitado por HTTP real (inject do Fastify) contra PostgreSQL 17
 // real: getHealth (DEC-028: desvio do Clock contra o now() do banco, DEGRADED e DOWN com 503),
 // X-Correlation-ID em toda resposta, problem+json para rota fora do contrato e falha inesperada

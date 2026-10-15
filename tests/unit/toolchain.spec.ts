@@ -1,4 +1,4 @@
-// Teste de infraestrutura (sem ID normativo): protege premissas da fundacao tecnica.
+// @trace-exempt teste de infraestrutura, sem ID normativo: protege premissas da fundacao tecnica
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
