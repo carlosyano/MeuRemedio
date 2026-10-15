@@ -610,3 +610,16 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Navegação:** "Privacidade" entra na navegação, que passa a quebrar linha em telas estreitas.
 - **Riscos:** o aviso das 5 tentativas não distingue a senha errada do bloqueio já ativo, porque a API responde 401 nos dois casos.
 - **Aplica-se a:** `apps/web/src/app/privacidade`, `lib/privacy.ts`, `components/app-nav.tsx` e aos testes `tests/e2e/privacy.spec.ts` e `tests/unit/web-privacy.spec.ts`.
+
+## DC-059 — Content-Security-Policy com nonce na web (spike S6) (15/10/2026)
+
+- **Contexto:** a ADR-001 prevê o spike S6 ("Next.js seguro") e a DC-052 deixou a CSP para um PR próprio. Com nonce, o Next exige que todas as páginas sejam renderizadas por requisição, porque o nonce precisa ser novo em cada resposta. As páginas da aplicação eram geradas no build.
+- **Alternativas:** (a) CSP sem nonce, com `'unsafe-inline'` nos scripts, o que deixa a CSP sem efeito contra injeção de script; (b) CSP com hashes (SRI) e páginas estáticas, que ainda é experimental no Next e não cobre os scripts inline de cada renderização; (c) nonce por requisição gerado no `proxy.ts`, com todas as páginas dinâmicas.
+- **Decisão:**
+  - **CSP:** (c). O `proxy.ts` gera 128 bits aleatórios em base64 e envia a política na requisição, de onde o Next lê o nonce e o aplica aos próprios scripts, e na resposta. A política é `default-src 'self'`; `script-src 'self' 'nonce-…' 'strict-dynamic'`; `style-src 'self' 'nonce-…'`; `img-src 'self' blob: data:`; `font-src 'self'`; `connect-src 'self'`; `object-src 'none'`; `base-uri 'none'`; `form-action 'self'`; `frame-ancestors 'none'`. Em produção não há `'unsafe-inline'` nem `'unsafe-eval'`. No desenvolvimento entra `'unsafe-eval'`, que o React exige para as pilhas de erro.
+  - **Fora do proxy:** `/api` (respostas JSON e PDF da API), `/_next/static`, `/_next/image` e os prefetches de navegação, que não são documentos HTML.
+  - **Renderização:** o layout raiz chama `connection()`, e todas as páginas passam a ser renderizadas por requisição. As páginas já eram leves e sem cache (`Cache-Control: no-store`, DC-052).
+  - **HTTPS:** a política não usa `upgrade-insecure-requests`, que quebraria o E2E em `http://localhost`. O TLS 1.3 e o HSTS ficam na borda da infraestrutura.
+  - **Prova:** um E2E confere o cabeçalho, o nonce novo a cada requisição, o nonce em todos os scripts e a ausência de violação de CSP numa jornada autenticada por todas as telas. Um teste unitário fixa a política.
+- **Riscos:** a renderização por requisição aumenta o custo de servidor por página. Uma biblioteca futura que injete estilo ou script inline vai ser bloqueada, e o E2E de CSP acusa isso.
+- **Aplica-se a:** `apps/web/src/proxy.ts`, `lib/csp.ts`, `app/layout.tsx` e aos testes `tests/e2e/csp.spec.ts` e `tests/unit/web-csp.spec.ts`.

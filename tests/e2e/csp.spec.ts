@@ -18,7 +18,7 @@ test.describe('CSP com nonce', () => {
 
     const scripts = await page
       .locator('script')
-      .evaluateAll((elements) => elements.map((element) => (element as HTMLScriptElement).nonce));
+      .evaluateAll((elements) => elements.map((element) => (element as { nonce?: string }).nonce));
     expect(scripts.length).toBeGreaterThan(0);
     expect(scripts.every((value) => value === nonce)).toBe(true);
 
@@ -33,10 +33,11 @@ test.describe('CSP com nonce', () => {
     page.on('console', (message) => {
       if (/Content Security Policy/i.test(message.text())) violations.push(message.text());
     });
-    await page.addInitScript(() => {
-      document.addEventListener('securitypolicyviolation', (event) => {
-        console.error(`Content Security Policy: ${event.violatedDirective} ${event.blockedURI}`);
-      });
+    // Script como texto: os testes nao carregam os tipos do DOM.
+    await page.addInitScript({
+      content: `document.addEventListener('securitypolicyviolation', (event) => {
+        console.error('Content Security Policy: ' + event.violatedDirective + ' ' + event.blockedURI);
+      });`,
     });
 
     const email = uniqueEmail();
