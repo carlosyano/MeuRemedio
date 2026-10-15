@@ -597,3 +597,16 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Navegação:** "Exportar" entra na navegação da área logada.
 - **Riscos:** quem sair da página sem guardar o endereço perde o acompanhamento daquele pedido e precisa solicitar outro. O identificador do pedido fica no histórico do navegador, mas sozinho não dá acesso ao arquivo.
 - **Aplica-se a:** `apps/web/src/app/exportacao`, `lib/exports.ts`, `components/app-nav.tsx` e aos testes `tests/e2e/exports.spec.ts`, `tests/e2e/support/seed.ts` e `tests/unit/web-exports.spec.ts`.
+
+## DC-058 — Privacidade (TL-008) na web (15/10/2026)
+
+- **Contexto:** o TL-008 exige os estados carregando, dados, confirmação destrutiva, reautenticação, exclusão agendada e erro. `requestAccountDeletion` exige senha e a confirmação textual `EXCLUIR MINHA CONTA`. A senha errada retorna 401 sem excluir (DC-043, DC-045), o mesmo status da sessão encerrada.
+- **Alternativas para o 401 da reautenticação:** (a) tratar todo 401 como sessão encerrada e levar à entrada; (b) consultar `getCurrentAccount` depois do 401: se a sessão continua válida, o problema é a senha.
+- **Decisão:**
+  - **Dados:** os direitos automatizados viram links para as telas (histórico e exportação). O canal externo de direitos (RF-011) aparece como link, e os prazos de retenção do contrato aparecem em pt-BR.
+  - **Confirmação destrutiva:** o botão "Excluir minha conta" abre, na própria página, os avisos (acesso encerrado na hora, remoção em até 30 dias, sem como desfazer), o campo da confirmação textual e o da senha atual. A tela confere os dois antes de enviar.
+  - **Reautenticação:** (b). Senha errada mostra "Senha incorreta." no campo e um aviso de que, depois de 5 tentativas erradas, é preciso aguardar 15 minutos, porque o bloqueio do login também vale aqui. Sessão encerrada leva à entrada. O 409 `STATE_CONFLICT` mostra "A exclusão desta conta já foi solicitada."
+  - **Exclusão agendada:** o 202 mostra que o acesso foi encerrado em todos os dispositivos e até quando os dados serão removidos (`purge_due_at`, no fuso da conta), sem a navegação da área logada.
+  - **Navegação:** "Privacidade" entra na navegação, que passa a quebrar linha em telas estreitas.
+- **Riscos:** o aviso das 5 tentativas não distingue a senha errada do bloqueio já ativo, porque a API responde 401 nos dois casos.
+- **Aplica-se a:** `apps/web/src/app/privacidade`, `lib/privacy.ts`, `components/app-nav.tsx` e aos testes `tests/e2e/privacy.spec.ts` e `tests/unit/web-privacy.spec.ts`.
