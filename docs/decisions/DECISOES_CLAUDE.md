@@ -636,3 +636,15 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **CI:** o job `QG-011 Traceability (matriz, testes e contrato)` roda o `validate_all.py` e o `trace:check` em todo PR e na `main`. Ele ainda não é check obrigatório no ruleset: incluí-lo é decisão do mantenedor.
 - **Riscos:** o gate confere a presença e a validade dos IDs, não se o teste de fato prova o requisito. Isso continua na revisão e nos testes sentinela.
 - **Aplica-se a:** `tools/scripts/trace-check.mjs`, `package.json`, `.github/workflows/ci.yml`, `CLAUDE.md` e aos cabeçalhos de `tests/integration/migrate.spec.ts`, `tests/unit/toolchain.spec.ts` e `tests/integration/api-health.spec.ts`.
+
+## DC-061 — Conta na web: nome, acessibilidade e sessões (15/10/2026)
+
+- **Contexto:** a API já tem `updateCurrentAccount` (só o nome, CA-015), as preferências de acessibilidade (RF-009) e `revokeAllSessions` (TS-044), mas a lista de telas da Especificação (TL-001 a TL-008) não inclui uma tela de conta. A RF-009 pede persistir as preferências, sem dizer como a interface as aplica.
+- **Alternativas para aplicar as preferências:** (a) só guardar, sem efeito na interface; (b) aplicar no elemento raiz em toda tela da área logada: escala pelo `font-size` da raiz, que o Tailwind acompanha porque usa `rem`, e alto contraste por uma marca `data-contrast` que troca as cores.
+- **Decisão:**
+  - **Tela `/conta`:** nome editável (sem espaços nas pontas e obrigatório, como na DC-043), e-mail e fuso só para leitura, com o aviso de que o fuso não muda (RN-013).
+  - **Acessibilidade:** (b). A tela tem "Tamanho do texto" (as escalas do contrato, de 100% a 200%) e "Alto contraste". As preferências são aplicadas assim que a API confirma, e a navegação da área logada as busca e aplica a cada tela. O alto contraste usa preto sobre branco, contornos pretos e links sublinhados. A troca de estilo é feita pelo CSSOM, que a CSP com nonce permite (DC-059).
+  - **Encerrar todas as sessões:** pede a senha atual na própria página. A senha errada é tratada como na DC-058: a tela confere a sessão para separá-la da sessão encerrada e avisa sobre o bloqueio. No sucesso, a tela diz que todas as sessões, inclusive a atual, foram encerradas e leva à entrada.
+  - **Navegação:** "Conta" entra na navegação da área logada.
+- **Riscos:** fora da área logada (entrada, cadastro), as preferências não se aplicam, porque dependem da sessão. A troca de escala acontece depois do primeiro desenho da página, o que pode causar um salto visual breve.
+- **Aplica-se a:** `apps/web/src/app/conta`, `lib/accessibility.ts`, `components/app-nav.tsx`, `app/globals.css` e aos testes `tests/e2e/account.spec.ts` e `tests/unit/web-accessibility.spec.ts`.
