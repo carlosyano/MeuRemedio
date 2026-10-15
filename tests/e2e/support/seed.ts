@@ -65,7 +65,7 @@ export async function planWithOccurrences(
       await client.query<{ id: string }>(
         `INSERT INTO medication_plans (user_id, medication_name, medication_name_norm, dose_text,
            dose_text_norm, medication_form, administration_route, start_date, end_date)
-         VALUES ($1, $2, lower($2), $3, lower($3), 'TABLET', 'ORAL',
+         VALUES ($1, $2::text, lower($2::text), $3::text, lower($3::text), 'TABLET', 'ORAL',
            (now() AT TIME ZONE 'America/Sao_Paulo')::date - 1,
            (now() AT TIME ZONE 'America/Sao_Paulo')::date)
          RETURNING id`,
@@ -90,8 +90,8 @@ export async function planWithOccurrences(
              local_time, scheduled_at, deadline_at, status, no_response_reached_at,
              medication_name_snapshot, dose_text_snapshot)
            SELECT $2, $1, time_row.id, local.civil::date, local.civil::time, local.at,
-             local.at + interval '60 minutes', $4::occurrence_status,
-             CASE WHEN $4 = 'NO_RESPONSE' THEN local.at + interval '60 minutes' END, $5, $6
+             local.at + interval '60 minutes', $4::text::occurrence_status,
+             CASE WHEN $4::text = 'NO_RESPONSE' THEN local.at + interval '60 minutes' END, $5::text, $6::text
              FROM local, time_row
            RETURNING id, to_char(local_time, 'HH24:MI') AS local_time`,
           [planId, userId, slot.minutesAgo, status, plan.name, plan.dose],

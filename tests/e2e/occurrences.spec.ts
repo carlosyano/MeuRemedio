@@ -44,9 +44,9 @@ test.describe('TL-005 ocorrencias', () => {
     const items = itemFor(page, 'Losartana');
     await expect(items).toHaveCount(2);
     // Da mais recente para a mais antiga (DC-036).
-    await expect(items.nth(0)).toContainText(`${recent?.localTime ?? ''}`);
+    await expect(items.nth(0)).toContainText(recent?.localTime ?? '');
     await expect(items.nth(0)).toContainText('50 mg');
-    await expect(items.nth(1)).toContainText(`${late?.localTime ?? ''}`);
+    await expect(items.nth(1)).toContainText(late?.localTime ?? '');
     await expect(items.nth(1)).toContainText('Sem resposta no prazo de 60 minutos.');
     await expectNoA11yViolations(page);
   });
@@ -57,7 +57,7 @@ test.describe('TL-005 ocorrencias', () => {
       { minutesAgo: 5 },
     ]);
     await page.reload();
-    await itemFor(page, 'Losartana').getByRole('button', { name: 'Tomei' }).click();
+    await itemFor(page, 'Losartana').getByRole('button', { name: 'Tomei', exact: true }).click();
     await expect(statusIn(page)).toHaveText(
       `Resposta registrada: tomei Losartana (${slot?.localTime ?? ''}).`,
     );
@@ -98,7 +98,7 @@ test.describe('TL-005 ocorrencias', () => {
 
     const other = await page.context().newPage();
     await other.goto('/hoje');
-    await itemFor(other, 'Losartana').getByRole('button', { name: 'Tomei' }).click();
+    await itemFor(other, 'Losartana').getByRole('button', { name: 'Tomei', exact: true }).click();
     await expect(statusIn(other)).toContainText('Resposta registrada');
     await other.close();
 
@@ -116,7 +116,7 @@ test.describe('TL-005 ocorrencias', () => {
     await planWithOccurrences(userId, { name: 'Losartana', dose: '50 mg' }, [{ minutesAgo: 5 }]);
     await page.reload();
     await page.route('**/api/occurrences/*/responses', (route) => route.abort('connectionrefused'));
-    await itemFor(page, 'Losartana').getByRole('button', { name: 'Tomei' }).click();
+    await itemFor(page, 'Losartana').getByRole('button', { name: 'Tomei', exact: true }).click();
     await expect(alertIn(page)).toHaveText(
       'O serviço está temporariamente indisponível. Tente novamente.',
     );
@@ -179,14 +179,14 @@ test.describe('TL-005 ocorrencias', () => {
       delivered = true;
       await route.fetch();
     });
-    await itemFor(page, 'Losartana').getByRole('button', { name: 'Tomei' }).click();
+    await itemFor(page, 'Losartana').getByRole('button', { name: 'Tomei', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Registrando…' })).toBeVisible();
     await page.clock.runFor(30_000);
     await expect(alertIn(page)).toHaveText(
       'A resposta demorou demais e não sabemos se foi registrada. Tente de novo: o envio repetido não registra duas vezes.',
     );
     await expect(statusIn(page)).toHaveCount(0);
-    await itemFor(page, 'Losartana').getByRole('button', { name: 'Tomei' }).click();
+    await itemFor(page, 'Losartana').getByRole('button', { name: 'Tomei', exact: true }).click();
     await expect(statusIn(page)).toHaveText(
       `Resposta registrada: tomei Losartana (${slot?.localTime ?? ''}).`,
     );

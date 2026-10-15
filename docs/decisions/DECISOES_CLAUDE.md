@@ -554,3 +554,18 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Navegação:** a área logada ganha a navegação "Hoje" e "Planos".
 - **Riscos:** os rótulos de forma e via são escolha desta DC e podem mudar com o design system ou com revisão de conteúdo. Uma requisição abortada pelo tempo limite pode ter sido gravada; o aviso orienta repetir, e a idempotência evita o efeito em dobro.
 - **Aplica-se a:** `apps/web/src/app/planos`, `components/app-nav.tsx`, `components/fields.tsx`, `lib/api-client.ts`, `lib/plan-form.ts`, `lib/use-account.ts` e aos testes `tests/e2e/plans.spec.ts`, `tests/unit/web-plan-form.spec.ts` e `tests/unit/web-api-client.spec.ts`.
+
+## DC-055 — Ocorrências na tela Hoje (TL-005) (15/10/2026)
+
+- **Contexto:** o TL-005 exige os estados carregando, vazio, acionável, respondendo, sucesso, conflito e desconectado, e a RN-018 manda o lembrete web consultar `listOccurrences` a cada 60 s. A Especificação não diz quais ocorrências a tela mostra, como o motivo do NOT_TAKEN é pedido, o que é "desconectado" nem os rótulos dos motivos.
+- **Alternativas para o recorte:** (a) todas as ocorrências alcançadas, inclusive as respondidas; (b) só as que ainda aceitam resposta, PROGRAMMED e NO_RESPONSE alcançadas (DC-036, DC-037).
+- **Decisão:**
+  - **Recorte:** (b), da mais recente para a mais antiga, com até 100 itens (o máximo do contrato). Se houver mais, a tela avisa que as anteriores ficam no histórico (TL-006). A ocorrência NO_RESPONSE mostra "Sem resposta no prazo de 60 minutos." e continua aceitando resposta (RN-009).
+  - **Consulta a cada 60 s:** enquanto a página está aberta, a lista é consultada de novo a cada 60 s (RF-005, RN-018). Não há notificação do sistema nem som: o lembrete web é a própria lista atualizada.
+  - **Resposta:** "Tomei" registra TAKEN. "Não tomei" abre a escolha do motivo, opcional ("Prefiro não informar" vem marcado), e "Confirmar" registra NOT_TAKEN. A `Idempotency-Key` é estável por ocorrência e corpo. A resposta aceita tira o item da lista e mostra "Resposta registrada: ...". O 409 `STATE_CONFLICT` (ERR-007) e o 404 mostram a mensagem do catálogo e recarregam a lista.
+  - **Desconectado:** quando a consulta falha ou o navegador avisa que ficou sem rede, a tela mostra "Sem conexão com o serviço. A lista pode estar desatualizada." e mantém a última lista, com "Tentar agora". Ao voltar a rede, a lista é consultada de novo. Nada é enfileirado e o sucesso só aparece com a resposta da API (RN-015, TS-010).
+  - **Tempo limite:** o mesmo da DC-054 (30 s). O aviso diz que não se sabe se a resposta foi registrada e que repetir não registra duas vezes (CA-013).
+  - **Horário:** a tela mostra o `local_time` e a data civil da própria ocorrência ("Hoje, 08:00" ou "14/10/2026, 08:00"), sem converter fuso.
+  - **Motivos:** Esqueci; Não tinha o medicamento; Preocupação com efeito colateral; Decidi não tomar; Outro motivo.
+- **Riscos:** os rótulos dos motivos podem mudar com revisão de conteúdo. Um titular com mais de 100 ocorrências sem resposta só vê as 100 mais recentes na tela Hoje.
+- **Aplica-se a:** `apps/web/src/app/hoje/today-screen.tsx`, `lib/occurrences.ts` e aos testes `tests/e2e/occurrences.spec.ts`, `tests/e2e/support/seed.ts` e `tests/unit/web-occurrences.spec.ts`.
