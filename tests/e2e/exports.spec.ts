@@ -1,4 +1,4 @@
-// @trace TL-007 RF-008 RN-011 FL-005 CA-010 CA-011 CA-016 TS-008 TS-010 TS-011 TS-020 TS-022 TS-042 ERR-001 ERR-003 ERR-011 ERR-012 createExport getExport cancelExport downloadExport
+// @trace TL-007 RF-008 RN-011 FL-005 CA-010 CA-011 CA-016 TS-008 TS-010 TS-011 TS-020 TS-022 TS-042 ERR-001 ERR-003 ERR-011 ERR-012 createExport getExport cancelExport downloadExport listExports DEC-034
 // Exportacao em PDF (TL-007; DC-057), contra a API, o worker e o PostgreSQL reais: solicitando,
 // processando, concluida com download do PDF, cancelamento (CA-016), falha, expirada (CA-011),
 // pedido de outro titular (404), periodo invalido e servico indisponivel sem declarar sucesso;
@@ -107,6 +107,35 @@ test.describe('TL-007 exportacao', () => {
       page.getByText('A data final deve ser igual ou posterior à inicial.'),
     ).toBeVisible();
     await expect(page).toHaveURL(/\/exportacao$/);
+  });
+
+  test('exportacoes recentes: lista do titular, a mais recente primeiro (DEC-034)', async ({
+    page,
+  }) => {
+    const userId = await signedIn(page);
+    await seedExport(userId, 'FAILED');
+    await seedExport(userId, 'REQUESTED');
+    const other = await activeUser(uniqueEmail('bruno.costa'), 'Bruno Costa');
+    await seedExport(other, 'EXPIRED');
+    await page.reload();
+    const recent = page.getByRole('region', { name: 'Exportações recentes' });
+    const items = recent.getByRole('listitem');
+    await expect(items).toHaveCount(2);
+    await expect(items.nth(0)).toContainText('Em andamento');
+    await expect(items.nth(1)).toContainText('Falhou');
+    await expectNoA11yViolations(page);
+    await items
+      .nth(0)
+      .getByRole('link', { name: /Acompanhar/ })
+      .click();
+    await expect(page).toHaveURL(/\/exportacao\?pedido=[0-9a-f-]{36}$/);
+    await expect(statusIn(page)).toContainText('Gerando o PDF…');
+  });
+
+  test('sem exportacoes: aviso no lugar da lista', async ({ page }) => {
+    await signedIn(page);
+    const recent = page.getByRole('region', { name: 'Exportações recentes' });
+    await expect(recent).toContainText('Nenhuma exportação solicitada.');
   });
 
   test('servico indisponivel ao solicitar: ERR-011 sem declarar sucesso (TS-010)', async ({
