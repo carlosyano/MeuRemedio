@@ -1,4 +1,6 @@
+// Todas as paginas sao renderizadas por requisicao: o nonce da CSP muda a cada uma (DC-059).
 import type { Metadata } from 'next';
+import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 import './globals.css';
 
@@ -8,7 +10,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function RootLayout({ children }: { readonly children: ReactNode }) {
+export default async function RootLayout({ children }: { readonly children: ReactNode }) {
+  await connection();
   return (
     <html lang="pt-BR">
       <body className="min-h-screen text-base leading-relaxed">
