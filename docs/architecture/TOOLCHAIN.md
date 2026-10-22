@@ -29,8 +29,8 @@
 | fast-check | 4.10.2 | Testes de propriedade (TS-024 e demais); dependência única: pure-rand |
 | @types/node | 24.19.1 | Tipos do Node 24 |
 | @stoplight/spectral-core, -parsers, -rulesets | 1.24.0, 1.0.5, 1.23.0 | QG-001 (lint da OpenAPI) via `tools/scripts/openapi-lint.mjs` |
-| @nestjs/common, @nestjs/core, @nestjs/platform-fastify (em `apps/api`) | 12.1.2 | API HTTP (ADR-001 v1.5 §4); linha 12 é ESM nativa (`"type": "module"`), como o repositório. MIT |
-| fastify (em `apps/api`) | 5.12.5 | Adaptador HTTP; mesma versão exigida pelo `@nestjs/platform-fastify` 12.1.2 |
+| @nestjs/common, @nestjs/core, @nestjs/platform-fastify (em `apps/api`) | 12.2.0 | API HTTP (ADR-001 v1.5 §4); linha 12 é ESM nativa (`"type": "module"`), como o repositório. MIT. Atualizada em 22/10/2026 pelo fastify corrigido (QG-006) |
+| fastify (em `apps/api`) | 5.12.7 | Adaptador HTTP; mesma versão exigida pelo `@nestjs/platform-fastify` 12.2.0; 5.12.7 corrige o GHSA-389g-gv7q-r4x8 |
 | reflect-metadata, rxjs (em `apps/api`) | 0.2.2, 7.8.2 | Dependências de par do NestJS |
 | ajv, ajv-formats (em `apps/api`) | 8.20.0, 3.0.1 | Validação de requisição e resposta contra os schemas da OpenAPI (JSON Schema 2020-12, `Ajv2020`) |
 | @node-rs/argon2 (em `apps/api`) | 2.2.1 | Argon2id (RN-017, OA-009): binários N-API pré-compilados, sem dependências em tempo de execução, MIT. A 2.2.2 tinha 2 dias em 08/10/2026; preferida a anterior (DC-013) |
@@ -40,7 +40,7 @@
 | @types/pdfkit (em `apps/api`, dev) | 0.17.6 | Tipos do pdfkit (o pacote não publica tipos); a API usada (`text`, `font`, `fontSize`, `moveDown`) não mudou entre a 0.17 e a 0.20 |
 | @stryker-mutator/core | 10.0.0 | QG-010 (testes de mutação no domínio) com o runner `command`, que executa o Vitest por mutante: o `@stryker-mutator/vitest-runner` 10.0.0 não ativa os mutantes com o Vitest 5 e não foi instalado (DC-050) |
 | qs (override) | 6.16.0 | Transitiva do Stryker (`typed-rest-client` fixa `qs` 6.15.1, com 2 vulnerabilidades moderadas); o `overrides` do `package.json` mantém o `npm audit` em 0 |
-| next, react, react-dom (em `apps/web`) | 16.3.8, 19.3.0, 19.3.0 | Aplicação web (ADR-001 v1.5 §5.3), App Router; versões com mais de 2 semanas em 14/10/2026. Otimização de imagem desligada: o `sharp`, opcional do Next, nunca é carregado (DC-052) |
+| next, react, react-dom (em `apps/web`) | 16.4.2, 19.3.0, 19.3.0 | Aplicação web (ADR-001 v1.5 §5.3), App Router. Next 16.4.2 (22/10/2026, com 1 semana) por correção de segurança crítica (GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr, QG-006): a exceção à regra das 2 semanas vale para correção de segurança. Otimização de imagem desligada: o `sharp`, opcional do Next, nunca é carregado (DC-052) |
 | tailwindcss, @tailwindcss/postcss (em `apps/web`, dev) | 4.3.3 | Estilos (ADR-001 v1.5); estilo neutro até o design system |
 | @types/react, @types/react-dom (em `apps/web`, dev) | 19.3.0 | Tipos do React |
 | @playwright/test, @axe-core/playwright | 1.63.0, 4.13.0 | QG-007 e QG-008; `overrides` fixa `playwright-core` em 1.63.0 para o axe usar o mesmo Playwright |
