@@ -1,4 +1,4 @@
-// Rotas de conta (OpenAPI 02.33.5, tag Accounts).
+// Rotas de conta (OpenAPI 02.33.6, tag Accounts).
 import { Body, Controller, Get, Headers, Inject, Post, Put, Req, Res } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { sessionOf } from '../../../platform/http/access.guard.js';

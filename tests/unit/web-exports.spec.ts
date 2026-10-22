@@ -1,8 +1,8 @@
-// @trace TL-007 RF-008 RN-011 FL-005 getExport
+// @trace TL-007 RF-008 RN-011 FL-005 DEC-034 getExport listExports
 // Textos e estados da exportacao na web (TL-007; DC-057): o instante de expiracao no fuso da conta,
 // em pt-BR, e quais estados ainda estao em andamento (a tela consulta de novo so nesses).
 import { describe, expect, it } from 'vitest';
-import { formatInstant, isPending } from '../../apps/web/src/lib/exports.js';
+import { formatInstant, isPending, statusLabel } from '../../apps/web/src/lib/exports.js';
 
 describe('exportacao', () => {
   it('instante no fuso da conta, nao no do processo', () => {
@@ -13,5 +13,11 @@ describe('exportacao', () => {
   it('em andamento so REQUESTED e PROCESSING (FL-005)', () => {
     expect(['REQUESTED', 'PROCESSING'].every(isPending)).toBe(true);
     expect(['COMPLETED', 'FAILED', 'EXPIRED', 'CANCELED'].some(isPending)).toBe(false);
+  });
+
+  it('rotulo de cada estado na lista de exportacoes recentes (DEC-034)', () => {
+    expect(
+      ['REQUESTED', 'PROCESSING', 'COMPLETED', 'FAILED', 'EXPIRED', 'CANCELED'].map(statusLabel),
+    ).toEqual(['Em andamento', 'Em andamento', 'Concluída', 'Falhou', 'Expirada', 'Cancelada']);
   });
 });

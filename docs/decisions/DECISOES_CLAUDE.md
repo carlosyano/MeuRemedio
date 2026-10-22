@@ -597,6 +597,7 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Navegação:** "Exportar" entra na navegação da área logada.
 - **Riscos:** quem sair da página sem guardar o endereço perde o acompanhamento daquele pedido e precisa solicitar outro. O identificador do pedido fica no histórico do navegador, mas sozinho não dá acesso ao arquivo.
 - **Aplica-se a:** `apps/web/src/app/exportacao`, `lib/exports.ts`, `components/app-nav.tsx` e aos testes `tests/e2e/exports.spec.ts`, `tests/e2e/support/seed.ts` e `tests/unit/web-exports.spec.ts`.
+- **Atualização (DEC-034, OpenAPI 02.33.6):** a lacuna da lista foi resolvida com `listExports`. A tela mantém o pedido no endereço e mostra, abaixo do formulário, as 10 exportações mais recentes, cada uma com link para acompanhá-la (`exportacao/recent-exports.tsx`).
 
 ## DC-058 — Privacidade (TL-008) na web (15/10/2026)
 

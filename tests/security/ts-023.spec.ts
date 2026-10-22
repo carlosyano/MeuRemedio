@@ -1,4 +1,4 @@
-// @trace TS-023 TS-008 RNF-003 CA-012 RN-002 deleteCurrentSession getAccessibilityPreferences updateAccessibilityPreferences listPlans createPlan getPlan updatePlan deletePlan listOccurrences createResponse getHistory createExport getExport cancelExport downloadExport getPrivacy requestAccountDeletion getCurrentAccount updateCurrentAccount revokeAllSessions
+// @trace TS-023 TS-008 RNF-003 CA-012 RN-002 deleteCurrentSession getAccessibilityPreferences updateAccessibilityPreferences listPlans createPlan getPlan updatePlan deletePlan listOccurrences createResponse getHistory listExports createExport getExport cancelExport downloadExport getPrivacy requestAccountDeletion getCurrentAccount updateCurrentAccount revokeAllSessions
 // TS-023 (BOLA/IDOR em todas as rotas privadas, QG-009), gerado a partir da OpenAPI: cada operacao
 // privada precisa de um caso, ou o teste reprova.
 //   - com identificador no caminho: U2 usa o identificador de U1 -> 404 RESOURCE_NOT_FOUND
@@ -176,6 +176,7 @@ const READS: Record<string, Call> = {
   listPlans: { method: 'GET', url: '/plans' },
   listOccurrences: { method: 'GET', url: '/occurrences' },
   getHistory: { method: 'GET', url: '/history?start=2026-10-01&end=2026-10-31' },
+  listExports: { method: 'GET', url: '/exports' },
   getPrivacy: { method: 'GET', url: '/privacy' },
   getCurrentAccount: { method: 'GET', url: '/accounts/me' },
   getAccessibilityPreferences: { method: 'GET', url: '/preferences/accessibility' },

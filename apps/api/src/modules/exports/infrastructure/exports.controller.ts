@@ -1,4 +1,4 @@
-// Rotas de exportacao (OpenAPI 02.33.5, tag Exports).
+// Rotas de exportacao (OpenAPI 02.33.6, tag Exports).
 import {
   Body,
   Controller,
@@ -8,18 +8,37 @@ import {
   Inject,
   Param,
   Post,
+  Query,
   Req,
   Res,
 } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { sessionOf } from '../../../platform/http/access.guard.js';
 import { correlationIdOf } from '../../../platform/http/correlation.js';
+import { DEFAULT_PAGE_LIMIT } from '../../../platform/http/keyset-cursor.js';
 import { OperationId } from '../../../platform/http/operation-id.js';
-import { Exports, type CreateExportRequest, type ExportView } from '../application/exports.js';
+import {
+  Exports,
+  type CreateExportRequest,
+  type ExportPage,
+  type ExportView,
+} from '../application/exports.js';
 
 @Controller()
 export class ExportsController {
   constructor(@Inject(Exports) private readonly exports: Exports) {}
+
+  @Get('exports')
+  @OperationId('listExports')
+  async list(
+    @Req() request: FastifyRequest,
+    @Query('cursor') cursor: string | undefined,
+    @Query('limit') limit: string | number | undefined,
+  ): Promise<ExportPage> {
+    // O contrato ja validou limit (1..100); a query chega como texto.
+    const size = limit === undefined ? DEFAULT_PAGE_LIMIT : Number(limit);
+    return this.exports.list(sessionOf(request).userId, cursor, size);
+  }
 
   @Post('exports')
   @OperationId('createExport')

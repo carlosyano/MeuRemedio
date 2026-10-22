@@ -34,3 +34,15 @@ export function formatInstant(instant: string, timeZone: string): string {
   const part = (type: string): string => parts.find((item) => item.type === type)?.value ?? '';
   return `${part('day')}/${part('month')}/${part('year')} às ${part('hour')}:${part('minute')}`;
 }
+
+const STATUS_LABELS: Readonly<Record<string, string>> = {
+  REQUESTED: 'Em andamento',
+  PROCESSING: 'Em andamento',
+  COMPLETED: 'Concluída',
+  FAILED: 'Falhou',
+  EXPIRED: 'Expirada',
+  CANCELED: 'Cancelada',
+};
+
+/** Rotulo do estado na lista de exportacoes recentes (listExports, DEC-034). */
+export const statusLabel = (status: string): string => STATUS_LABELS[status] ?? status;

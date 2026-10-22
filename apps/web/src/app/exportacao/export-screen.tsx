@@ -1,8 +1,8 @@
 'use client';
 // TL-007 (DC-057): solicitando; processando; concluida; falha; expirada; sem permissao.
 //   - solicitar: periodo com a regra do historico (DC-041), Idempotency-Key estavel para o mesmo
-//     periodo; o 202 leva a /exportacao?pedido=<id>, que guarda o pedido no endereco (o contrato
-//     nao tem lista de exportacoes);
+//     periodo; o 202 leva a /exportacao?pedido=<id>, que guarda o pedido no endereco; abaixo do
+//     formulario ficam as exportacoes recentes (listExports, DEC-034);
 //   - acompanhar: consulta a cada 2 s enquanto REQUESTED ou PROCESSING, com cancelamento (CA-016);
 //   - concluida: link de download do PDF ate expires_at (24 h, RN-011); expirada mostra o ERR-012
 //     (CA-011); pedido inexistente ou de outro titular mostra o ERR-003, sem dado do pedido.
@@ -18,6 +18,7 @@ import { formatInstant, isPending, type ExportRequest } from '@/lib/exports';
 import { defaultPeriod, validatePeriod } from '@/lib/history';
 import { formatDate, todayIn } from '@/lib/plan-form';
 import { loginPath, useAccount } from '@/lib/use-account';
+import { RecentExports } from './recent-exports';
 
 const POLL_MS = 2_000;
 const VALIDATION = 'Revise os campos destacados e tente novamente.';
@@ -204,6 +205,7 @@ export function ExportScreen() {
           <FormAlert message={alert} />
           <SubmitButton label="Solicitar PDF" busyLabel="Solicitando…" busy={busy} />
         </form>
+        <RecentExports timeZone={timeZone} />
       </>
     );
   }
