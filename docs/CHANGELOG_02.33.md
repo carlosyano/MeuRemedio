@@ -174,3 +174,17 @@ Lacuna registrada na DC-057 (TL-007): o contrato não tinha operação para list
 Efeitos: OpenAPI `02.33.6` (arquivo renomeado; oasdiff sem incompatibilidade, pois só acrescenta), matriz `2.1.11` (hashes das quatro fontes, operação `listExports`, RF-008, DEC-034 e catálogo de decisões), `maxProperties` de `decisions` no schema (33 → 34), `AGENTS.md` 1.7 (referências à OpenAPI vigente), Especificação (DEC-034, referências vigentes e nota no Anexo C), ADR (referências vigentes), `validate_all.py`, workflow de rastreabilidade e `CLAUDE.md`.
 
 **Aprovação:** decisão de 15/10/2026; aprovação formal no pull request desta revisão.
+
+## Matriz 2.1.12: testes negativos do catálogo de erros e ownership (22/10/2026)
+
+Os PRs #68 e #69 materializaram os testes negativos de todo o catálogo de erros, nos caminhos que a matriz já previa (`tests/api/errors/err-0NN.spec.ts`). Cada teste confere o Problem completo e que o estado persistido não muda; os de ERR-001, ERR-002, ERR-003, ERR-010, ERR-015 e ERR-016 são gerados das operações que a matriz liga ao erro e reprovam se a matriz e o contrato divergirem.
+
+1. **ERR-001 a ERR-016:** `status` passa de `planned` a `implemented`.
+2. **Ownership das 21 operações privadas:** o artefato previsto era um arquivo por operação (`tests/security/ownership/<operação>.ownership.spec.ts`). O `tests/security/ts-023.spec.ts`, gerado da OpenAPI, já cobre todas as operações privadas num só arquivo e reprova se alguma ficar sem caso (QG-009). O `test_artifact` de cada `ownership_test` passa a apontar para ele, com `status` `implemented`, em vez de criar 21 arquivos repetidos.
+3. **Verificação:** `tests/contract/test-artifacts.spec.ts` passa a conferir também os artefatos implementados dos ERR e do ownership: o arquivo existe e a primeira linha rastreia o ERR ou o operationId.
+
+Seguem `planned` o TS-030, o TS-031, o TS-032 e o TS-039.
+
+Efeitos: matriz `2.1.12` (`matrix_version`, `status` dos 16 ERR e `test_artifact`/`status` de 21 `ownership_test`). Especificação, OpenAPI, ADR, AGENTS.md e schema não mudam.
+
+**Aprovação:** proposta em 22/10/2026; aprovação formal no pull request desta revisão.
