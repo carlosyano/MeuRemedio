@@ -281,6 +281,7 @@ Pedido, snapshot, arquivo privado, checksum e expiração.
 - CHECK: `failure_reason` só e sempre em FAILED; `canceled_at` em CANCELED; `file_sha256` de 32 bytes; `snapshot` até 5 MB
 - Índice (status,expires_at) WHERE status='COMPLETED'
 - Índice (status,updated_at) WHERE status='PROCESSING' (processamento parado, DC-042)
+- Índice (user_id,requested_at DESC,id DESC) (`export_requests_user_requested_idx`; lista do titular com cursor, `listExports`, DEC-034)
 
 ### ENT-011 — `idempotency_records`
 
@@ -431,7 +432,7 @@ Perfil versionado e reproduzível de desempenho.
 ## 5. Regras de completude
 
 - Cada campo possui as 11 propriedades exigidas pela Especificação §5.1 (campo, tipo, obrigatoriedade, tamanho, formato, padrão, unicidade, FK, LGPD, validação e entidade).
-- Os campos expostos pela API devem ser equivalentes aos schemas da OpenAPI 02.33.5, comprovado por testes de contrato (RNF-014, TS-040).
+- Os campos expostos pela API devem ser equivalentes aos schemas da OpenAPI 02.33.6, comprovado por testes de contrato (RNF-014, TS-040).
 - Pendências explícitas: retenção definitiva de `audit_events` (GX-003; padrão provisório de 180 dias configuráveis) e conteúdo final de `incident_records` (GX-006).
 
 ## 6. Estado de implementação (migrações)
@@ -445,6 +446,7 @@ Perfil versionado e reproduzível de desempenho.
 | `apps/api/migrations/0005_plans.sql` | ENT-013 `audit_events` (append-only por trigger) e a tabela de plataforma `plan_duplicate_confirmations` (DC-028) | Implementada e coberta por `tests/integration/db-plans.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0006_reminders.sql` | ENT-009 `email_reminders` (DC-040) | Implementada e coberta por `tests/integration/db-reminders.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0007_exports.sql` | ENT-010 `export_requests` (DC-042) | Implementada e coberta por `tests/integration/db-exports.spec.ts` (PostgreSQL 17 real) |
+| `apps/api/migrations/0010_exports_list.sql` | Índice `export_requests_user_requested_idx` de ENT-010 (`listExports`, DEC-034) | Implementada e coberta por `tests/integration/exports-list.spec.ts` (PostgreSQL 17 real) |
 | Demais entidades | ENT-003, ENT-014 a ENT-017 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
 
 **Rollback:** as migrações criam apenas objetos novos, sem dados nem dependentes externos; o rollback é uma migração nova que remove os objetos criados (a lista está no cabeçalho de cada arquivo). Uma migração aplicada nunca é editada.

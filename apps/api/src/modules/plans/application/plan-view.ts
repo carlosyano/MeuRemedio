@@ -1,4 +1,4 @@
-// Leitura de um plano no formato do schema Plan (OpenAPI 02.33.5) e ETag derivado de row_version.
+// Leitura de um plano no formato do schema Plan (OpenAPI 02.33.6) e ETag derivado de row_version.
 import type { Pool, PoolClient } from 'pg';
 
 export interface PlanView {

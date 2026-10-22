@@ -163,3 +163,14 @@ Os artefatos passam a `implemented`, com os caminhos reais. Seguem `planned` o T
 Efeitos: matriz `2.1.10` (`matrix_version` e `test_artifacts` de TS-010, TS-019 e TS-026). Especificação, OpenAPI, ADR, AGENTS.md e schema não mudam.
 
 **Aprovação:** proposta em 15/10/2026; aprovação formal no pull request desta revisão.
+
+## DEC-034 e revisão 02.33.6 da OpenAPI: lista de exportações do titular (15/10/2026)
+
+Lacuna registrada na DC-057 (TL-007): o contrato não tinha operação para listar as exportações do titular, e a aplicação só acompanhava o pedido recém-criado, perdendo-o ao sair da página.
+
+1. **DEC-034:** nova operação `listExports` (`GET /exports`, schema `ExportRequestPage`): pedidos de exportação do titular em todos os estados, do mais recente para o mais antigo, com paginação por cursor (padrão 20, máximo 100). `COMPLETED` com `expires_at` atingido aparece como `EXPIRED`; a resposta não inclui snapshot nem dados do arquivo.
+2. **Implementação:** índice `export_requests_user_requested_idx` (migração `0010_exports_list.sql`), cursor por chave `(requested_at, id)` da DC-030, TS-023 com a nova operação privada (21) e a lista de exportações recentes na tela TL-007.
+
+Efeitos: OpenAPI `02.33.6` (arquivo renomeado; oasdiff sem incompatibilidade, pois só acrescenta), matriz `2.1.11` (hashes das quatro fontes, operação `listExports`, RF-008, DEC-034 e catálogo de decisões), `maxProperties` de `decisions` no schema (33 → 34), `AGENTS.md` 1.7 (referências à OpenAPI vigente), Especificação (DEC-034, referências vigentes e nota no Anexo C), ADR (referências vigentes), `validate_all.py`, workflow de rastreabilidade e `CLAUDE.md`.
+
+**Aprovação:** decisão de 15/10/2026; aprovação formal no pull request desta revisão.

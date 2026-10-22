@@ -1,16 +1,18 @@
-# MeuRemedio OpenAPI 02.33.5 - completo
-# Base: MeuRemedio_OpenAPI_02.33.4_COMPLETO.yaml
+# MeuRemedio OpenAPI 02.33.6 - completo
+# Base: MeuRemedio_OpenAPI_02.33.5_COMPLETO.yaml
 # Mudancas 02.33.3 (decisao de 04/10/2026): removido o 410 de createResponse (GAP-008); X-Correlation-ID em toda resposta, inclusive 202, 204 e getHealth (GAP-009).
 # Mudancas 02.33.4 (decisao de 06/10/2026, DEC-026, GAP-010): falha inesperada documentada em toda operacao,
 # com 500 INTERNAL_ERROR (ERR-016, resposta InternalError) e 503 DEPENDENCY_UNAVAILABLE (ERR-011).
 # Mudancas 02.33.5 (decisao de 10/10/2026, DEC-032): 400 VALIDATION_FAILED documentado em createSession,
 # revokeAllSessions e requestAccountDeletion, que validam corpo e Idempotency-Key e nao o declaravam.
-# Mantem as 27 operacoes e os operationId da 02.33.2.
+# Mudancas 02.33.6 (decisao de 15/10/2026, DEC-034): nova operacao listExports (GET /exports) e schema
+# ExportRequestPage, para o titular listar os proprios pedidos de exportacao.
+# Mantem os operationId da 02.33.2 e acrescenta listExports (28 operacoes).
 openapi: 3.1.1
 info:
   title: MeuRemedio API
-  version: 02.33.5
-  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.5
+  version: 02.33.6
+  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.6
   description: API declaratoria para conta individual, planos de medicamentos, ocorrencias, respostas, historico,
     exportacoes e privacidade. Nao prescreve, nao valida medicamentos ou interacoes e nao substitui orientacao profissional.
     Todas as mutacoes autenticadas exigem protecao CSRF (cookie mr_csrf + cabecalho X-CSRF-Token) e validacao do
@@ -833,6 +835,45 @@ paths:
       description: Historico por periodo civil inclusivo de ate 12 meses (intervalo semiaberto no fuso da conta),
         em ordem decrescente.
   /exports:
+    get:
+      tags:
+      - Exports
+      summary: Listar exportacoes
+      operationId: listExports
+      responses:
+        '200':
+          description: Pagina de pedidos de exportacao
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportRequestPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      x-traceability:
+      - RF-008
+      - DEC-034
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+      description: Lista os pedidos de exportacao do titular em todos os estados, do mais recente para o mais
+        antigo, com paginacao por cursor (padrao 20, maximo 100). COMPLETED com expires_at atingido aparece
+        como EXPIRED. Nao inclui snapshot nem dados do arquivo.
     post:
       tags:
       - Exports
@@ -2124,6 +2165,19 @@ components:
       - completed_at
       - expires_at
       - failure_reason
+    ExportRequestPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportRequest'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+      required:
+      - items
+      - page
     AccessibilityPreferences:
       type: object
       additionalProperties: false

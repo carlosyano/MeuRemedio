@@ -29,8 +29,8 @@ describe('OpenApiContract: carga da OpenAPI normativa', () => {
     expect(locateNormativeOpenApi().pathname.endsWith(`/${ctx.openapiFile}`)).toBe(true);
   });
 
-  it('expõe as 27 operacoes com metodo e caminho do contrato', () => {
-    expect(contract.operations).toHaveLength(27);
+  it('expõe as 28 operacoes com metodo e caminho do contrato', () => {
+    expect(contract.operations).toHaveLength(28);
     expect(contract.operation('getHealth')).toMatchObject({ method: 'GET', path: '/health' });
     expect(contract.operation('updatePlan')).toMatchObject({
       method: 'PUT',

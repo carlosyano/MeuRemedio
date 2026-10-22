@@ -1,6 +1,6 @@
 // @trace TS-040 RNF-014 RNF-016 (Especificacao 02.33 secao 13; AGENTS.md secoes 13 e 14; QG-001)
 // TS-040, verificacao 4: Schemathesis contra a API em execucao (PostgreSQL 17 real, HTTP de verdade)
-// nas 27 operacoes da OpenAPI. Reprova se houver 5xx, status nao documentado, Content-Type, cabecalho
+// nas 28 operacoes da OpenAPI. Reprova se houver 5xx, status nao documentado, Content-Type, cabecalho
 // ou corpo fora do contrato, dado invalido aceito ou rota privada sem autenticacao (DC-047).
 //   - fase 1: todas as operacoes, exceto as tres que encerram a sessao, com uma sessao valida;
 //   - fase 2: deleteCurrentSession com sessao propria (o primeiro sucesso a encerra e o restante
@@ -152,7 +152,7 @@ async function schemathesis(name: string, filter: readonly string[]): Promise<vo
   expect(status, output).toBe(0);
 }
 
-describe('TS-040 Schemathesis nas 27 operacoes', () => {
+describe('TS-040 Schemathesis nas 28 operacoes', () => {
   it('fase 1: todas as operacoes, exceto as que encerram a sessao', async () => {
     await schemathesis(
       'fase-1',

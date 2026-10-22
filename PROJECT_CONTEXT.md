@@ -3,8 +3,8 @@
 | Campo | Valor |
 |---|---|
 | Versão do documento | 1.3 |
-| Última atualização | 15/10/2026 (web: conta, acessibilidade e sessões, DC-061) |
-| Baseline descrita | Especificação 02.33 · OpenAPI 02.33.5 · ADR-001 v1.5 · AGENTS.md 1.6 · Matriz 2.1.10 |
+| Última atualização | 22/10/2026 (DEC-034: listExports, OpenAPI 02.33.6) |
+| Baseline descrita | Especificação 02.33 · OpenAPI 02.33.6 · ADR-001 v1.5 · AGENTS.md 1.7 · Matriz 2.1.11 |
 | Commit da baseline | _preencher no merge do PR que aplica esta revisão_ |
 
 ## 1. Finalidade
@@ -20,7 +20,7 @@ Este documento fornece contexto operacional para continuidade do projeto **MeuRe
 | Projeto | MeuRemedio |
 | Repositório | `https://github.com/carlosyano/MeuRemedio` |
 | Branch principal | `main` |
-| Fase atual | Fundação técnica Test-First em andamento (baseline 02.33.5; §12, passos 5 a 7) |
+| Fase atual | Fundação técnica Test-First em andamento (baseline 02.33.6; §12, passos 5 a 7) |
 | Modelo de engenharia | Contract-First, Test-First e IA-First com aprovação humana |
 | Matriz de rastreabilidade | versão `2.1.6` |
 | Autorização de produção | Não concedida |
@@ -54,7 +54,7 @@ A prevalência depende do assunto tratado.
 
 | Assunto | Fonte normativa | Prevalece para |
 |---|---|---|
-| Superfície HTTP | `MeuRemedio_OpenAPI_02.33.5_COMPLETO.yaml` | paths, métodos, `operationId`, parâmetros, cabeçalhos, cookies, payloads, schemas, enums, códigos HTTP, `Problem.code` e segurança da API |
+| Superfície HTTP | `MeuRemedio_OpenAPI_02.33.6_COMPLETO.yaml` | paths, métodos, `operationId`, parâmetros, cabeçalhos, cookies, payloads, schemas, enums, códigos HTTP, `Problem.code` e segurança da API |
 | Comportamento funcional | `MeuRemedio_Especificacao_Funcional_02.33.docx` | requisitos, regras de negócio, entidades, fluxos, estados de tela, histórias, critérios de aceitação, mensagens, testes sentinela e gates externos |
 | Arquitetura | `ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx` | arquitetura, stack, persistência, processamento assíncrono, infraestrutura e governança arquitetural |
 | Processo operacional | `AGENTS.md` (v1.3) | comportamento de agentes, desenvolvimento, quality gates, testes, rastreabilidade, segurança e aprovação humana |
@@ -95,7 +95,7 @@ docs/
 ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
 AGENTS.md
 MeuRemedio_Especificacao_Funcional_02.33.docx
-MeuRemedio_OpenAPI_02.33.5_COMPLETO.yaml
+MeuRemedio_OpenAPI_02.33.6_COMPLETO.yaml
 PROJECT_CONTEXT.md
 requirements-validation.txt
 traceability-check.py
@@ -156,7 +156,7 @@ Use a versão de Python definida em `.github/workflows/traceability-validation.y
 6. cobertura de ownership (TS-023) em toda operação privada;
 7. existência de artefato de teste planejado para todo TS.
 
-`validate_all.py` exige o arquivo `MeuRemedio_OpenAPI_02.33.5_COMPLETO.yaml` no diretório; ao trocar a versão da OpenAPI, atualize a constante `OPENAPI` e a matriz.
+`validate_all.py` exige o arquivo `MeuRemedio_OpenAPI_02.33.6_COMPLETO.yaml` no diretório; ao trocar a versão da OpenAPI, atualize a constante `OPENAPI` e a matriz.
 
 ### 7.3 Significado de PASS
 
@@ -215,9 +215,10 @@ O ruleset com pull request, uma aprovação, check obrigatório e bloqueio de fo
 | DEC-032 / OpenAPI 02.33.5 / AGENTS 1.6 / matriz 2.1.8 | Proposta em 10/10/2026; aprovada no PR #42 (14/10/2026) |
 | DEC-033 / matriz 2.1.9 | Proposta em 14/10/2026; aprovação formal no PR desta revisão |
 | Matriz 2.1.10 / artefatos de TS-010, TS-019 e TS-026 | Aprovada no PR #63 (15/10/2026) |
-| Matriz 2.1.10 e schema | Validadas (`PASS`) com o schema real e no CI |
+| DEC-034 / OpenAPI 02.33.6 / AGENTS 1.7 / matriz 2.1.11 | Decisão de 15/10/2026 (lacuna da DC-057); aprovação formal no PR desta revisão |
+| Matriz 2.1.11 e schema | Validadas (`PASS`) com o schema real e no CI |
 | Fundação do monorepo | Em andamento: estrutura, toolchain e CI; PostgreSQL 17 com Testcontainers e migrações `0001_core` e `0002_platform` (ENT-001, ENT-004 a ENT-008, ENT-011 e ENT-012) com schemas Drizzle por módulo; `openapi:lint` e `openapi:diff`; Schemathesis na CI (TS-040, DC-047); QG-006 (npm audit, SBOM CycloneDX e licenças) e QG-009 (ownership) na CI (DC-048); QG-005 (Gitleaks, Semgrep e CodeQL) na CI (DC-049); QG-010 (Stryker no domínio) na CI (DC-050); QG-011 (rastreabilidade dos testes contra a matriz e o contrato) na CI (DC-060); QG-007 e QG-008 (Playwright e axe) na CI (DC-052); os 12 jobs de quality gate são obrigatórios no ruleset da `main` desde 14/10/2026 |
-| Implementação funcional | Iniciada: tempo civil (`resolveCivilInstant`) e gerador de ocorrências com o horizonte da DEC-027 (`generateOccurrencesForHorizon`); esqueleto HTTP contract-first (spike S1: NestJS 12 + Fastify, `getHealth`, Problem e `X-Correlation-ID`); idempotência e rate limit em PostgreSQL; `createAccount`, `verifyAccount`, `resendVerification` e `getCurrentAccount` (RF-001); sessões com CSRF, limite de 3 e bloqueio de login (`createSession`, `deleteCurrentSession`, RF-002); despachante do Outbox e processo do worker com pg-boss (TS-016); planos: `createPlan` com confirmação de duplicidade (RN-016), `getPlan` com auditoria `ownership.denied`, `listPlans`, `updatePlan` com `If-Match`/ETag e `deletePlan` lógico (RF-003, TS-004, TS-005, TS-014, TS-027), com a geração de ocorrências pelo Outbox; ocorrências e respostas: `listOccurrences` com as acionáveis do titular e `createResponse` com a primeira resposta aceita e a resposta tardia (RF-004, RF-005, RF-006, TS-001, TS-007); job de prazo NO_RESPONSE a cada minuto e job horário do horizonte de 30 dias no worker (RN-009, CA-008, TS-006, TS-013, DEC-027); lembretes por e-mail com o nome do medicamento e o horário (DEC-031), com supressão e sem reenvio cego (RN-018, DEC-005, TS-017, TS-034, TS-035); histórico: `getHistory` por período civil de até 12 meses (RF-007, RN-010, CA-009); exportação em PDF: `createExport`, `getExport`, `cancelExport` e `downloadExport`, com snapshot, expiração em 24 h e armazenamento privado por porta (RF-008, RN-011, FL-005, TS-020, TS-042); conta e sessões: `updateCurrentAccount`, preferências de acessibilidade e `revokeAllSessions` com reautenticação (RF-001, RF-009, TS-044); redefinição de senha: `requestPasswordReset` neutro e `confirmPasswordReset` com token de 60 min, senha comprometida recusada e revogação das sessões (RF-002, RN-017, TS-009, TS-036); privacidade: `getPrivacy` com o canal externo configurado na implantação e `requestAccountDeletion` com reautenticação, bloqueio imediato e expurgo agendado para 30 dias (RF-010, RN-012, TS-038); job de expurgo a cada 15 minutos com tombstone de 180 dias e reconciliação de restore (RN-012, RN-019, TS-029); remoção da conta pendente com 30 dias (TS-028, DC-051); TS-023 gerado da OpenAPI cobrindo todas as 20 operações privadas (QG-009); aplicação web (Next.js, estilo neutro): entrada TL-002 e área logada inicial, com cliente da API, CSRF e mensagens do catálogo (DC-052); cadastro TL-001, confirmação de e-mail, reenvio e redefinição de senha, com textos legais provisórios (DC-053); planos TL-003 e editor de plano TL-004, com confirmação de possível duplicidade, conflito de versão, exclusão e tempo limite de 30 s no cliente (DC-054); ocorrências TL-005 na tela Hoje, com resposta TAKEN e NOT_TAKEN, consulta a cada 60 s e aviso de desconectado (DC-055); histórico TL-006 com os últimos 30 dias, período inválido e paginação (DC-056); exportação TL-007 com acompanhamento, cancelamento e download do PDF (DC-057); privacidade TL-008 com direitos, prazos de retenção e exclusão da conta com reautenticação (DC-058); Content-Security-Policy com nonce por requisição em todas as páginas (spike S6, DC-059); conta com nome, preferências de acessibilidade aplicadas na área logada e encerramento de todas as sessões (DC-061) |
+| Implementação funcional | Iniciada: tempo civil (`resolveCivilInstant`) e gerador de ocorrências com o horizonte da DEC-027 (`generateOccurrencesForHorizon`); esqueleto HTTP contract-first (spike S1: NestJS 12 + Fastify, `getHealth`, Problem e `X-Correlation-ID`); idempotência e rate limit em PostgreSQL; `createAccount`, `verifyAccount`, `resendVerification` e `getCurrentAccount` (RF-001); sessões com CSRF, limite de 3 e bloqueio de login (`createSession`, `deleteCurrentSession`, RF-002); despachante do Outbox e processo do worker com pg-boss (TS-016); planos: `createPlan` com confirmação de duplicidade (RN-016), `getPlan` com auditoria `ownership.denied`, `listPlans`, `updatePlan` com `If-Match`/ETag e `deletePlan` lógico (RF-003, TS-004, TS-005, TS-014, TS-027), com a geração de ocorrências pelo Outbox; ocorrências e respostas: `listOccurrences` com as acionáveis do titular e `createResponse` com a primeira resposta aceita e a resposta tardia (RF-004, RF-005, RF-006, TS-001, TS-007); job de prazo NO_RESPONSE a cada minuto e job horário do horizonte de 30 dias no worker (RN-009, CA-008, TS-006, TS-013, DEC-027); lembretes por e-mail com o nome do medicamento e o horário (DEC-031), com supressão e sem reenvio cego (RN-018, DEC-005, TS-017, TS-034, TS-035); histórico: `getHistory` por período civil de até 12 meses (RF-007, RN-010, CA-009); exportação em PDF: `createExport`, `listExports` (DEC-034), `getExport`, `cancelExport` e `downloadExport`, com snapshot, expiração em 24 h e armazenamento privado por porta (RF-008, RN-011, FL-005, TS-020, TS-042); conta e sessões: `updateCurrentAccount`, preferências de acessibilidade e `revokeAllSessions` com reautenticação (RF-001, RF-009, TS-044); redefinição de senha: `requestPasswordReset` neutro e `confirmPasswordReset` com token de 60 min, senha comprometida recusada e revogação das sessões (RF-002, RN-017, TS-009, TS-036); privacidade: `getPrivacy` com o canal externo configurado na implantação e `requestAccountDeletion` com reautenticação, bloqueio imediato e expurgo agendado para 30 dias (RF-010, RN-012, TS-038); job de expurgo a cada 15 minutos com tombstone de 180 dias e reconciliação de restore (RN-012, RN-019, TS-029); remoção da conta pendente com 30 dias (TS-028, DC-051); TS-023 gerado da OpenAPI cobrindo todas as 21 operações privadas (QG-009); aplicação web (Next.js, estilo neutro): entrada TL-002 e área logada inicial, com cliente da API, CSRF e mensagens do catálogo (DC-052); cadastro TL-001, confirmação de e-mail, reenvio e redefinição de senha, com textos legais provisórios (DC-053); planos TL-003 e editor de plano TL-004, com confirmação de possível duplicidade, conflito de versão, exclusão e tempo limite de 30 s no cliente (DC-054); ocorrências TL-005 na tela Hoje, com resposta TAKEN e NOT_TAKEN, consulta a cada 60 s e aviso de desconectado (DC-055); histórico TL-006 com os últimos 30 dias, período inválido e paginação (DC-056); exportação TL-007 com acompanhamento, cancelamento, download do PDF e exportações recentes (DC-057, DEC-034); privacidade TL-008 com direitos, prazos de retenção e exclusão da conta com reautenticação (DC-058); Content-Security-Policy com nonce por requisição em todas as páginas (spike S6, DC-059); conta com nome, preferências de acessibilidade aplicadas na área logada e encerramento de todas as sessões (DC-061) |
 | Testes sentinela | Parciais: TS-040 (estático) e TS-024 (puro e integração) verdes; base de banco de TS-001, TS-015, TS-016, TS-017 e TS-038 verde; TS-008, TS-023 e os testes HTTP pendentes (requerem a API); estado em `docs/specifications/P0_SENTINEL_TESTS.md` |
 | Evidências de segurança dinâmica e de desempenho | Não produzidas |
 | GX-001 a GX-006 | Abertos (responsável interino `@carlosyano`; reatribuir) |
@@ -267,6 +268,7 @@ Aprovador: Carlos Yano (`@carlosyano`), mantenedor, **em caráter interino**. A 
 | DEC-031 (pedido de 10/10/2026, aprovada no PR #37) | E-mail de lembrete com o nome do medicamento e o horário local previsto, sem dose nem link com token (altera RN-018); risco de exposição de dado de saúde aceito, sujeito ao parecer de privacidade |
 | DEC-032 (proposta de 10/10/2026, aprovação no PR) | 400 `VALIDATION_FAILED` em `createSession`, `revokeAllSessions` e `requestAccountDeletion` (OpenAPI 02.33.5, AGENTS 1.6, matriz 2.1.8); regra R19 no TS-040 |
 | DEC-033 (proposta de 14/10/2026, aprovação no PR) | Conta `PENDING_VERIFICATION` com 30 dias de cadastro removida pelo job de expurgo, sem órfãos e sem tombstone (TS-028); matriz 2.1.9 com os artefatos de teste implementados |
+| DEC-034 (decisão de 15/10/2026, aprovação no PR) | Nova operação `listExports` (`GET /exports`): pedidos de exportação do titular em todos os estados, do mais recente para o mais antigo, com cursor (OpenAPI 02.33.6, AGENTS 1.7, matriz 2.1.11) |
 | Papel de privacidade (08/10/2026) | Haverá um DPO designado; ele substitui a alternativa "jurista ou DPO" das pendências |
 
 ### 14.1 Governança de alterações
@@ -304,7 +306,7 @@ Antes de propor ou alterar código, leia integralmente:
 1. AGENTS.md
 2. PROJECT_CONTEXT.md
 3. traceability-matrix.yaml
-4. MeuRemedio_OpenAPI_02.33.5_COMPLETO.yaml
+4. MeuRemedio_OpenAPI_02.33.6_COMPLETO.yaml
 5. MeuRemedio_Especificacao_Funcional_02.33.docx
 6. ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
 7. docs/specifications/P0_SENTINEL_TESTS.md e docs/architecture/DATA_MODEL.md
