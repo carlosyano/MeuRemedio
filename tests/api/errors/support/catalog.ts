@@ -3,6 +3,7 @@
 // do Problem devolvido.
 import { randomBytes, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import type { Pool } from 'pg';
 import { expect } from 'vitest';
 import { parse } from 'yaml';
 import { PROBLEM_CATALOG } from '../../../../apps/api/src/platform/http/problem-catalog.js';
@@ -31,6 +32,25 @@ export const unknownSessionToken = (): string => randomBytes(32).toString('base6
 /** Caminho da operacao com cada parametro de caminho trocado por um UUID novo. */
 export const genericUrl = (operation: ContractOperation): string =>
   operation.path.replace(/\{[^}]+\}/g, () => randomUUID());
+
+/** Estado que uma chamada recusada nao pode alterar. */
+export const persistedState = async (pool: Pool): Promise<string> =>
+  JSON.stringify(
+    (
+      await pool.query(
+        `SELECT (SELECT count(*) FROM medication_plans) AS plans,
+                (SELECT string_agg(row_version::text, ',' ORDER BY id) FROM medication_plans)
+                  AS plan_versions,
+                (SELECT count(*) FROM responses) AS responses,
+                (SELECT count(*) FROM export_requests) AS exports,
+                (SELECT count(*) FROM sessions WHERE revoked_at IS NULL) AS sessions,
+                (SELECT count(*) FROM idempotency_records) AS idempotency,
+                (SELECT count(*) FROM outbox_events) AS outbox,
+                (SELECT string_agg(name || row_version::text || status, ',' ORDER BY id)
+                   FROM users) AS users`,
+      )
+    ).rows,
+  );
 
 interface ProblemResponse {
   readonly status: number;
