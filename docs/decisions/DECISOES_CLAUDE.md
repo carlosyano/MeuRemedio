@@ -648,3 +648,11 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Navegação:** "Conta" entra na navegação da área logada.
 - **Riscos:** fora da área logada (entrada, cadastro), as preferências não se aplicam, porque dependem da sessão. A troca de escala acontece depois do primeiro desenho da página, o que pode causar um salto visual breve.
 - **Aplica-se a:** `apps/web/src/app/conta`, `lib/accessibility.ts`, `components/app-nav.tsx`, `app/globals.css` e aos testes `tests/e2e/account.spec.ts` e `tests/unit/web-accessibility.spec.ts`.
+
+## DC-062 — Banco indisponível responde 503 DEPENDENCY_UNAVAILABLE (22/10/2026)
+
+- **Contexto:** a Especificação define o ERR-011 (`DEPENDENCY_UNAVAILABLE`, 503, "não declarar sucesso") e a OpenAPI o declara em todas as operações (DEC-026), mas não diz quais falhas o produzem. Até aqui, só `getPrivacy` sem canal externo configurado respondia 503; com o PostgreSQL fora do ar, toda operação respondia 500 `INTERNAL_ERROR`, o que trata indisponibilidade passageira como defeito.
+- **Alternativas:** (a) manter 500 para tudo que não é Problem; (b) classificar as falhas de conexão com o PostgreSQL como 503 no filtro de Problem; (c) sondar o banco antes de cada requisição.
+- **Decisão:** (b). Viram 503: erros de rede do Node.js na conexão (`ECONNREFUSED`, `ECONNRESET`, `ETIMEDOUT`, `EHOSTUNREACH`, `ENETUNREACH`, `ENOTFOUND`, `EAI_AGAIN`, `EPIPE`), tempo-limite de conexão do pool e conexão encerrada (mensagens do `pg` e do `pg-pool`), SQLSTATE da classe 08 e `57P01`, `57P02`, `57P03` e `53300`, inclusive quando chegam como causa encadeada ou dentro de `AggregateError`. O resto segue 500 (DEC-026). O 503 vai ao log como aviso, com `correlation_id`, e a resposta não traz detalhe técnico nem `Retry-After` (o contrato o permite, mas a Especificação não fixa um valor).
+- **Riscos:** uma falha de rede que não é do banco (por exemplo, de outra dependência que use os mesmos códigos) também vira 503, o que continua correto para o cliente. Falha no meio de uma transação pode ter sido confirmada pelo servidor antes da queda da conexão; a idempotência das mutações críticas cobre a repetição.
+- **Aplica-se a:** `apps/api/src/platform/db/dependency-errors.ts`, `platform/http/problem-filter.ts` e aos testes `tests/api/errors/err-011.spec.ts` e `tests/unit/dependency-errors.spec.ts`.

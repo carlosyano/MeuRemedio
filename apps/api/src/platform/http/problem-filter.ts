@@ -1,6 +1,7 @@
-// Toda excecao vira Problem do catalogo fechado (application/problem+json). Falha inesperada:
-// 500 INTERNAL_ERROR sem detalhe tecnico na resposta; o detalhe vai so para o log, com
-// correlation_id (DEC-026).
+// Toda excecao vira Problem do catalogo fechado (application/problem+json). Falha de conexao com
+// o PostgreSQL: 503 DEPENDENCY_UNAVAILABLE (ERR-011, DC-062). Falha inesperada: 500
+// INTERNAL_ERROR sem detalhe tecnico na resposta; o detalhe vai so para o log, com correlation_id
+// (DEC-026).
 import {
   Catch,
   HttpException,
@@ -9,6 +10,7 @@ import {
   type ExceptionFilter,
 } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { isDependencyUnavailable } from '../db/dependency-errors.js';
 import { correlationIdOf, instanceOf } from './correlation.js';
 import {
   ProblemError,
@@ -55,6 +57,12 @@ export class ProblemFilter implements ExceptionFilter {
       fieldErrors = exception.fieldErrors;
       headers = exception.headers;
       extensions = exception.extensions;
+    } else if (isDependencyUnavailable(exception)) {
+      code = 'DEPENDENCY_UNAVAILABLE';
+      this.logger.warn({
+        correlation_id: correlationId,
+        error: exception instanceof Error ? exception.message : typeof exception,
+      });
     } else {
       const status = statusOf(exception);
       code = status === undefined ? 'INTERNAL_ERROR' : codeForStatus(status);
