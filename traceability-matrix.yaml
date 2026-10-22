@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-matrix_version: 2.1.11
+matrix_version: 2.1.12
 status: baseline-development-and-testing
 generated_from:
   functional_specification: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -2407,8 +2407,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/deleteCurrentSession.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   getAccessibilityPreferences:
     method: GET
     path: /preferences/accessibility
@@ -2447,8 +2447,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/getAccessibilityPreferences.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   updateAccessibilityPreferences:
     method: PUT
     path: /preferences/accessibility
@@ -2496,8 +2496,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/updateAccessibilityPreferences.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   listPlans:
     method: GET
     path: /plans
@@ -2539,8 +2539,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/listPlans.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   createPlan:
     method: POST
     path: /plans
@@ -2600,8 +2600,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/createPlan.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   getPlan:
     method: GET
     path: /plans/{plan_id}
@@ -2645,8 +2645,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/getPlan.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   updatePlan:
     method: PUT
     path: /plans/{plan_id}
@@ -2705,8 +2705,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/updatePlan.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   deletePlan:
     method: DELETE
     path: /plans/{plan_id}
@@ -2756,8 +2756,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/deletePlan.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   listOccurrences:
     method: GET
     path: /occurrences
@@ -2799,8 +2799,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/listOccurrences.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   createResponse:
     method: POST
     path: /occurrences/{occurrence_id}/responses
@@ -2860,8 +2860,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/createResponse.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   getHistory:
     method: GET
     path: /history
@@ -2903,8 +2903,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/getHistory.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   createExport:
     method: POST
     path: /exports
@@ -2958,8 +2958,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/createExport.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   listExports:
     method: GET
     path: /exports
@@ -3000,8 +3000,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/listExports.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   getExport:
     method: GET
     path: /exports/{export_id}
@@ -3041,8 +3041,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/getExport.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   cancelExport:
     method: DELETE
     path: /exports/{export_id}
@@ -3093,8 +3093,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/cancelExport.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   downloadExport:
     method: GET
     path: /exports/{export_id}/file
@@ -3143,8 +3143,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/downloadExport.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   getPrivacy:
     method: GET
     path: /privacy
@@ -3185,8 +3185,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/getPrivacy.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   requestAccountDeletion:
     method: POST
     path: /account-deletions
@@ -3241,8 +3241,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/requestAccountDeletion.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   getHealth:
     method: GET
     path: /health
@@ -3307,8 +3307,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/getCurrentAccount.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   updateCurrentAccount:
     method: PUT
     path: /accounts/me
@@ -3356,8 +3356,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/updateCurrentAccount.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
   revokeAllSessions:
     method: POST
     path: /sessions/revocations
@@ -3406,8 +3406,8 @@ operations:
       sentinel_tests:
       - TS-008
       - TS-023
-      test_artifact: tests/security/ownership/revokeAllSessions.ownership.spec.ts
-      status: planned
+      test_artifact: tests/security/ts-023.spec.ts
+      status: implemented
 validation_rules:
 - id: TR-001
   description: Todo operationId da OpenAPI deve existir em operations.
@@ -4629,7 +4629,7 @@ errors:
     - updatePlan
     - verifyAccount
     negative_test_artifact: tests/api/errors/err-001.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4662,7 +4662,7 @@ errors:
     - updateCurrentAccount
     - updatePlan
     negative_test_artifact: tests/api/errors/err-002.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4680,7 +4680,7 @@ errors:
     - getPlan
     - updatePlan
     negative_test_artifact: tests/api/errors/err-003.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4692,7 +4692,7 @@ errors:
     operationIds:
     - createSession
     negative_test_artifact: tests/api/errors/err-004.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4704,7 +4704,7 @@ errors:
     operationIds:
     - updatePlan
     negative_test_artifact: tests/api/errors/err-005.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4722,7 +4722,7 @@ errors:
     - requestAccountDeletion
     - revokeAllSessions
     negative_test_artifact: tests/api/errors/err-006.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4737,7 +4737,7 @@ errors:
     - createResponse
     - verifyAccount
     negative_test_artifact: tests/api/errors/err-007.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4750,7 +4750,7 @@ errors:
     - verifyAccount
     - confirmPasswordReset
     negative_test_artifact: tests/api/errors/err-008.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4764,7 +4764,7 @@ errors:
     - createPlan
     - updatePlan
     negative_test_artifact: tests/api/errors/err-009.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4802,7 +4802,7 @@ errors:
     - updatePlan
     - verifyAccount
     negative_test_artifact: tests/api/errors/err-010.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4841,7 +4841,7 @@ errors:
     - updatePlan
     - verifyAccount
     negative_test_artifact: tests/api/errors/err-011.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4853,7 +4853,7 @@ errors:
     operationIds:
     - downloadExport
     negative_test_artifact: tests/api/errors/err-012.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4865,7 +4865,7 @@ errors:
     operationIds:
     - createSession
     negative_test_artifact: tests/api/errors/err-013.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4877,7 +4877,7 @@ errors:
     operationIds:
     - createPlan
     negative_test_artifact: tests/api/errors/err-014.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4899,7 +4899,7 @@ errors:
     - updateCurrentAccount
     - updatePlan
     negative_test_artifact: tests/api/errors/err-015.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
@@ -4938,7 +4938,7 @@ errors:
     - updatePlan
     - verifyAccount
     negative_test_artifact: tests/api/errors/err-016.spec.ts
-    status: planned
+    status: implemented
     provenance:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       source_section: 'Seção 8: Matriz de Erros/Exceções'
