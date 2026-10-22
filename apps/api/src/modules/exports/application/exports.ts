@@ -1,5 +1,7 @@
-// createExport, getExport, cancelExport e downloadExport (RF-008, RN-011, FL-005; CA-010, CA-011,
-// CA-016; TS-008, TS-011, TS-023, TS-038, TS-042; DC-042).
+// createExport, listExports, getExport, cancelExport e downloadExport (RF-008, RN-011, FL-005;
+// CA-010, CA-011, CA-016; TS-008, TS-011, TS-023, TS-038, TS-042; DC-042, DEC-034).
+//   - listExports: pedidos do titular em todos os estados, do mais recente para o mais antigo
+//     (requested_at, id), com o cursor da DC-030;
 //   - createExport: periodo de ate 12 meses (DC-041) ou 422 BUSINESS_RULE_VIOLATION em end_date;
 //     Idempotency-Key no escopo do titular; pedido REQUESTED e evento exports.requested no Outbox
 //     na mesma transacao; 202;
@@ -16,6 +18,7 @@ import type { Pool, PoolClient } from 'pg';
 import { recordAudit } from '../../../platform/audit/audit.js';
 import type { Clock } from '../../../platform/clock.js';
 import { withTransaction } from '../../../platform/db/transaction.js';
+import { decodeCursor, pageOf, type PageMeta } from '../../../platform/http/keyset-cursor.js';
 import { ProblemError } from '../../../platform/http/problem-catalog.js';
 import {
   runIdempotent,
@@ -40,6 +43,11 @@ export interface ExportView {
   readonly failure_reason: 'TECHNICAL_FAILURE' | 'ACCOUNT_NOT_ACTIVE' | null;
 }
 
+export interface ExportPage {
+  readonly items: ExportView[];
+  readonly page: PageMeta;
+}
+
 export interface CreateExportRequest {
   readonly start_date: string;
   readonly end_date: string;
@@ -57,11 +65,14 @@ interface ExportRow {
   failure_reason: ExportView['failure_reason'];
   file_object_key: string | null;
   file_sha256: Buffer | null;
+  /** requested_at com microssegundos, para o cursor. */
+  requested_at_us: string;
 }
 
 const EXPORT_COLUMNS = `id, user_id, status, to_char(start_date, 'YYYY-MM-DD') AS start_date,
   to_char(end_date, 'YYYY-MM-DD') AS end_date, requested_at, completed_at, expires_at,
-  failure_reason, file_object_key, file_sha256`;
+  failure_reason, file_object_key, file_sha256,
+  to_char(requested_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS requested_at_us`;
 
 const instantOf = (value: Date): string => value.toISOString().replace('.000Z', 'Z');
 
@@ -154,6 +165,28 @@ export class Exports {
       ),
     );
     return response;
+  }
+
+  async list(userId: string, cursor: string | undefined, limit: number): Promise<ExportPage> {
+    const now = this.clock.now();
+    const after = cursor === undefined ? null : decodeCursor(cursor);
+    const rows = (
+      await this.pool.query<ExportRow>(
+        `SELECT ${EXPORT_COLUMNS}
+           FROM export_requests
+          WHERE user_id = $1
+            AND ($2::timestamptz IS NULL OR (requested_at, id) < ($2::timestamptz, $3::uuid))
+          ORDER BY requested_at DESC, id DESC
+          LIMIT $4`,
+        [userId, after?.t ?? null, after?.i ?? null, limit + 1],
+      )
+    ).rows;
+    return pageOf(
+      rows,
+      limit,
+      (row) => toExportView(row, now),
+      (row) => ({ t: row.requested_at_us, i: row.id }),
+    );
   }
 
   async get(userId: string, exportId: string, correlationId: string): Promise<ExportView> {

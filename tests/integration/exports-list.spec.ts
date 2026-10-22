@@ -47,6 +47,7 @@ interface ExportPage {
   page: { next_cursor: string | null; limit: number };
 }
 
+// Intervalos curtos: a sessao expira com 30 min de inatividade (RN-004).
 async function requestExport(session: LoggedIn, at: string): Promise<ExportBody> {
   h.now = at;
   const response = await h.call('createExport', 'POST', '/exports', {
@@ -69,8 +70,8 @@ describe('listExports (DEC-034)', () => {
 
   it('pedidos do titular, do mais recente para o mais antigo, sem os de outro titular', async () => {
     const first = await requestExport(ana, '2026-10-05T07:00:00Z');
-    const second = await requestExport(ana, '2026-10-05T08:00:00Z');
-    await requestExport(bruno, '2026-10-05T09:00:00Z');
+    const second = await requestExport(ana, '2026-10-05T07:05:00Z');
+    await requestExport(bruno, '2026-10-05T07:10:00Z');
     const response = await list(ana);
     expect(response.status).toBe(200);
     const page = response.body as ExportPage;
@@ -93,7 +94,7 @@ describe('listExports (DEC-034)', () => {
 
   it('paginacao por cursor: limit e next_cursor ate o fim', async () => {
     const created = [];
-    for (const at of ['2026-10-05T07:00:00Z', '2026-10-05T08:00:00Z', '2026-10-05T09:00:00Z']) {
+    for (const at of ['2026-10-05T07:00:00Z', '2026-10-05T07:05:00Z', '2026-10-05T07:10:00Z']) {
       created.push(await requestExport(ana, at));
     }
     const first = (await list(ana, '?limit=2')).body as ExportPage;
