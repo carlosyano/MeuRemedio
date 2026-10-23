@@ -5,7 +5,7 @@
 ## 1. Princípios
 
 - Acesso operacional por papéis IAM dedicados, com MFA, fora da API HTTP; a API tem um único papel (TITULAR).
-- Toda ação operacional executa por script versionado em `tools/scripts/ops/` e gera `audit_events` (ator, ação, resultado, `correlation_id`).
+- Toda ação operacional executa por script versionado (`npm run ops -- <comando>`, código em `apps/api/src/ops`, com `DATABASE_URL` e o principal IAM em `OPS_OPERATOR`) e gera `audit_events` (ator, ação, resultado, `correlation_id`).
 - Nenhum dado de saúde, e-mail completo, token ou conteúdo da solicitação em logs (RNF-008, TS-032).
 - Dados reais de titulares nunca são usados em desenvolvimento ou por agentes de IA (AGENTS.md §15).
 
@@ -15,12 +15,21 @@
 |---|---|---|
 | 1. Recebimento | Pedido chega ao canal externo aprovado em GX-002 (o canal é exposto em `getPrivacy.external_channel`). | Mensagem arquivada no canal |
 | 2. Protocolo | Script `rights:register` cria o registro com protocolo `DSR-AAAAMMDD-NNNN`, tipo (`ACCESS`, `CORRECTION`, `DELETION`, `PORTABILITY`, `OPPOSITION`, `OTHER`), `due_at` conforme GX-002. | Linha em `external_rights_requests` |
+| 2a. Andamento | Script `rights:advance` muda o status só para a frente (`RECEIVED` → `IN_PROGRESS` → `ANSWERED` → `CLOSED`); `ANSWERED` grava `answered_at`. | `audit_events` (`rights.request_updated`) |
 | 3. Verificação | Confirmar identidade a partir do e-mail da conta, sem pedir dados de saúde. | Registro de verificação |
 | 4. Execução | Acesso/portabilidade: usar o fluxo de exportação do titular quando possível. Exclusão: orientar o fluxo `requestAccountDeletion` ou executar `account:request-deletion` com auditoria. Correção de e-mail: script com dupla verificação que revoga todas as sessões. | `audit_events` |
 | 5. Resposta | Responder pelo canal externo citando o protocolo. | Cópia da resposta |
 | 6. Encerramento | Status `ANSWERED` e depois `CLOSED`. | `answered_at` preenchido |
 
 O conteúdo da solicitação permanece no canal externo; o banco guarda apenas protocolo, tipo, datas e status.
+
+Uso dos scripts (DC-066). O e-mail da conta, quando houver, entra só pela entrada padrão e serve para ligar o `user_id`; ele não é gravado, auditado nem impresso. A saída é uma linha JSON com o protocolo, e os erros não repetem os valores recebidos. Códigos de saída: 0 (sucesso), 2 (uso inválido) e 3 (recusa do procedimento).
+
+```bash
+printf '%s' 'email.da.conta@example.com' | npm run ops -- rights:register --channel email-privacidade \
+  --type ACCESS --received-at 2026-10-23T09:15:00-03:00 --due-at <prazo GX-002> --email-stdin
+npm run ops -- rights:advance --protocol DSR-20261023-0001 --status IN_PROGRESS
+```
 
 ## 3. Incidentes de segurança (RF-012, ENT-015)
 
