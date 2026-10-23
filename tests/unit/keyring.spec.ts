@@ -24,7 +24,8 @@ describe('keyringOf e hmacDigest', () => {
 
   it('os digests aceitos sao o da chave atual seguido dos das anteriores', () => {
     const digest = hmacDigest(keyringOf(current, [old]), 'x');
-    expect(acceptedDigests(digest)).toEqual([hmac(current, 'x'), hmac(old, 'x')]);
+    const hex = (buffers: Buffer[]) => buffers.map((buffer) => buffer.toString('hex'));
+    expect(hex(acceptedDigests(digest))).toEqual(hex([hmac(current, 'x'), hmac(old, 'x')]));
   });
 
   it('sem chaves anteriores, so o digest atual e aceito', () => {

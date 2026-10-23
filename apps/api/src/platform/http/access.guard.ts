@@ -91,9 +91,10 @@ export class AccessGuard implements CanActivate {
   ): boolean {
     const header = headerOf(request, 'x-csrf-token');
     const cookie = cookies[CSRF_COOKIE];
-    const expected = this.sessionService.csrfTokenFor(session.sessionId);
-    if (header === undefined || cookie === undefined) return false;
-    if (!sameText(header, expected) || !sameText(cookie, expected)) return false;
+    if (header === undefined || cookie === undefined || !sameText(header, cookie)) return false;
+    // Durante a rotacao, o token pela chave anterior tambem vale (TS-031, DC-065).
+    const accepted = this.sessionService.acceptedCsrfTokens(session.sessionId);
+    if (!accepted.some((token) => sameText(cookie, token))) return false;
     const origin = headerOf(request, 'origin');
     if (origin !== undefined) return this.origins.has(origin);
     return headerOf(request, 'sec-fetch-site') === 'same-origin';

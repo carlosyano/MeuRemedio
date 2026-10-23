@@ -8,11 +8,12 @@
 //   - logout: revoga a sessao atual (LOGOUT).
 import type { Pool } from 'pg';
 import type { Clock } from '../../../platform/clock.js';
+import { asKeyring, type Keyring } from '../../../platform/crypto/keyring.js';
 import { withTransaction } from '../../../platform/db/transaction.js';
 import { ProblemError } from '../../../platform/http/problem-catalog.js';
 import type { PasswordHasher } from '../infrastructure/password-hasher.js';
 import {
-  csrfTokenFor,
+  csrfTokensFor,
   hashSessionToken,
   isSessionToken,
   newSessionToken,
@@ -39,14 +40,17 @@ const iso = (epochMs: number): string => new Date(epochMs).toISOString();
 
 export class Sessions {
   private dummyHash: Promise<string> | undefined;
+  private readonly csrfKey: Keyring;
 
   constructor(
     private readonly pool: Pool,
     private readonly clock: Clock,
     private readonly passwords: PasswordHasher,
     private readonly throttle: LoginThrottle,
-    private readonly csrfKey: Buffer,
-  ) {}
+    csrfKey: Buffer | Keyring,
+  ) {
+    this.csrfKey = asKeyring(csrfKey);
+  }
 
   async create(email: string, password: string): Promise<CreatedSession> {
     const normalized = email.trim().toLowerCase();
@@ -108,7 +112,7 @@ export class Sessions {
         absolute_expires_at: iso(nowMs + ABSOLUTE_MS),
       },
       token,
-      csrf: csrfTokenFor(sessionId, this.csrfKey),
+      csrf: this.csrfTokenFor(sessionId),
     };
   }
 
@@ -153,8 +157,14 @@ export class Sessions {
     return { sessionId: row.id, userId: row.user_id };
   }
 
+  /** Token CSRF emitido para a sessao (chave atual). */
   csrfTokenFor(sessionId: string): string {
-    return csrfTokenFor(sessionId, this.csrfKey);
+    return this.acceptedCsrfTokens(sessionId)[0] ?? '';
+  }
+
+  /** Tokens CSRF aceitos para a sessao: o atual e os das chaves anteriores (TS-031). */
+  acceptedCsrfTokens(sessionId: string): string[] {
+    return csrfTokensFor(sessionId, this.csrfKey);
   }
 
   async revoke(sessionId: string): Promise<void> {

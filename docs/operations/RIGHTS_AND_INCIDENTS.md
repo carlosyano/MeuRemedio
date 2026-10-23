@@ -28,7 +28,7 @@ O conteúdo da solicitação permanece no canal externo; o banco guarda apenas p
 |---|---|
 | Detecção e triagem | Alerta de observabilidade, achado de segurança ou relato. Classificar `LOW`, `MEDIUM`, `HIGH` ou `CRITICAL`. |
 | Registro | Script `incident:open` grava em `incident_records` (schema `security`), sem dados de titulares; evidências vão para cofre segregado e só a referência é gravada. |
-| Contenção | Revogar sessões (em lote), rotacionar segredos e chaves, desativar feature flag, bloquear acesso afetado. |
+| Contenção | Revogar sessões (em lote), rotacionar segredos e chaves (`docs/operations/KEY_ROTATION.md` §3), desativar feature flag, bloquear acesso afetado. |
 | Preservação | Snapshot de logs e artefatos em armazenamento com retenção imutável; cadeia de custódia registrada. |
 | Decisão | O controlador decide sobre comunicação à autoridade e aos titulares (GX-001, GX-006); a decisão fica em `decision_summary`. |
 | Encerramento | Relatório pós-incidente, ações corretivas e `closed_at`. |
