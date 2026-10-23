@@ -13,7 +13,12 @@ export default defineConfig({
     projects: [
       {
         resolve,
-        test: { name: 'unit', include: ['tests/unit/**/*.spec.ts'], environment: 'node' },
+        test: {
+          name: 'unit',
+          // tests/performance: validacao pura da evidencia de desempenho contra o perfil (TS-039).
+          include: ['tests/unit/**/*.spec.ts', 'tests/performance/**/*.spec.ts'],
+          environment: 'node',
+        },
       },
       {
         resolve,
