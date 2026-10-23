@@ -1,4 +1,4 @@
-// @trace ENT-001 ENT-002 ENT-003 ENT-004 ENT-005 ENT-006 ENT-007 ENT-008 ENT-009 ENT-010 ENT-011 ENT-012 ENT-013 ENT-014 ENT-016 ENT-017 DEC-019
+// @trace ENT-001 ENT-002 ENT-003 ENT-004 ENT-005 ENT-006 ENT-007 ENT-008 ENT-009 ENT-010 ENT-011 ENT-012 ENT-013 ENT-014 ENT-015 ENT-016 ENT-017 DEC-019
 // Schemas Drizzle x migracoes SQL (ADR-001 v1.5 OA-001; AGENTS.md §12.1: sem divergencia entre o
 // conjunto de migracoes e o esquema efetivo). Rastreia as entidades do DATA_MODEL mapeadas.
 // O SQL e a fonte do esquema; o Drizzle e apenas o mapeamento tipado e precisa coincidir com o banco
@@ -48,6 +48,16 @@ function normalizeType(type: string): string {
   return type.replace(/^character varying/, 'varchar').replace(/^time without time zone$/, 'time');
 }
 
+// Enum de outro schema: o catalogo qualifica (security.nome) e o Drizzle nao.
+const unqualified = (type: string): string => type.replace(/^security\./, '');
+
+// Tabelas fora do public (ENT-015 no schema segregado security) vao qualificadas.
+const SCHEMAS = ['public', 'security'];
+const qualifiedName = (table: PgTable): string => {
+  const config = getTableConfig(table);
+  return config.schema === undefined ? config.name : `${config.schema}.${config.name}`;
+};
+
 async function databaseColumns(table: string): Promise<Record<string, ColumnShape>> {
   const result = await pool.query<{
     name: string;
@@ -71,7 +81,7 @@ async function databaseColumns(table: string): Promise<Record<string, ColumnShap
     result.rows.map((r) => [
       r.name,
       {
-        type: normalizeType(r.type),
+        type: unqualified(normalizeType(r.type)),
         notNull: r.not_null,
         hasDefault: r.has_default,
         primary: r.primary,
@@ -100,18 +110,21 @@ function drizzleColumns(table: PgTable): Record<string, ColumnShape> {
 describe('schemas Drizzle coincidem com as migracoes SQL', () => {
   it('cada tabela do banco tem schema Drizzle e vice-versa', async () => {
     const result = await pool.query<{ name: string }>(
-      `SELECT tablename AS name FROM pg_tables
-        WHERE schemaname = 'public' AND tablename <> 'schema_migrations'`,
+      `SELECT CASE schemaname WHEN 'public' THEN tablename
+              ELSE schemaname || '.' || tablename END AS name
+         FROM pg_tables
+        WHERE schemaname = ANY($1) AND tablename <> 'schema_migrations'`,
+      [SCHEMAS],
     );
     const fromDb = result.rows.map((r) => r.name).sort();
-    const fromDrizzle = tables.map((t) => getTableConfig(t).name).sort();
+    const fromDrizzle = tables.map(qualifiedName).sort();
     expect(fromDrizzle).toEqual(fromDb);
   });
 
   it('as colunas coincidem em tipo, nulidade, default e chave primaria', async () => {
     expect(tables.length).toBeGreaterThan(0);
     for (const table of tables) {
-      const name = getTableConfig(table).name;
+      const name = qualifiedName(table);
       expect(drizzleColumns(table), name).toEqual(await databaseColumns(name));
     }
   });
