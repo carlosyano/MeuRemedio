@@ -1,6 +1,6 @@
 // Mapeamento Drizzle de ENT-011 idempotency_records e ENT-012 outbox_events (migracao 0002_platform)
 // da tabela de plataforma rate_limit_counters (migracao 0003_identity, DEC-019) e de ENT-013
-// audit_events (migracao 0005_plans).
+// audit_events (migracao 0005_plans) e de ENT-017 performance_profiles (migracao 0011).
 // O SQL e a fonte do esquema: as regras de idempotencia e de tamanho vivem na migracao.
 import { sql } from 'drizzle-orm';
 import {
@@ -69,4 +69,16 @@ export const auditEvents = pgTable('audit_events', {
   outcome: auditOutcome('outcome').notNull(),
   correlationId: uuid('correlation_id').notNull(),
   metadata: jsonb('metadata').$type<JsonObject>(),
+});
+
+export const performanceProfiles = pgTable('performance_profiles', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  profileKey: varchar('profile_key').notNull(),
+  version: integer('version').notNull(),
+  definition: jsonb('definition').$type<JsonObject>().notNull(),
+  // SHA-256 do JSON canonico da definicao (platform/performance/profile.ts).
+  definitionSha256: bytea('definition_sha256').notNull(),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  approvedBy: varchar('approved_by'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });

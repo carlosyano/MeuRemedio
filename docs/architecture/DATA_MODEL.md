@@ -421,6 +421,8 @@ Perfil versionado e reproduzível de desempenho.
 
 **Constraints e índices:**
 - UNIQUE(profile_key,version)
+- Perfil registrado é imutável (trigger `performance_profiles_immutable`); a única escrita posterior aceita é aprovar uma vez o perfil que ainda não tem aprovação (DC-064)
+- Migração: `0011_performance_profiles.sql`
 
 ## 4. Tabelas de plataforma
 
@@ -447,7 +449,8 @@ Perfil versionado e reproduzível de desempenho.
 | `apps/api/migrations/0006_reminders.sql` | ENT-009 `email_reminders` (DC-040) | Implementada e coberta por `tests/integration/db-reminders.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0007_exports.sql` | ENT-010 `export_requests` (DC-042) | Implementada e coberta por `tests/integration/db-exports.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0010_exports_list.sql` | Índice `export_requests_user_requested_idx` de ENT-010 (`listExports`, DEC-034) | Implementada e coberta por `tests/integration/exports-list.spec.ts` (PostgreSQL 17 real) |
-| Demais entidades | ENT-003, ENT-014 a ENT-017 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
+| `apps/api/migrations/0011_performance_profiles.sql` | ENT-017 `performance_profiles` (imutável depois de registrado, DC-064) | Implementada e coberta por `tests/integration/db-performance.spec.ts` (PostgreSQL 17 real) |
+| Demais entidades | ENT-003, ENT-015 e ENT-016 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
 
 **Rollback:** as migrações criam apenas objetos novos, sem dados nem dependentes externos; o rollback é uma migração nova que remove os objetos criados (a lista está no cabeçalho de cada arquivo). Uma migração aplicada nunca é editada.
 
