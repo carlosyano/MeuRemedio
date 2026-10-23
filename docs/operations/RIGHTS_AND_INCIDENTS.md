@@ -42,6 +42,15 @@ npm run ops -- rights:advance --protocol DSR-20261023-0001 --status IN_PROGRESS
 | Decisão | O controlador decide sobre comunicação à autoridade e aos titulares (GX-001, GX-006); a decisão fica em `decision_summary`. |
 | Encerramento | Relatório pós-incidente, ações corretivas e `closed_at`. |
 
+Scripts (DC-067): `incident:open` (severidade, resumo e referência da evidência), `incident:contain`, `incident:resolve` e `incident:close` (estados só para a frente: `OPEN` → `CONTAINED` → `RESOLVED` → `CLOSED`), `incident:decide` (registra ou revisa a decisão até o encerramento, que a exige) e `incident:report` (relatório pós-incidente com o registro e a linha do tempo da auditoria). O resumo, a decisão e a referência recusam e-mail e CPF, e a auditoria leva só o operador, a severidade ou o estado.
+
+```bash
+npm run ops -- incident:open --severity HIGH --summary 'Credencial de servico exposta em log de build' \
+  --evidence-ref cofre://incidentes/2026-10-23/build-log
+npm run ops -- incident:contain --id <uuid>
+npm run ops -- incident:report --id <uuid>
+```
+
 Cobertura de teste: TS-030 (registro, contenção, decisão e relatório) e TS-032 (protocolo sem exposição em logs).
 
 ## 4. Pendências

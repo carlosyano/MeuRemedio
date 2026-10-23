@@ -48,8 +48,8 @@ function normalizeType(type: string): string {
   return type.replace(/^character varying/, 'varchar').replace(/^time without time zone$/, 'time');
 }
 
-// Enum de outro schema: o catalogo escreve security.nome e o Drizzle "security"."nome".
-const unquoted = (type: string): string => type.replace(/"/g, '');
+// Enum de outro schema: o catalogo qualifica (security.nome) e o Drizzle nao.
+const unqualified = (type: string): string => type.replace(/^security\./, '');
 
 // Tabelas fora do public (ENT-015 no schema segregado security) vao qualificadas.
 const SCHEMAS = ['public', 'security'];
@@ -81,7 +81,7 @@ async function databaseColumns(table: string): Promise<Record<string, ColumnShap
     result.rows.map((r) => [
       r.name,
       {
-        type: normalizeType(r.type),
+        type: unqualified(normalizeType(r.type)),
         notNull: r.not_null,
         hasDefault: r.has_default,
         primary: r.primary,
@@ -98,7 +98,7 @@ function drizzleColumns(table: PgTable): Record<string, ColumnShape> {
     config.columns.map((c) => [
       c.name,
       {
-        type: unquoted(c.getSQLType()),
+        type: c.getSQLType(),
         notNull: c.notNull,
         hasDefault: c.hasDefault,
         primary: c.primary || composite.has(c.name),

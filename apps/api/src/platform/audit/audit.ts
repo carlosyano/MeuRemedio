@@ -8,7 +8,13 @@ export type AuditAction =
   | 'account.deletion_requested'
   // Scripts operacionais de direitos do titular (RF-011, DC-066).
   | 'rights.request_registered'
-  | 'rights.request_updated';
+  | 'rights.request_updated'
+  // Scripts operacionais de incidente de seguranca (RF-012, DC-067).
+  | 'incident.opened'
+  | 'incident.contained'
+  | 'incident.resolved'
+  | 'incident.decided'
+  | 'incident.closed';
 
 export interface AuditEvent {
   /** Id gerado pelo chamador quando ele precisa referenciar o evento; por padrao, o do banco. */
@@ -17,7 +23,12 @@ export interface AuditEvent {
   readonly actorUserId: string | null;
   readonly action: AuditAction;
   readonly resourceType:
-    'medication_plan' | 'occurrence' | 'export_request' | 'user_account' | 'rights_request';
+    | 'medication_plan'
+    | 'occurrence'
+    | 'export_request'
+    | 'user_account'
+    | 'rights_request'
+    | 'incident';
   readonly resourceId: string | null;
   readonly outcome: 'SUCCESS' | 'DENIED' | 'FAILED';
   readonly correlationId: string;

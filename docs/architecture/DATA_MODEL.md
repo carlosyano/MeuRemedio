@@ -382,6 +382,8 @@ Registro segregado de incidente de segurança.
 
 **Constraints e índices:**
 - Schema segregado `security`; acesso por papel IAM operacional, sem exposição na API HTTP
+- CHECKs: `summary` de 1 a 500, `evidence_ref` até 512, `decision_summary` até 1000 e obrigatória em `CLOSED`; `closed_at` exatamente em `CLOSED` e não antes de `opened_at` (DC-067)
+- Migração: `0013_incidents.sql` (os GRANTs do papel operacional entram com a infraestrutura)
 
 ### ENT-016 — `external_rights_requests`
 
@@ -453,7 +455,8 @@ Perfil versionado e reproduzível de desempenho.
 | `apps/api/migrations/0010_exports_list.sql` | Índice `export_requests_user_requested_idx` de ENT-010 (`listExports`, DEC-034) | Implementada e coberta por `tests/integration/exports-list.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0011_performance_profiles.sql` | ENT-017 `performance_profiles` (imutável depois de registrado, DC-064) | Implementada e coberta por `tests/integration/db-performance.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0012_rights_requests.sql` | ENT-016 `external_rights_requests` (DC-066) | Implementada e coberta por `tests/integration/db-rights.spec.ts` e `tests/security/ts-032.spec.ts` (PostgreSQL 17 real) |
-| Demais entidades | ENT-003 e ENT-015 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
+| `apps/api/migrations/0013_incidents.sql` | ENT-015 `security.incident_records` (DC-067) | Implementada e coberta por `tests/integration/db-incidents.spec.ts` e `tests/security/ts-030.spec.ts` (PostgreSQL 17 real) |
+| Demais entidades | ENT-003 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
 
 **Rollback:** as migrações criam apenas objetos novos, sem dados nem dependentes externos; o rollback é uma migração nova que remove os objetos criados (a lista está no cabeçalho de cada arquivo). Uma migração aplicada nunca é editada.
 
