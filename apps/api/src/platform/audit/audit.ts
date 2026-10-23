@@ -3,7 +3,12 @@
 import type { Pool, PoolClient } from 'pg';
 
 /** Catalogo fechado de acoes auditadas. */
-export type AuditAction = 'ownership.denied' | 'account.deletion_requested';
+export type AuditAction =
+  | 'ownership.denied'
+  | 'account.deletion_requested'
+  // Scripts operacionais de direitos do titular (RF-011, DC-066).
+  | 'rights.request_registered'
+  | 'rights.request_updated';
 
 export interface AuditEvent {
   /** Id gerado pelo chamador quando ele precisa referenciar o evento; por padrao, o do banco. */
@@ -11,17 +16,20 @@ export interface AuditEvent {
   readonly occurredAt: string;
   readonly actorUserId: string | null;
   readonly action: AuditAction;
-  readonly resourceType: 'medication_plan' | 'occurrence' | 'export_request' | 'user_account';
+  readonly resourceType:
+    'medication_plan' | 'occurrence' | 'export_request' | 'user_account' | 'rights_request';
   readonly resourceId: string | null;
   readonly outcome: 'SUCCESS' | 'DENIED' | 'FAILED';
   readonly correlationId: string;
+  /** Contexto minimizado (ex.: operador e protocolo); nunca e-mail, senha, token ou dado de saude. */
+  readonly metadata?: Readonly<Record<string, string>>;
 }
 
 export async function recordAudit(db: Pool | PoolClient, event: AuditEvent): Promise<void> {
   await db.query(
     `INSERT INTO audit_events (id, occurred_at, actor_user_id, action, resource_type, resource_id,
-                               outcome, correlation_id)
-     VALUES (COALESCE($8::uuid, gen_random_uuid()), $1, $2, $3, $4, $5, $6, $7)`,
+                               outcome, correlation_id, metadata)
+     VALUES (COALESCE($8::uuid, gen_random_uuid()), $1, $2, $3, $4, $5, $6, $7, $9)`,
     [
       event.occurredAt,
       event.actorUserId,
@@ -31,6 +39,7 @@ export async function recordAudit(db: Pool | PoolClient, event: AuditEvent): Pro
       event.outcome,
       event.correlationId,
       event.id ?? null,
+      event.metadata === undefined ? null : JSON.stringify(event.metadata),
     ],
   );
 }

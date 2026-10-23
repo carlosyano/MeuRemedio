@@ -403,6 +403,8 @@ Protocolo de solicitação externa de direito.
 **Constraints e índices:**
 - UNIQUE(protocol)
 - Conteúdo da solicitação permanece no canal externo; nada de PII em logs (TS-032)
+- Protocolo pelo dia UTC do recebimento; `answered_at` preenchido exatamente em `ANSWERED` e `CLOSED`; índice dos pedidos em aberto por `due_at` (DC-066)
+- Migração: `0012_rights_requests.sql`
 
 ### ENT-017 — `performance_profiles`
 
@@ -450,7 +452,8 @@ Perfil versionado e reproduzível de desempenho.
 | `apps/api/migrations/0007_exports.sql` | ENT-010 `export_requests` (DC-042) | Implementada e coberta por `tests/integration/db-exports.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0010_exports_list.sql` | Índice `export_requests_user_requested_idx` de ENT-010 (`listExports`, DEC-034) | Implementada e coberta por `tests/integration/exports-list.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0011_performance_profiles.sql` | ENT-017 `performance_profiles` (imutável depois de registrado, DC-064) | Implementada e coberta por `tests/integration/db-performance.spec.ts` (PostgreSQL 17 real) |
-| Demais entidades | ENT-003, ENT-015 e ENT-016 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
+| `apps/api/migrations/0012_rights_requests.sql` | ENT-016 `external_rights_requests` (DC-066) | Implementada e coberta por `tests/integration/db-rights.spec.ts` e `tests/security/ts-032.spec.ts` (PostgreSQL 17 real) |
+| Demais entidades | ENT-003 e ENT-015 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
 
 **Rollback:** as migrações criam apenas objetos novos, sem dados nem dependentes externos; o rollback é uma migração nova que remove os objetos criados (a lista está no cabeçalho de cada arquivo). Uma migração aplicada nunca é editada.
 
