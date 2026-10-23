@@ -57,6 +57,7 @@ import { OPERATION_ID } from './platform/http/operation-id.js';
 import { ProblemFilter } from './platform/http/problem-filter.js';
 import { createRequestHasher } from './platform/idempotency/idempotency.js';
 import { PostgresRateLimiter, type RateLimits } from './platform/rate-limit/rate-limiter.js';
+import { secretKeyrings, type AppSecrets } from './platform/secrets.js';
 import {
   unconfiguredObjectStorage,
   type ObjectStorage,
@@ -73,21 +74,16 @@ const CONTROLLERS: Type[] = [
   PrivacyController,
 ];
 
+export type { AppSecrets } from './platform/secrets.js';
+
 export interface CreateAppOptions {
   readonly clock: Clock;
   /** PostgreSQL. */
   readonly database: Pool;
   /** Banco sondado por getHealth; por padrao, `database` (os testes trocam por um que trava). */
   readonly healthProbeDatabase?: Queryable;
-  /** Segredos do servidor (Secrets Manager em producao). */
-  readonly secrets: {
-    /** Chave do HMAC do hash de requisicao idempotente (DC-012), 32 bytes ou mais. */
-    readonly requestHashKey: Buffer;
-    /** Pepper do HMAC do e-mail normalizado (bloqueio de login, DEC-016; tombstone, RN-019). */
-    readonly emailPepper: Buffer;
-    /** Chave do HMAC do token CSRF vinculado a sessao (OA-008). */
-    readonly csrfKey: Buffer;
-  };
+  /** Segredos do servidor (Secrets Manager em producao), com as chaves anteriores da rotacao. */
+  readonly secrets: AppSecrets;
   /** Armazenamento privado dos PDFs (ENT-010); sem ele, o download falha. */
   readonly storage?: ObjectStorage;
   /** Canal externo de direitos do titular (GX-002), exposto por getPrivacy; sem ele, 503. */
@@ -113,7 +109,8 @@ class AppModule {
       clockSkewMaxMs: options.clockSkewMaxMs ?? DEFAULT_CLOCK_SKEW_MAX_MS,
       probeTimeoutMs: options.healthProbeTimeoutMs ?? DEFAULT_HEALTH_PROBE_TIMEOUT_MS,
     };
-    const hashRequest = createRequestHasher(options.secrets.requestHashKey);
+    const keys = secretKeyrings(options.secrets);
+    const hashRequest = createRequestHasher(keys.requestHashKey);
     return {
       module: AppModule,
       imports: [DiscoveryModule],
@@ -130,7 +127,7 @@ class AppModule {
             options.clock,
             hashRequest,
             argon2idPasswordHasher,
-            new LoginThrottle(options.database, options.secrets.emailPepper),
+            new LoginThrottle(options.database, keys.emailPepper),
           ),
         },
         {
@@ -160,7 +157,7 @@ class AppModule {
             options.clock,
             hashRequest,
             argon2idPasswordHasher,
-            new LoginThrottle(options.database, options.secrets.emailPepper),
+            new LoginThrottle(options.database, keys.emailPepper),
           ),
         },
         { provide: Sessions, useValue: sessions },
@@ -179,7 +176,7 @@ class AppModule {
             options.clock,
             argon2idPasswordHasher,
             loadCompromisedPasswords(),
-            new LoginThrottle(options.database, options.secrets.emailPepper),
+            new LoginThrottle(options.database, keys.emailPepper),
           ),
         },
         {
@@ -254,12 +251,13 @@ function declaredRoutes(app: NestFastifyApplication): DeclaredRoute[] {
 
 export async function createApp(options: CreateAppOptions): Promise<NestFastifyApplication> {
   const contract = options.contract ?? OpenApiContract.load(locateNormativeOpenApi());
+  const keys = secretKeyrings(options.secrets);
   const sessions = new Sessions(
     options.database,
     options.clock,
     argon2idPasswordHasher,
-    new LoginThrottle(options.database, options.secrets.emailPepper),
-    options.secrets.csrfKey,
+    new LoginThrottle(options.database, keys.emailPepper),
+    keys.csrfKey,
   );
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule.forRoot(options, sessions),

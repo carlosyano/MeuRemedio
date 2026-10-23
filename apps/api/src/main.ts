@@ -1,19 +1,15 @@
 // Ponto de entrada da API: sobe o servidor HTTP com o relogio do sistema e o PostgreSQL de
-// DATABASE_URL. Segredos em base64 (32+ bytes) vem do ambiente (Secrets Manager em producao).
+// DATABASE_URL. Segredos em base64 (32+ bytes) vem do ambiente (Secrets Manager em producao), com
+// as chaves anteriores da rotacao em *_PREVIOUS (TS-031, DC-065).
 import pg from 'pg';
 import { createApp } from './app.js';
 import { systemClock } from './platform/clock.js';
+import { secretsFromEnv } from './platform/secrets.js';
 import { FileSystemObjectStorage } from './platform/storage/object-storage.js';
 
 const optionalNumber = (name: string): number | undefined => {
   const raw = process.env[name];
   return raw === undefined || raw === '' ? undefined : Number(raw);
-};
-
-const secret = (name: string): Buffer => {
-  const value = Buffer.from(process.env[name] ?? '', 'base64');
-  if (value.length < 32) throw new Error(`${name} (base64, 32+ bytes) nao definida`);
-  return value;
 };
 
 const databaseUrl = process.env['DATABASE_URL'];
@@ -37,11 +33,7 @@ const healthProbeTimeoutMs = optionalNumber('HEALTH_PROBE_TIMEOUT_MS');
 const app = await createApp({
   clock: systemClock,
   database: new pg.Pool({ connectionString: databaseUrl }),
-  secrets: {
-    requestHashKey: secret('REQUEST_HASH_KEY'),
-    emailPepper: secret('EMAIL_PEPPER'),
-    csrfKey: secret('CSRF_KEY'),
-  },
+  secrets: secretsFromEnv(process.env),
   allowedOrigins,
   externalRightsChannel,
   // EXPORT_STORAGE_DIR: diretorio local dos PDFs em desenvolvimento (o S3 entra com a infraestrutura).

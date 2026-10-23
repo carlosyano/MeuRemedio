@@ -2,7 +2,9 @@
 //   - mr_session: segredo opaco de 32 bytes (base64url); HttpOnly; Secure; SameSite=Lax; Path=/;
 //     sem Domain; Max-Age igual a duracao absoluta (24 h) (DC-025);
 //   - mr_csrf: HMAC-SHA-256 do id da sessao com segredo do servidor; legivel por JavaScript.
-import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+//     Durante a rotacao, o token pela chave anterior tambem vale (TS-031, DC-065).
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { acceptedDigests, hmacDigest, type Keyring } from '../../../platform/crypto/keyring.js';
 
 export const SESSION_COOKIE = 'mr_session';
 export const CSRF_COOKIE = 'mr_csrf';
@@ -18,8 +20,9 @@ export const isSessionToken = (value: string | undefined): value is string =>
 export const hashSessionToken = (token: string): Buffer =>
   createHash('sha256').update(token).digest();
 
-export const csrfTokenFor = (sessionId: string, key: Buffer): string =>
-  createHmac('sha256', key).update(sessionId).digest('base64url');
+/** Tokens CSRF aceitos para a sessao: o da chave atual (o que e emitido) primeiro. */
+export const csrfTokensFor = (sessionId: string, ring: Keyring): string[] =>
+  acceptedDigests(hmacDigest(ring, sessionId)).map((digest) => digest.toString('base64url'));
 
 /** Comparacao em tempo constante de dois textos. */
 export function sameText(a: string, b: string): boolean {

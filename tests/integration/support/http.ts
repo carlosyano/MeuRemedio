@@ -4,7 +4,7 @@ import { randomBytes } from 'node:crypto';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import pg from 'pg';
 import { expect } from 'vitest';
-import { createApp } from '../../../apps/api/src/app.js';
+import { createApp, type AppSecrets } from '../../../apps/api/src/app.js';
 import { argon2idPasswordHasher } from '../../../apps/api/src/modules/identity/infrastructure/password-hasher.js';
 import type { Clock } from '../../../apps/api/src/platform/clock.js';
 import {
@@ -48,6 +48,10 @@ export interface Harness {
   readonly contract: OpenApiContract;
   /** Pepper do HMAC do e-mail usado pela API (bloqueio de login; tombstone no expurgo). */
   readonly emailPepper: Buffer;
+  /** Segredos da API em execucao. */
+  readonly secrets: AppSecrets;
+  /** Reinicia a API no mesmo banco com outros segredos (rotacao de chave, TS-031). */
+  restart(secrets: AppSecrets): Promise<void>;
   now: string;
   call(
     operationId: string,
@@ -77,28 +81,42 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
   const state = { now };
   const clock: Clock = { now: () => state.now };
   const storage = new MemoryObjectStorage();
-  const emailPepper = randomBytes(32);
-  const app = await createApp({
-    clock,
-    database: pool,
-    storage,
-    logger: false,
-    allowedOrigins: [ORIGIN],
-    externalRightsChannel: RIGHTS_CHANNEL,
-    secrets: {
-      requestHashKey: randomBytes(32),
-      emailPepper,
-      csrfKey: randomBytes(32),
-    },
-  });
+  const build = (secrets: AppSecrets) =>
+    createApp({
+      clock,
+      database: pool,
+      storage,
+      logger: false,
+      allowedOrigins: [ORIGIN],
+      externalRightsChannel: RIGHTS_CHANNEL,
+      secrets,
+    });
+  const initial: AppSecrets = {
+    requestHashKey: randomBytes(32),
+    emailPepper: randomBytes(32),
+    csrfKey: randomBytes(32),
+  };
+  const running = { secrets: initial, app: await build(initial) };
 
   const harness: Harness = {
     pool,
-    emailPepper,
     storage,
     url: db.url,
-    app,
     contract,
+    get app() {
+      return running.app;
+    },
+    get secrets() {
+      return running.secrets;
+    },
+    get emailPepper() {
+      return running.secrets.emailPepper;
+    },
+    async restart(secrets) {
+      await running.app.close();
+      running.app = await build(secrets);
+      running.secrets = secrets;
+    },
     get now() {
       return state.now;
     },
@@ -108,7 +126,7 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
     async call(operationId, method, url, options = {}) {
       const headers: Record<string, string> = { ...options.headers };
       if (options.body !== undefined) headers['content-type'] ??= 'application/json';
-      const response = await app
+      const response = await running.app
         .getHttpAdapter()
         .getInstance()
         .inject({
@@ -162,7 +180,7 @@ export async function startHarness(now = '2026-10-05T11:05:15Z'): Promise<Harnes
       storage.clear();
     },
     async close() {
-      await app.close();
+      await running.app.close();
       await pool.end();
       await db.stop();
     },

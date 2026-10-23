@@ -2,8 +2,16 @@
 // normalizado (inclusive de e-mails inexistentes), bloqueiam por 15 min a partir da 5a falha.
 // Durante o bloqueio, toda tentativa recebe 423 com Retry-After e nao conta nova falha.
 // Login bem-sucedido zera o contador (DC-024).
-import { createHmac } from 'node:crypto';
+// Rotacao do pepper (TS-031, DC-065): o bloqueio gravado pelo HMAC de um pepper anterior continua
+// valendo e o login bem-sucedido o remove; falhas novas contam so pelo pepper atual.
 import type { Pool } from 'pg';
+import {
+  acceptedDigests,
+  asKeyring,
+  hmacDigest,
+  type KeyedDigest,
+  type Keyring,
+} from '../../../platform/crypto/keyring.js';
 import { withTransaction } from '../../../platform/db/transaction.js';
 
 const WINDOW_MS = 15 * 60_000;
@@ -11,21 +19,25 @@ const LOCK_MS = 15 * 60_000;
 const MAX_FAILURES = 5;
 
 export class LoginThrottle {
+  private readonly pepper: Keyring;
+
   constructor(
     private readonly pool: Pool,
-    private readonly pepper: Buffer,
-  ) {}
+    pepper: Buffer | Keyring,
+  ) {
+    this.pepper = asKeyring(pepper);
+  }
 
-  emailHash(normalizedEmail: string): Buffer {
-    return createHmac('sha256', this.pepper).update(normalizedEmail).digest();
+  emailHash(normalizedEmail: string): KeyedDigest {
+    return hmacDigest(this.pepper, normalizedEmail);
   }
 
   /** Segundos ate o fim do bloqueio, ou undefined se nao houver bloqueio. */
-  async lockedFor(emailHash: Buffer, now: string): Promise<number | undefined> {
+  async lockedFor(emailHash: KeyedDigest, now: string): Promise<number | undefined> {
     const row = (
       await this.pool.query<{ locked_until: Date | null }>(
-        'SELECT locked_until FROM login_failure_counters WHERE email_hash = $1',
-        [emailHash],
+        'SELECT max(locked_until) AS locked_until FROM login_failure_counters WHERE email_hash = ANY($1::bytea[])',
+        [acceptedDigests(emailHash)],
       )
     ).rows[0];
     const remaining = (row?.locked_until?.getTime() ?? 0) - Date.parse(now);
@@ -63,7 +75,10 @@ export class LoginThrottle {
     });
   }
 
-  async reset(emailHash: Buffer): Promise<void> {
-    await this.pool.query('DELETE FROM login_failure_counters WHERE email_hash = $1', [emailHash]);
+  async reset(emailHash: KeyedDigest): Promise<void> {
+    await this.pool.query(
+      'DELETE FROM login_failure_counters WHERE email_hash = ANY($1::bytea[])',
+      [acceptedDigests(emailHash)],
+    );
   }
 }

@@ -5,9 +5,16 @@
 //   - registro vigente com hash diferente -> 409 IDEMPOTENCY_KEY_REUSED, sem sobrescrever;
 //   - registro expirado (7 dias) -> removido; a chave e tratada como nova;
 //   - so respostas 2xx viram snapshot; falha desfaz a transacao e nao consome a chave (DC-009);
-//   - o hash da requisicao e HMAC com segredo do servidor (DC-012).
-import { createHmac } from 'node:crypto';
+//   - o hash da requisicao e HMAC com segredo do servidor (DC-012); durante a rotacao, o hash
+//     por uma chave anterior tambem vale para o replay (TS-031, DC-065).
 import type { PoolClient } from 'pg';
+import {
+  acceptedDigests,
+  asKeyring,
+  hmacDigest,
+  type KeyedDigest,
+  type Keyring,
+} from '../crypto/keyring.js';
 import { ProblemError } from '../http/problem-catalog.js';
 
 export type IdempotentOperation =
@@ -26,7 +33,7 @@ export interface IdempotencyRequest {
   /** Valor do cabecalho Idempotency-Key (ja validado pelo contrato). */
   readonly key: string;
   /** RequestHasher(...) do corpo e dos parametros que definem a requisicao. */
-  readonly requestHash: Buffer;
+  readonly requestHash: KeyedDigest;
   /** Instante atual (Clock injetavel), UTC. */
   readonly now: string;
 }
@@ -53,20 +60,18 @@ function canonical(value: unknown): unknown {
   return value;
 }
 
-export type RequestHasher = (parts: unknown) => Buffer;
+export type RequestHasher = (parts: unknown) => KeyedDigest;
 
 /**
  * HMAC-SHA-256 (32 bytes) do JSON canonico das partes da requisicao, com segredo do servidor
  * (DC-012): o corpo pode conter senha, e um SHA-256 simples permitiria testar senhas por forca
  * bruta rapida a partir de idempotency_records.
  */
-export function createRequestHasher(secret: Buffer): RequestHasher {
-  if (secret.length < 32)
+export function createRequestHasher(secret: Buffer | Keyring): RequestHasher {
+  if (Buffer.isBuffer(secret) && secret.length < 32)
     throw new Error('Segredo do hash de requisicao exige pelo menos 32 bytes');
-  return (parts) =>
-    createHmac('sha256', secret)
-      .update(JSON.stringify(canonical(parts)))
-      .digest();
+  const ring = asKeyring(secret);
+  return (parts) => hmacDigest(ring, JSON.stringify(canonical(parts)));
 }
 
 interface RecordRow {
@@ -100,7 +105,9 @@ export async function runIdempotent(
 
   if (existing !== undefined) {
     if (existing.expires_at.getTime() > nowMs) {
-      if (!existing.request_hash.equals(request.requestHash)) {
+      if (
+        !acceptedDigests(request.requestHash).some((hash) => existing.request_hash.equals(hash))
+      ) {
         throw new ProblemError('IDEMPOTENCY_KEY_REUSED');
       }
       return {

@@ -13,6 +13,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { planPeriodsOverlap } from '@meuremedio/domain';
 import type { Pool, PoolClient } from 'pg';
 import type { Clock } from '../../../platform/clock.js';
+import { acceptedDigests, type KeyedDigest } from '../../../platform/crypto/keyring.js';
 import { withTransaction } from '../../../platform/db/transaction.js';
 import { ProblemError } from '../../../platform/http/problem-catalog.js';
 import {
@@ -124,7 +125,7 @@ export class CreatePlan {
       normalized: NormalizedPlanText;
       now: string;
       token: string | undefined;
-      payloadHash: Buffer;
+      payloadHash: KeyedDigest;
     },
   ): Promise<Outcome> {
     const { userId, request, normalized, now } = input;
@@ -217,7 +218,7 @@ export class CreatePlan {
   private async issueToken(
     client: PoolClient,
     userId: string,
-    payloadHash: Buffer,
+    payloadHash: KeyedDigest,
     now: string,
   ): Promise<string> {
     const token = `dup_${randomBytes(32).toString('base64url')}`;
@@ -241,15 +242,16 @@ export class CreatePlan {
     client: PoolClient,
     userId: string,
     token: string,
-    payloadHash: Buffer,
+    payloadHash: KeyedDigest,
     now: string,
   ): Promise<boolean> {
     const result = await client.query(
       `UPDATE plan_duplicate_confirmations
           SET consumed_at = $5
-        WHERE token_hash = $1 AND user_id = $2 AND request_hash = $3 AND consumed_at IS NULL
+        WHERE token_hash = $1 AND user_id = $2 AND request_hash = ANY($3::bytea[])
+          AND consumed_at IS NULL
           AND expires_at > $4`,
-      [hashToken(token), userId, payloadHash, now, now],
+      [hashToken(token), userId, acceptedDigests(payloadHash), now, now],
     );
     return result.rowCount === 1;
   }
