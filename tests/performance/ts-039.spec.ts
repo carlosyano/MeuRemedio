@@ -50,6 +50,14 @@ function evidence(overrides: Record<string, unknown> = {}): Record<string, unkno
   };
 }
 
+/** Copia das operacoes da evidencia padrao sem as indicadas. */
+const operationsWithout = (...omitted: string[]): Record<string, unknown> =>
+  Object.fromEntries(
+    Object.entries(evidence()['operations'] as Record<string, unknown>).filter(
+      ([operationId]) => !omitted.includes(operationId),
+    ),
+  );
+
 const codes = (verdict: ReturnType<typeof validateEvidence>): string[] =>
   verdict.valid ? [] : verdict.problems.map((problem) => problem.code);
 
@@ -148,18 +156,18 @@ describe('TS-039: evidencia sem perfil e invalida', () => {
   });
 
   it('operacao do mix sem resultado: OPERATION_MISSING', () => {
-    const { getHistory: _omitted, ...rest } = evidence().operations as Record<string, unknown>;
-    const verdict = validateEvidence(evidence({ operations: rest }), [pp001]);
+    const verdict = validateEvidence(evidence({ operations: operationsWithout('getHistory') }), [
+      pp001,
+    ]);
     expect(verdict.valid).toBe(false);
     if (verdict.valid) return;
     expect(verdict.problems).toContainEqual({ code: 'OPERATION_MISSING', path: 'getHistory' });
   });
 
   it('createPlan_or_updatePlan aceita uma das duas e exige ao menos uma', () => {
-    const operations = evidence().operations as Record<string, unknown>;
-    const { updatePlan: _u, ...onlyCreate } = operations;
+    const onlyCreate = operationsWithout('updatePlan');
     expect(validateEvidence(evidence({ operations: onlyCreate }), [pp001]).valid).toBe(true);
-    const { createPlan: _c, updatePlan: _u2, ...neither } = operations;
+    const neither = operationsWithout('createPlan', 'updatePlan');
     const verdict = validateEvidence(evidence({ operations: neither }), [pp001]);
     expect(verdict.valid).toBe(false);
     if (verdict.valid) return;
@@ -176,7 +184,7 @@ describe('TS-039: evidencia sem perfil e invalida', () => {
     ['mais erros que requisicoes', { requests: 10, errors: 11, ...timing(500) }],
     ['sem p99', { requests: 10, errors: 0, p50_ms: 100, p95_ms: 500 }],
   ])('%s: RESULT_MALFORMED', (_case, result) => {
-    const operations = { ...(evidence().operations as object), listPlans: result };
+    const operations = { ...(evidence()['operations'] as object), listPlans: result };
     const verdict = validateEvidence(evidence({ operations }), [pp001]);
     expect(verdict.valid).toBe(false);
     if (verdict.valid) return;
@@ -217,7 +225,7 @@ describe('TS-039: evidencia sem perfil e invalida', () => {
 describe('objetivos do PP-001 sobre a evidencia valida', () => {
   it('RNF-004: p95 de qualquer operacao acima de 2 s reprova', () => {
     const operations = {
-      ...(evidence().operations as object),
+      ...(evidence()['operations'] as object),
       getHistory: { requests: 9_000, errors: 0, ...timing(2_001) },
     };
     expect(validateEvidence(evidence({ operations }), [pp001])).toMatchObject({
@@ -229,7 +237,7 @@ describe('objetivos do PP-001 sobre a evidencia valida', () => {
 
   it('RNF-004: p95 de exatamente 2 s aprova', () => {
     const operations = {
-      ...(evidence().operations as object),
+      ...(evidence()['operations'] as object),
       getHistory: { requests: 9_000, errors: 0, ...timing(2_000) },
     };
     expect(validateEvidence(evidence({ operations }), [pp001])).toMatchObject({ passed: true });
@@ -243,7 +251,7 @@ describe('objetivos do PP-001 sobre a evidencia valida', () => {
 
   it('taxa de erro acima de 0,1% reprova', () => {
     const operations = {
-      ...(evidence().operations as object),
+      ...(evidence()['operations'] as object),
       listOccurrences: { requests: 31_500, errors: 200, ...timing(400) },
     };
     const verdict = validateEvidence(evidence({ operations }), [pp001]);
