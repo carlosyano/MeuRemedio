@@ -805,3 +805,22 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - O fluxo não foi executado contra uma conta real. A primeira implantação depende do `apply` inicial feito pelo operador (`infra/terraform/README.md`).
   - Uma migração que quebre a versão em execução (sem compatibilidade retroativa) derruba os serviços antigos entre os passos 3 e 4. As migrações precisam continuar aditivas.
 - **Aplica-se a:** `.github/workflows/deploy.yml`, `tools/scripts/deploy.sh`, `infra/terraform/modules/platform/deploy.tf`, `infra/terraform/envs/homologacao/github_oidc.tf`, `infra/terraform/README.md` e aos testes `tests/unit/deploy-workflow.spec.ts` e `infra/terraform/modules/platform/tests/security.tftest.hcl`.
+
+## DC-073 — Ambiente local completo com docker compose e Mailpit (27/10/2026)
+
+- **Contexto:** o mantenedor não tem conta na AWS e quer usar a aplicação no próprio notebook. O `npm run test:e2e` já sobe a pilha real, mas só para os testes. Para usar o app à mão faltava subir tudo de uma vez e, principalmente, receber o e-mail de verificação do cadastro: sem provedor de e-mail, a conta nunca é confirmada.
+- **Alternativas:**
+  - E-mail: gravar o link no log do worker (viola a ADR-001 §7, log nunca leva destinatário nem conteúdo); SMTP com uma biblioteca nova (dependência a mais na imagem de produção); ou a API HTTP do Mailpit, só com o `fetch` do Node.
+  - Segredos: valores fixos no `compose.yaml` (iguais em toda máquina e versionados) ou um `.env` gerado com valores aleatórios por máquina.
+- **Decisão:**
+  - **`compose.yaml`** na raiz com PostgreSQL 17, migração (roda e termina antes de API e worker), API, worker, web e Mailpit. As imagens da API e da web saem do mesmo `Dockerfile` da DC-070. As de terceiros (PostgreSQL e Mailpit 1.31.5, publicado em 11/10/2026) são fixadas por digest.
+  - **Só 127.0.0.1:** apenas a web (3001) e a caixa do Mailpit (8025) publicam porta, e só no loopback. Banco e API ficam na rede interna do compose.
+  - **E-mail:** `EMAIL_PROVIDER=mailpit` com `MAILPIT_URL` e `EMAIL_FROM` (`mailpit-email-sender.ts`). Segue a mesma regra de erros do SES: 4xx é recusa definitiva, o resto fica incerto, e nenhum erro leva o destinatário. A mensagem nunca sai da máquina.
+  - **Segredos:** `npm run local:env` grava um `.env` (fora do git) com os três segredos HMAC aleatórios e nunca sobrescreve um existente. O compose recusa subir sem eles.
+  - **Exportações:** `EXPORT_STORAGE_DIR` num volume compartilhado entre API e worker. A imagem cria o diretório com dono `node` para o volume herdar a permissão.
+  - **Prova:** `tests/unit/mailpit-email-sender.spec.ts`, `tests/unit/local-env.spec.ts` (segredos e propriedades do compose: portas só em 127.0.0.1, digest, Mailpit no worker, segredos só do `.env`) e um teste manual da pilha (cadastro, e-mail no Mailpit, confirmação e entrada até `/hoje`).
+- **Riscos:**
+  - O `EMAIL_PROVIDER=mailpit` existe também na imagem de produção. Se for configurado por engano na AWS, os e-mails não chegam ao titular. O Terraform fixa `ses`, e o adaptador só aceita URL http(s).
+  - A senha do PostgreSQL local é fixa no arquivo. O banco não publica porta, então ela só vale dentro da rede do compose.
+  - O ambiente local não substitui a homologação: não prova TLS, IAM, SES nem S3.
+- **Aplica-se a:** `compose.yaml`, `apps/api/src/platform/email/mailpit-email-sender.ts`, `apps/api/src/platform/email/ses-email-sender.ts` (`emailSenderFromEnv`), `tools/scripts/local-env.mjs`, `Dockerfile` e `docs/operations/AMBIENTE_LOCAL.md`.

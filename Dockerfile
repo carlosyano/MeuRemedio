@@ -68,6 +68,9 @@ COPY --from=api-build /app/apps/api/dist apps/api/dist
 COPY apps/api/migrations apps/api/migrations
 COPY apps/api/assets apps/api/assets
 COPY MeuRemedio_OpenAPI_*_COMPLETO.yaml ./
+# Exportacoes em disco no ambiente local (EXPORT_STORAGE_DIR, DC-073): o volume montado aqui
+# herda o dono node na criacao. Na AWS as exportacoes vao para o S3 e o diretorio fica vazio.
+RUN mkdir -p /var/lib/meuremedio/exports && chown node:node /var/lib/meuremedio/exports
 USER node
 EXPOSE 3000
 CMD ["node", "apps/api/dist/main.js"]

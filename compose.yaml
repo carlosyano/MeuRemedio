@@ -1,0 +1,112 @@
+# Ambiente local completo, sem AWS (DC-073): PostgreSQL 17, migracao, API, worker, web e uma caixa
+# de e-mail local (Mailpit). So para desenvolvimento e teste manual na propria maquina.
+#
+#   npm run local:env        # uma vez: cria o .env com os segredos desta maquina
+#   docker compose up --build
+#
+# Aplicacao: http://localhost:3001   E-mails (verificacao, lembretes): http://localhost:8025
+# As portas so escutam em 127.0.0.1: nada fica exposto para a rede local.
+name: meuremedio
+
+x-database-url: &database-url postgres://meuremedio:meuremedio-local@db:5432/meuremedio
+
+x-api-image: &api-image
+  image: meuremedio-api:local
+  build:
+    context: .
+    target: api
+
+services:
+  db:
+    image: postgres:17@sha256:b8faeff7712663c2773a190181e1246e37e364b887611c04658c28b44e2408fe
+    environment:
+      POSTGRES_USER: meuremedio
+      POSTGRES_PASSWORD: meuremedio-local
+      POSTGRES_DB: meuremedio
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'meuremedio', '-d', 'meuremedio']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  migrate:
+    <<: *api-image
+    command: ['node', 'apps/api/dist/migrate-main.js']
+    environment:
+      DATABASE_URL: *database-url
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: 'no'
+
+  api:
+    <<: *api-image
+    environment:
+      DATABASE_URL: *database-url
+      ALLOWED_ORIGINS: http://localhost:3001
+      RIGHTS_CHANNEL_URL: https://example.com/privacidade
+      REQUEST_HASH_KEY: ${REQUEST_HASH_KEY:?rode npm run local:env antes}
+      EMAIL_PEPPER: ${EMAIL_PEPPER:?rode npm run local:env antes}
+      CSRF_KEY: ${CSRF_KEY:?rode npm run local:env antes}
+      EXPORT_STORAGE_DIR: /var/lib/meuremedio/exports
+    volumes:
+      - exports:/var/lib/meuremedio/exports
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))",
+        ]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    <<: *api-image
+    command: ['node', 'apps/api/dist/worker-main.js']
+    environment:
+      DATABASE_URL: *database-url
+      EMAIL_PEPPER: ${EMAIL_PEPPER:?rode npm run local:env antes}
+      WEB_BASE_URL: http://localhost:3001
+      EMAIL_PROVIDER: mailpit
+      MAILPIT_URL: http://mailpit:8025
+      EMAIL_FROM: MeuRemedio <nao-responda@meuremedio.local>
+      EXPORT_STORAGE_DIR: /var/lib/meuremedio/exports
+    volumes:
+      - exports:/var/lib/meuremedio/exports
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_started
+
+  web:
+    image: meuremedio-web:local
+    build:
+      context: .
+      target: web
+      args:
+        MEUREMEDIO_API_URL: http://api:3000
+    environment:
+      MEUREMEDIO_API_URL: http://api:3000
+    ports:
+      - '127.0.0.1:3001:3001'
+    depends_on:
+      api:
+        condition: service_healthy
+
+  mailpit:
+    image: axllent/mailpit:v1.31.5@sha256:94f6b70c1436defae6799d9ac7ff0eeff9540465b842026d5cdb018f1c0234ea
+    ports:
+      - '127.0.0.1:8025:8025'
+
+volumes:
+  db-data:
+  exports:

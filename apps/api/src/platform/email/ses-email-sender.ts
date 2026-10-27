@@ -16,6 +16,7 @@ import {
   type EmailSender,
   unconfiguredEmailSender,
 } from './email-sender.js';
+import { MailpitEmailSender, mailpitUrlOf } from './mailpit-email-sender.js';
 
 /** O que o adaptador usa do SESv2Client (o teste troca por um duble). */
 export interface SesCommands {
@@ -91,13 +92,21 @@ const valueOf = (env: NodeJS.ProcessEnv, name: string): string | undefined => {
 /**
  * Provedor de e-mail pelo ambiente: EMAIL_PROVIDER=ses com EMAIL_FROM obrigatorio e
  * EMAIL_CONFIGURATION_SET opcional (regiao e credenciais pela cadeia padrao da AWS, ou seja, o
- * papel da tarefa no ECS). Sem EMAIL_PROVIDER, o envio fica sem provedor (recusa definitiva).
+ * papel da tarefa no ECS). EMAIL_PROVIDER=mailpit com MAILPIT_URL e EMAIL_FROM so no ambiente
+ * local (DC-073). Sem EMAIL_PROVIDER, o envio fica sem provedor (recusa definitiva).
  */
 export const emailSenderFromEnv = (env: NodeJS.ProcessEnv): EmailSender => {
   const provider = valueOf(env, 'EMAIL_PROVIDER');
   if (provider === undefined) return unconfiguredEmailSender;
-  if (provider !== 'ses') throw new Error('EMAIL_PROVIDER desconhecido (aceito: ses)');
+  if (provider !== 'ses' && provider !== 'mailpit') {
+    throw new Error('EMAIL_PROVIDER desconhecido (aceito: ses, mailpit)');
+  }
   const from = valueOf(env, 'EMAIL_FROM');
+  if (provider === 'mailpit') {
+    const baseUrl = mailpitUrlOf(valueOf(env, 'MAILPIT_URL'));
+    if (from === undefined) throw new Error('EMAIL_FROM nao definida (EMAIL_PROVIDER=mailpit)');
+    return new MailpitEmailSender({ baseUrl, from });
+  }
   if (from === undefined) throw new Error('EMAIL_FROM nao definida (EMAIL_PROVIDER=ses)');
   const configurationSet = valueOf(env, 'EMAIL_CONFIGURATION_SET');
   const region = valueOf(env, 'AWS_REGION');

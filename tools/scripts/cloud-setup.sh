@@ -31,6 +31,8 @@ fi
 
 # Docker para o Testcontainers dos testes de integracao
 if ! docker info > /dev/null 2>&1; then
+  # pid de uma sessao anterior (o numero pode ter sido reusado) impede a subida do dockerd
+  pgrep -x dockerd > /dev/null || rm -f /var/run/docker.pid
   nohup dockerd > /tmp/dockerd.log 2>&1 &
   for _ in $(seq 1 30); do
     docker info > /dev/null 2>&1 && break

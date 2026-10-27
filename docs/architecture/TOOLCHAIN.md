@@ -49,6 +49,7 @@
 | @playwright/test, @axe-core/playwright | 1.63.0, 4.13.0 | QG-007 e QG-008; `overrides` fixa `playwright-core` em 1.63.0 para o axe usar o mesmo Playwright |
 | Terraform (binário, fora do npm) | 1.16.5 | Infraestrutura (DC-071) via `tools/scripts/terraform-bin.mjs`, com SHA-256 de cada plataforma fixado (assinatura GPG da HashiCorp conferida ao fixar). Publicada em 02/10/2026 (regra das 2 semanas) |
 | Provedor hashicorp/aws (Terraform) | 6.68.0 | Fixado em `versions.tf` e nos `.terraform.lock.hcl`, com os hashes `zh:` de todas as plataformas (SHA256SUMS assinado). Publicado em 07/10/2026 |
+| Mailpit (imagem, só no ambiente local) | 1.31.5 | Caixa de e-mail local do `compose.yaml` (DC-073), fixada por digest. Publicada em 11/10/2026 |
 | oasdiff (binário Go, fora do npm) | 1.33.0 | QG-001 (incompatibilidades da OpenAPI) via `tools/scripts/openapi-diff.mjs`; SHA-256 de cada plataforma fixado em `tools/scripts/oasdiff-bin.mjs` |
 
 ### Decisões de versão

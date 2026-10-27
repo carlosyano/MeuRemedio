@@ -24,7 +24,8 @@ const worker = await startWorker({
   pool: new pg.Pool({ connectionString: databaseUrl }),
   boss,
   clock: systemClock,
-  // EMAIL_PROVIDER=ses com EMAIL_FROM; sem provedor, os jobs de e-mail falham
+  // EMAIL_PROVIDER=ses com EMAIL_FROM (ou mailpit no ambiente local, DC-073); sem provedor, os
+  // jobs de e-mail falham
   email: emailSenderFromEnv(process.env),
   webBaseUrl: required('WEB_BASE_URL'),
   emailPepper,
