@@ -5,24 +5,13 @@ import pg from 'pg';
 import { PgBoss } from 'pg-boss';
 import { systemClock } from './platform/clock.js';
 import { unconfiguredEmailSender } from './platform/email/email-sender.js';
-import {
-  FileSystemObjectStorage,
-  unconfiguredObjectStorage,
-} from './platform/storage/object-storage.js';
+import { objectStorageFromEnv } from './platform/storage/s3-object-storage.js';
 import { startWorker } from './worker.js';
 
 const required = (name: string): string => {
   const value = process.env[name];
   if (value === undefined || value === '') throw new Error(`${name} nao definida`);
   return value;
-};
-
-// EXPORT_STORAGE_DIR: diretorio local dos PDFs em desenvolvimento (o S3 entra com a infraestrutura).
-const storageFromEnv = () => {
-  const dir = process.env['EXPORT_STORAGE_DIR'];
-  return dir === undefined || dir === ''
-    ? unconfiguredObjectStorage
-    : new FileSystemObjectStorage(dir);
 };
 
 // EMAIL_PEPPER: o mesmo segredo da API (base64, 32+ bytes); HMAC do e-mail no tombstone (RN-019).
@@ -38,7 +27,8 @@ const worker = await startWorker({
   email: unconfiguredEmailSender,
   webBaseUrl: required('WEB_BASE_URL'),
   emailPepper,
-  storage: storageFromEnv(),
+  // EXPORT_STORAGE_BUCKET (S3) ou EXPORT_STORAGE_DIR (diretorio local em desenvolvimento)
+  storage: objectStorageFromEnv(process.env),
 });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {

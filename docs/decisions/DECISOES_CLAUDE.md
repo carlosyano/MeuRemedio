@@ -719,3 +719,17 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Sem dado de titular:** o resumo, a decisão e a referência da evidência recusam e-mail e CPF. A auditoria leva só o operador, a severidade ou o estado, nunca o resumo nem a decisão, e os erros não ecoam valores.
 - **Riscos:** a recusa de dado pessoal é heurística (e-mail e CPF) e não substitui a revisão de quem registra. O conteúdo do relatório e os prazos de comunicação podem mudar com o GX-006 e o parecer jurídico.
 - **Aplica-se a:** `apps/api/migrations/0013_incidents.sql`, `apps/api/src/modules/audit/{application/incidents.ts,infrastructure/schema.ts}`, `apps/api/src/ops/{args,ops-cli,rights-commands,incident-commands}.ts`, `platform/audit/audit.ts`, `platform/db/schema.ts`, `DATA_MODEL.md`, `RIGHTS_AND_INCIDENTS.md` e aos testes `tests/security/ts-030.spec.ts`, `tests/integration/db-incidents.spec.ts` e `tests/integration/drizzle-schema.spec.ts`.
+
+## DC-068 — Adaptador S3 do armazenamento privado das exportações (27/10/2026)
+
+- **Contexto:** a DC-042 deixou a porta `ObjectStorage` com adaptadores em memória e em disco, e o S3 privado (ADR-001, OA-010) para a infraestrutura. Sem ele, a exportação em PDF (RF-008) não funciona fora do desenvolvimento. O RNF-002 pede criptografia em repouso, e o `file_object_key` é dado de saúde sensível que nunca sai na API.
+- **Alternativas:** (a) AWS SDK v3 (`@aws-sdk/client-s3`); (b) cliente próprio com assinatura SigV4 sobre `fetch`, sem dependência; (c) testar contra um S3 compatível em contêiner (MinIO ou LocalStack) em vez de um dublê.
+- **Decisão:** (a), com teste unitário por dublê do `send`.
+  - **SDK:** a assinatura SigV4 é código de segurança que não vale reescrever. O pacote é grande, mas é o cliente oficial, Apache-2.0, e o `npm audit` segue em 0.
+  - **Cifragem:** todo `PutObject` vai com `ServerSideEncryption: aws:kms` (e `SSEKMSKeyId` quando `EXPORT_STORAGE_KMS_KEY_ID` existe), para a política do bucket poder recusar envio sem KMS. A cifragem padrão do bucket fica com o Terraform.
+  - **Objeto inexistente:** `NoSuchKey` vira `undefined`; qualquer outra falha sobe. O S3 só responde `NoSuchKey` quando o papel tem `s3:ListBucket`; sem isso responde `AccessDenied`, e a política IAM do Terraform precisa conceder o `ListBucket` restrito ao prefixo `exports/`.
+  - **Chave:** vazia ou acima de 512 caracteres (limite do `file_object_key`) é recusada sem chamar o S3, e a mensagem de erro não leva a chave.
+  - **Configuração:** `objectStorageFromEnv` na API e no worker. `EXPORT_STORAGE_BUCKET` escolhe o S3 (região e credenciais pela cadeia padrão da AWS, ou seja, o papel da tarefa no ECS, sem chave de acesso no ambiente), `EXPORT_STORAGE_DIR` escolhe o disco, e as duas juntas impedem a subida.
+  - **Teste em contêiner:** fica de fora. O MinIO anunciou em 2025 o fim das imagens prontas da edição comunitária e o LocalStack anunciou exigir conta a partir de 2026 (a confirmar caso se queira esse teste), e os dois só imitariam o S3. A prova contra o S3 real entra com o ambiente de homologação.
+- **Riscos:** o dublê não prova o comportamento real do S3 (permissões, KMS, região). Uma política IAM sem `ListBucket` transforma "objeto inexistente" em erro, e o download responde 500 em vez de 404.
+- **Aplica-se a:** `apps/api/src/platform/storage/s3-object-storage.ts`, `apps/api/src/main.ts`, `apps/api/src/worker-main.ts`, `apps/api/package.json`, `docs/architecture/TOOLCHAIN.md` e ao teste `tests/unit/s3-object-storage.spec.ts`.
