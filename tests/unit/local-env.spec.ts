@@ -61,6 +61,7 @@ describe('npm run local:env', () => {
 interface ComposeService {
   readonly image?: string;
   readonly build?: unknown;
+  readonly pull_policy?: string;
   readonly ports?: readonly string[];
   readonly environment?: Record<string, string>;
 }
@@ -80,10 +81,26 @@ describe('compose.yaml', () => {
   });
 
   it('imagem de terceiros fixada por digest; as do projeto sao construidas do Dockerfile', () => {
+    const built = new Set(
+      services.flatMap(([, service]) => (service.build === undefined ? [] : [service.image])),
+    );
     for (const [name, service] of services) {
       if (service.build !== undefined) continue;
+      if (built.has(service.image)) {
+        // imagem do projeto construida por outro servico: nunca baixada de um registro
+        expect(service.pull_policy, name).toBe('never');
+        continue;
+      }
       expect(service.image, name).toMatch(/@sha256:[0-9a-f]{64}$/);
     }
+  });
+
+  it('cada imagem do projeto e construida por um servico so (builds iguais em paralelo)', () => {
+    const builders = services
+      .filter(([, service]) => service.build !== undefined)
+      .map(([, service]) => service.image);
+    expect(builders).toHaveLength(new Set(builders).size);
+    expect(builders.sort()).toEqual(['meuremedio-api:local', 'meuremedio-web:local']);
   });
 
   it('o worker envia pelo Mailpit e os segredos vem do .env, sem valor no arquivo', () => {
