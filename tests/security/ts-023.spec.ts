@@ -172,7 +172,7 @@ const BY_ID: Record<string, (id: string) => Call> = {
 
 /** Identificador de U1 usado em cada operacao por identificador. */
 const anaIdFor = (operationId: string): string => {
-  if (operationId.endsWith('Plan')) return fixture.planId;
+  if (operationId.endsWith('Plan') || operationId === 'changePlanStatus') return fixture.planId;
   if (operationId === 'createResponse') return fixture.occurrenceId;
   return fixture.exportId;
 };

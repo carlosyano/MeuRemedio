@@ -4819,6 +4819,7 @@ errors:
     - changePlanStatus
     - confirmPasswordReset
     - createResponse
+    - updatePlan
     - verifyAccount
     negative_test_artifact: tests/api/errors/err-007.spec.ts
     status: implemented

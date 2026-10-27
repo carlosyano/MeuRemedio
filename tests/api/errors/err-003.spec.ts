@@ -1,4 +1,4 @@
-// @trace ERR-003 CA-012 (404 RESOURCE_NOT_FOUND para recurso inexistente)
+// @trace ERR-003 CA-012 DEC-036 (404 RESOURCE_NOT_FOUND para recurso inexistente)
 // ERR-003: toda operacao sobre um recurso identificado no caminho responde 404 quando o
 // identificador nao existe, com o mesmo Problem do recurso de outro titular (TS-023), sem efeito.
 // As operacoes vem da matriz e precisam ser exatamente as operacoes privadas com parametro de
@@ -20,6 +20,7 @@ let ana: LoggedIn;
 /** Corpo valido das operacoes que o exigem (o 404 nao pode depender de entrada invalida). */
 const VALID_BODY: Record<string, unknown> = {
   createResponse: { type: 'TAKEN', reason: null },
+  changePlanStatus: { action: 'INTERRUPT', reason: 'OTHER', note: null },
   updatePlan: {
     medication_name: 'Comprimido',
     dose_text: '1 comprimido',

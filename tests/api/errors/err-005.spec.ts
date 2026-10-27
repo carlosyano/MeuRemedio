@@ -1,6 +1,6 @@
-// @trace ERR-005 CA-006 (409 VERSION_CONFLICT em updatePlan)
-// ERR-005: updatePlan com If-Match de uma versao anterior responde 409 sem alterar o plano, que
-// continua na versao salva pela outra sessao.
+// @trace ERR-005 CA-006 DEC-036 (409 VERSION_CONFLICT em updatePlan e changePlanStatus)
+// ERR-005: updatePlan e changePlanStatus com If-Match de uma versao anterior respondem 409 sem
+// alterar o plano, que continua na versao salva pela outra sessao.
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   login,
@@ -32,9 +32,36 @@ beforeEach(async () => {
 });
 
 describe('ERR-005 VERSION_CONFLICT (409)', () => {
-  it('a matriz liga ERR-005 a updatePlan', () => {
+  it('a matriz liga ERR-005 a updatePlan e changePlanStatus', () => {
     expect(entry).toMatchObject({ code: 'VERSION_CONFLICT', http_status: 409 });
-    expect(entry.operationIds).toEqual(['updatePlan']);
+    expect([...entry.operationIds].sort()).toEqual(['changePlanStatus', 'updatePlan']);
+  });
+
+  it('changePlanStatus com If-Match desatualizado', async () => {
+    const planId = await createPlan(h, ana);
+    const other = await login(h, 'ana.silva@example.com');
+    const saved = await mutate(
+      h,
+      other,
+      'updatePlan',
+      `/plans/${planId}`,
+      { ...PLAN, medication_name: 'Comprimido Outra Sessao' },
+      { 'if-match': '"1"' },
+    );
+    expect(saved.status).toBe(200);
+    const before = await persistedState(h.pool);
+    const stale = await mutate(
+      h,
+      ana,
+      'changePlanStatus',
+      `/plans/${planId}/status-changes`,
+      { action: 'INTERRUPT', reason: 'OTHER', note: null },
+      { 'if-match': '"1"' },
+    );
+    expectProblem(stale, 'VERSION_CONFLICT');
+    expect(await persistedState(h.pool)).toBe(before);
+    const read = await h.call('getPlan', 'GET', `/plans/${planId}`, { headers: ana.read });
+    expect(read.body).toMatchObject({ status: 'ACTIVE', row_version: 2 });
   });
 
   it('updatePlan com If-Match desatualizado', async () => {
