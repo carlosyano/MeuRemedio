@@ -16,9 +16,14 @@ export function TextField(props: {
   readonly error?: string | undefined;
   readonly maxLength?: number;
   readonly defaultValue?: string;
+  readonly inputMode?: 'numeric';
+  /** Campo controlado: com `value`, informar tambem `onValueChange`. */
+  readonly value?: string;
+  readonly onValueChange?: (value: string) => void;
 }) {
   const descriptionId = props.description === undefined ? undefined : `${props.id}-descricao`;
   const errorId = props.error === undefined ? undefined : `${props.id}-erro`;
+  const onValueChange = props.onValueChange;
   return (
     <div className="mb-4">
       <label htmlFor={props.id} className="mb-1 block font-medium">
@@ -33,9 +38,18 @@ export function TextField(props: {
         id={props.id}
         name={props.id}
         type={props.type ?? 'text'}
+        inputMode={props.inputMode}
         autoComplete={props.autoComplete}
         maxLength={props.maxLength}
         defaultValue={props.defaultValue}
+        value={props.value}
+        onChange={
+          onValueChange === undefined
+            ? undefined
+            : (event) => {
+                onValueChange(event.target.value);
+              }
+        }
         aria-invalid={props.error === undefined ? undefined : true}
         aria-describedby={describedBy(descriptionId, errorId)}
         className="w-full rounded border border-line p-2 aria-invalid:border-danger"

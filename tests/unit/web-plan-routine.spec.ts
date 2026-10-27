@@ -109,8 +109,8 @@ describe('describeRoutine', () => {
   });
 
   it('uso continuo e outra via', () => {
-    expect(
-      describeRoutine({ ...base, administration_route: 'OTHER', end_date: null }),
-    ).toBe('Tomar 1 comprimido, por outra via, 1 vez ao dia (08:00), uso contínuo a partir de 27/10/2026.');
+    expect(describeRoutine({ ...base, administration_route: 'OTHER', end_date: null })).toBe(
+      'Tomar 1 comprimido, por outra via, 1 vez ao dia (08:00), uso contínuo a partir de 27/10/2026.',
+    );
   });
 });
