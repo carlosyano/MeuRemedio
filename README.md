@@ -18,6 +18,15 @@ npm run verify        # typecheck, lint, format:check, test:unit e openapi:lint
 npm run traceability:check   # valida a matriz de rastreabilidade
 ```
 
+## Usar a aplicação na sua máquina
+
+```bash
+npm run local:env            # uma vez: segredos locais no .env
+docker compose up --build    # app em http://localhost:3001, e-mails em http://localhost:8025
+```
+
+Passo a passo em `docs/operations/AMBIENTE_LOCAL.md`.
+
 Versões e política de atualização: `docs/architecture/TOOLCHAIN.md`.
 
 ## Estrutura

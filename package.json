@@ -15,6 +15,7 @@
   "scripts": {
     "build": "tsc -b",
     "ops": "node apps/api/dist/ops-main.js",
+    "local:env": "node tools/scripts/local-env.mjs",
     "typecheck": "tsc -b && tsc -p tests/tsconfig.json && tsc -p apps/web/tsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write .",
