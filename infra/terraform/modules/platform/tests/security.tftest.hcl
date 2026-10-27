@@ -117,14 +117,15 @@ override_resource {
 }
 
 variables {
-  environment        = "homologacao"
-  domain_name        = "app.exemplo.com.br"
-  hosted_zone_id     = "Z0000000000000000000"
-  email_from         = "nao-responda@exemplo.com.br"
-  email_domain       = "exemplo.com.br"
-  rights_channel_url = "https://exemplo.com.br/privacidade"
-  api_image          = "111111111111.dkr.ecr.sa-east-1.amazonaws.com/meuremedio-api@sha256:0000000000000000000000000000000000000000000000000000000000000000"
-  web_image          = "111111111111.dkr.ecr.sa-east-1.amazonaws.com/meuremedio-web@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  environment              = "homologacao"
+  domain_name              = "app.exemplo.com.br"
+  hosted_zone_id           = "Z0000000000000000000"
+  email_from               = "nao-responda@exemplo.com.br"
+  email_domain             = "exemplo.com.br"
+  rights_channel_url       = "https://exemplo.com.br/privacidade"
+  github_oidc_provider_arn = "arn:aws:iam::111111111111:oidc-provider/token.actions.githubusercontent.com"
+  api_image                = "111111111111.dkr.ecr.sa-east-1.amazonaws.com/meuremedio-api@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  web_image                = "111111111111.dkr.ecr.sa-east-1.amazonaws.com/meuremedio-web@sha256:0000000000000000000000000000000000000000000000000000000000000000"
 }
 
 run "chave_kms_com_rotacao" {
@@ -334,6 +335,30 @@ run "imagens_e_logs" {
       for group in values(aws_cloudwatch_log_group.app) : group.retention_in_days == 180 && group.kms_key_id != null
     ])
     error_message = "Logs com retencao definida e cifrados com KMS."
+  }
+}
+
+run "cd_assume_o_papel_so_pelo_environment_do_github" {
+  command = apply
+
+  assert {
+    condition     = jsondecode(aws_iam_role.deploy.assume_role_policy).Statement[0].Condition.StringEquals["token.actions.githubusercontent.com:sub"] == "repo:carlosyano/MeuRemedio:environment:homologacao"
+    error_message = "So o environment homologacao do repositorio assume o papel (sem branch, PR ou fork)."
+  }
+
+  assert {
+    condition     = jsondecode(aws_iam_role.deploy.assume_role_policy).Statement[0].Condition.StringEquals["token.actions.githubusercontent.com:aud"] == "sts.amazonaws.com"
+    error_message = "Audiencia do token OIDC fixada no STS."
+  }
+
+  assert {
+    condition     = !strcontains(aws_iam_role.deploy.assume_role_policy, "StringLike")
+    error_message = "Sem curinga na confianca do papel de implantacao."
+  }
+
+  assert {
+    condition     = strcontains(aws_iam_role_policy.deploy_iam.policy, "role/meuremedio-homologacao-*")
+    error_message = "IAM do CD restrito aos papeis do proprio ambiente."
   }
 }
 

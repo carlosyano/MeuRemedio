@@ -24,6 +24,8 @@ module "platform" {
   api_image          = var.api_image
   web_image          = var.web_image
 
+  github_oidc_provider_arn = aws_iam_openid_connect_provider.github.arn
+
   # homologacao: uma zona de saida e uma tarefa por servico, para custo menor
   single_nat_gateway   = true
   db_multi_az          = false

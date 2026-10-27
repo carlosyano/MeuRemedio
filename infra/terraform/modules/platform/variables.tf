@@ -133,3 +133,14 @@ variable "single_nat_gateway" {
   type        = bool
   default     = true
 }
+
+variable "github_repository" {
+  description = "Repositorio do GitHub (dono/nome) cujo workflow de deploy assume o papel de implantacao."
+  type        = string
+  default     = "carlosyano/MeuRemedio"
+}
+
+variable "github_oidc_provider_arn" {
+  description = "ARN do provedor OIDC do GitHub Actions na conta (um por conta; criado no ambiente)."
+  type        = string
+}

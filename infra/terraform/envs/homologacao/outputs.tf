@@ -10,5 +10,7 @@ output "platform" {
     app_secret_arns             = module.platform.app_secret_arns
     exports_bucket              = module.platform.exports_bucket
     web_url                     = module.platform.web_url
+    deploy_role_arn             = module.platform.deploy_role_arn
+    api_security_group_id       = module.platform.api_security_group_id
   }
 }
