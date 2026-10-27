@@ -21,3 +21,12 @@ playwright-report/
 
 # configuracao local do Claude Code (permissoes da maquina de cada um)
 .claude/settings.local.json
+
+# Terraform (DC-071): estado e variaveis de cada ambiente nunca entram no repositorio
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+backend.hcl
+crash.log

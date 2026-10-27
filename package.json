@@ -29,6 +29,7 @@
     "test:integration": "vitest run --project integration",
     "test:schemathesis": "vitest run --project schemathesis",
     "test:containers": "vitest run --project containers",
+    "infra:check": "node tools/scripts/infra-check.mjs",
     "test:ownership": "vitest run --project integration tests/security/ts-023.spec.ts",
     "sbom": "node tools/scripts/sbom.mjs",
     "test:mutation": "stryker run",
