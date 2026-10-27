@@ -1,4 +1,4 @@
-// Rotas de ocorrencias e respostas (OpenAPI 02.33.6, tag Occurrences).
+// Rotas de ocorrencias e respostas (OpenAPI 02.33.7, tag Occurrences).
 import {
   Body,
   Controller,
@@ -41,12 +41,14 @@ export class OccurrencesController {
     @Query('status') status: string | undefined,
     @Query('cursor') cursor: string | undefined,
     @Query('limit') limit: string | number | undefined,
+    @Query('local_date') localDate: string | undefined,
   ): Promise<OccurrencePage> {
-    // O contrato ja validou status (enum, ate 5), cursor e limit (1..100); a query chega como texto.
+    // O contrato ja validou status (enum, ate 5), cursor, limit (1..100) e local_date (data civil);
+    // a query chega como texto.
     const statuses = commaSeparatedList(status) as OccurrenceStatus[] | undefined;
     return this.readOccurrences.list(
       sessionOf(request).userId,
-      { statuses, cursor },
+      { statuses, cursor, localDate },
       limit === undefined ? DEFAULT_PAGE_LIMIT : Number(limit),
     );
   }

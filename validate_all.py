@@ -12,7 +12,7 @@ from jsonschema import Draft202012Validator
 ROOT = Path(__file__).resolve().parent
 MATRIX = ROOT / "traceability-matrix.yaml"
 SCHEMA = ROOT / "traceability-matrix.schema.json"
-OPENAPI = ROOT / "MeuRemedio_OpenAPI_02.33.6_COMPLETO.yaml"
+OPENAPI = ROOT / "MeuRemedio_OpenAPI_02.33.7_COMPLETO.yaml"
 SEMANTIC_VALIDATOR = ROOT / "traceability-check.py"
 REPORT_DIR = ROOT / "validation-report"
 JSON_REPORT = REPORT_DIR / "traceability-validation-report.json"

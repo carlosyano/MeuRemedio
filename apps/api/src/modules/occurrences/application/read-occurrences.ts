@@ -1,5 +1,6 @@
 // listOccurrences (RF-004, RF-005; TS-023): ocorrencias acionaveis do titular (DC-036).
 //   - so as ja alcancadas (scheduled_at <= instante da consulta) de planos ACTIVE do titular;
+//   - com local_date, as daquele dia civil no fuso da conta, alcancadas ou nao (DEC-035);
 //   - sem filtro, todos os estados menos CANCELED; com status, exatamente os estados pedidos;
 //   - da mais recente para a mais antiga (scheduled_at, id), com cursor opaco (DC-030).
 import type { Pool } from 'pg';
@@ -84,7 +85,11 @@ export class ReadOccurrences {
 
   async list(
     userId: string,
-    filter: { statuses: readonly OccurrenceStatus[] | undefined; cursor: string | undefined },
+    filter: {
+      statuses: readonly OccurrenceStatus[] | undefined;
+      cursor: string | undefined;
+      localDate?: string | undefined;
+    },
     limit: number,
   ): Promise<OccurrencePage> {
     const after = filter.cursor === undefined ? null : decodeCursor(filter.cursor);
@@ -93,7 +98,9 @@ export class ReadOccurrences {
         `SELECT ${OCCURRENCE_COLUMNS}
            FROM occurrences o
            JOIN medication_plans p ON p.id = o.plan_id AND p.status = 'ACTIVE'
-          WHERE o.user_id = $1 AND o.scheduled_at <= $2
+          WHERE o.user_id = $1
+            AND ($7::date IS NOT NULL OR o.scheduled_at <= $2)
+            AND ($7::date IS NULL OR o.local_scheduled_date = $7::date)
             AND o.status = ANY ($3::occurrence_status[])
             AND ($4::timestamptz IS NULL OR (o.scheduled_at, o.id) < ($4::timestamptz, $5::uuid))
           ORDER BY o.scheduled_at DESC, o.id DESC
@@ -105,6 +112,7 @@ export class ReadOccurrences {
           after?.t ?? null,
           after?.i ?? null,
           limit + 1,
+          filter.localDate ?? null,
         ],
       )
     ).rows;

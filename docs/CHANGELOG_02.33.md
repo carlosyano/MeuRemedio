@@ -203,3 +203,14 @@ Com isso, nenhum TS segue `planned`, e o `trace:check` não lista mais pendênci
 Efeitos: matriz `2.1.13` (`matrix_version` e `status` dos artefatos `TS-030-PRIMARY`, `TS-031-PRIMARY`, `TS-032-PRIMARY` e `TS-039-PRIMARY`). Especificação, OpenAPI, ADR, AGENTS.md e schema não mudam.
 
 **Aprovação:** proposta em 23/10/2026; aprovação formal no pull request desta revisão.
+
+## DEC-035 e revisão 02.33.7 da OpenAPI: remédios do dia na tela Hoje (27/10/2026)
+
+Pedido do mantenedor após testar a aplicação: a tela Hoje só mostrava as ocorrências já alcançadas e pendentes (DC-036), sem o que ainda falta tomar no dia nem o que já foi registrado.
+
+1. **DEC-035:** parâmetro opcional `local_date` (data civil, schema `Date`) em `listOccurrences`. Com ele, a lista traz as ocorrências daquele dia no fuso da conta, inclusive as ainda não alcançadas, nos estados pedidos (padrão: todos menos `CANCELED`), só de planos ativos, com a mesma ordem e paginação. Sem ele, nada muda.
+2. **Implementação:** filtro pelo índice `occurrences_user_date_idx`, já existente; na tela Hoje, a seção "Remédios de hoje" lista cada horário do dia com a situação (Tomado, Não tomado, Sem resposta, A registrar ou Previsto), só para consulta. O registro segue em "Para registrar", e as duas listas se atualizam juntas.
+
+Efeitos: OpenAPI `02.33.7` (arquivo renomeado; oasdiff sem incompatibilidade, pois só acrescenta um parâmetro opcional), matriz `2.1.14` (hashes das quatro fontes, referências à OpenAPI vigente, `listOccurrences` com DEC-035 e catálogo de decisões), `maxProperties` de `decisions` no schema (34 → 35), `AGENTS.md` 1.8 (referências à OpenAPI vigente), Especificação (DEC-035, referências vigentes e nota no Anexo C), ADR (referências vigentes), `validate_all.py`, workflow de rastreabilidade e `CLAUDE.md`.
+
+**Aprovação:** pedido do mantenedor em 27/10/2026, que autorizou o merge com a CI verde.

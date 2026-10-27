@@ -1,5 +1,5 @@
-# MeuRemedio OpenAPI 02.33.6 - completo
-# Base: MeuRemedio_OpenAPI_02.33.5_COMPLETO.yaml
+# MeuRemedio OpenAPI 02.33.7 - completo
+# Base: MeuRemedio_OpenAPI_02.33.6_COMPLETO.yaml
 # Mudancas 02.33.3 (decisao de 04/10/2026): removido o 410 de createResponse (GAP-008); X-Correlation-ID em toda resposta, inclusive 202, 204 e getHealth (GAP-009).
 # Mudancas 02.33.4 (decisao de 06/10/2026, DEC-026, GAP-010): falha inesperada documentada em toda operacao,
 # com 500 INTERNAL_ERROR (ERR-016, resposta InternalError) e 503 DEPENDENCY_UNAVAILABLE (ERR-011).
@@ -7,12 +7,14 @@
 # revokeAllSessions e requestAccountDeletion, que validam corpo e Idempotency-Key e nao o declaravam.
 # Mudancas 02.33.6 (decisao de 15/10/2026, DEC-034): nova operacao listExports (GET /exports) e schema
 # ExportRequestPage, para o titular listar os proprios pedidos de exportacao.
+# Mudancas 02.33.7 (decisao de 27/10/2026, DEC-035): parametro opcional local_date em listOccurrences, para
+# listar as ocorrencias de um dia civil no fuso da conta, inclusive as ainda nao alcancadas.
 # Mantem os operationId da 02.33.2 e acrescenta listExports (28 operacoes).
 openapi: 3.1.1
 info:
   title: MeuRemedio API
-  version: 02.33.6
-  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.6
+  version: 02.33.7
+  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.7
   description: API declaratoria para conta individual, planos de medicamentos, ocorrencias, respostas, historico,
     exportacoes e privacidade. Nao prescreve, nao valida medicamentos ou interacoes e nao substitui orientacao profissional.
     Todas as mutacoes autenticadas exigem protecao CSRF (cookie mr_csrf + cabecalho X-CSRF-Token) e validacao do
@@ -712,17 +714,26 @@ paths:
           maxItems: 5
         style: form
         explode: false
+      - name: local_date
+        in: query
+        required: false
+        description: Dia civil no fuso da conta. Quando informado, lista as ocorrencias desse dia, inclusive as
+          ainda nao alcancadas (DEC-035).
+        schema:
+          $ref: '#/components/schemas/Date'
       - $ref: '#/components/parameters/Cursor'
       - $ref: '#/components/parameters/Limit'
       x-traceability:
       - RF-004
       - RF-005
+      - DEC-035
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
-      description: Lista ocorrencias do titular, filtravel por status, ordenadas e paginadas por cursor.
+      description: Lista ocorrencias do titular, filtravel por status, ordenadas e paginadas por cursor. Sem
+        local_date, so as ja alcancadas; com local_date, as daquele dia civil (DEC-035).
   /occurrences/{occurrence_id}/responses:
     post:
       tags:

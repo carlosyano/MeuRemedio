@@ -7,7 +7,9 @@
 //     permitida (RN-009); 409 STATE_CONFLICT (ERR-007) atualiza a lista;
 //   - consulta que falha ou navegador sem rede: aviso de desconectado, mantendo a ultima lista;
 //     nada e enfileirado e o sucesso so aparece com a resposta da API (RN-015, TS-010);
-//   - tempo limite (30 s): repetir usa a mesma Idempotency-Key e nao registra duas vezes (CA-013).
+//   - tempo limite (30 s): repetir usa a mesma Idempotency-Key e nao registra duas vezes (CA-013);
+//   - remedios do dia (DEC-035): todos os horarios do dia civil da conta, com a situacao de cada
+//     um, so para consulta; atualizados junto com a lista acionavel.
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppNav } from '@/components/app-nav';
@@ -17,6 +19,8 @@ import { api } from '@/lib/browser-api';
 import { createIdempotencyKeys } from '@/lib/forms';
 import {
   NOT_TAKEN_REASONS,
+  dayItems,
+  dayStatusText,
   responseBody,
   whenText,
   type NotTakenReason,
@@ -47,6 +51,9 @@ export function TodayScreen() {
   const router = useRouter();
   const account = useAccount('/hoje');
   const [items, setItems] = useState<readonly Occurrence[] | undefined>();
+  const [day, setDay] = useState<readonly Occurrence[] | undefined>();
+  const [dayTruncated, setDayTruncated] = useState(false);
+  const [now, setNow] = useState(() => new Date().toISOString());
   const [truncated, setTruncated] = useState(false);
   const [disconnected, setDisconnected] = useState(false);
   const [notice, setNotice] = useState<string | undefined>();
@@ -57,16 +64,27 @@ export function TodayScreen() {
   const [leaving, setLeaving] = useState(false);
   const keys = useRef(new Map<string, (payload: unknown) => string>());
 
-  const accountReady = account.status === 'ready';
+  const timezone = account.status === 'ready' ? account.account.account_timezone : undefined;
+  const accountReady = timezone !== undefined;
 
   const refresh = useCallback(async (): Promise<void> => {
+    if (timezone === undefined) return;
     try {
-      const response = await api.request<OccurrencePage>({
-        method: 'GET',
-        path: `/occurrences?status=PROGRAMMED,NO_RESPONSE&limit=${String(PAGE_LIMIT)}`,
-      });
-      setItems(response.body.items);
-      setTruncated(response.body.page.next_cursor !== null);
+      const [actionable, today] = await Promise.all([
+        api.request<OccurrencePage>({
+          method: 'GET',
+          path: `/occurrences?status=PROGRAMMED,NO_RESPONSE&limit=${String(PAGE_LIMIT)}`,
+        }),
+        api.request<OccurrencePage>({
+          method: 'GET',
+          path: `/occurrences?local_date=${todayIn(timezone)}&limit=${String(PAGE_LIMIT)}`,
+        }),
+      ]);
+      setItems(actionable.body.items);
+      setTruncated(actionable.body.page.next_cursor !== null);
+      setDay(dayItems(today.body.items));
+      setDayTruncated(today.body.page.next_cursor !== null);
+      setNow(new Date().toISOString());
       setDisconnected(false);
     } catch (error) {
       if (error instanceof ApiProblem && error.status === 401) {
@@ -75,7 +93,7 @@ export function TodayScreen() {
       }
       setDisconnected(true);
     }
-  }, [router]);
+  }, [router, timezone]);
 
   useEffect(() => {
     if (!accountReady) return;
@@ -124,6 +142,7 @@ export function TodayScreen() {
       );
       setItems((current) => current?.filter((item) => item.occurrence_id !== id));
       setDeclining(undefined);
+      void refresh();
     } catch (error) {
       if (error instanceof ApiProblem && error.status === 401) {
         router.replace(loginPath('/hoje'));
@@ -193,103 +212,134 @@ export function TodayScreen() {
       )}
       <FormAlert message={alert} />
 
-      <h2 className="mb-2 text-xl font-semibold">Para registrar</h2>
-      {items === undefined && !disconnected && <p aria-live="polite">Carregando…</p>}
-      {items?.length === 0 && <p>Nada para registrar agora.</p>}
-      {items !== undefined && items.length > 0 && (
-        <ul className="divide-y divide-line">
-          {items.map((occurrence) => {
-            const id = occurrence.occurrence_id;
-            const busy = pending !== undefined;
-            const mine = pending?.occurrenceId === id;
-            return (
-              <li key={id} className="py-3">
-                <p className="font-semibold">
-                  {occurrence.medication_name_snapshot}{' '}
-                  <span className="font-normal">· {occurrence.dose_text_snapshot}</span>
-                </p>
-                <p>{whenText(occurrence, today)}</p>
-                {occurrence.status === 'NO_RESPONSE' && (
-                  <p className="text-sm text-muted">Sem resposta no prazo de 60 minutos.</p>
-                )}
-                {declining === id ? (
-                  <div className="mt-2">
-                    <fieldset className="mb-2">
-                      <legend className="mb-1 font-medium">Motivo (opcional)</legend>
-                      {[['', 'Prefiro não informar'] as const, ...NOT_TAKEN_REASONS].map(
-                        ([value, label]) => (
-                          <div key={value} className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              id={`motivo-${id}-${value || 'nenhum'}`}
-                              name={`motivo-${id}`}
-                              value={value}
-                              checked={reason === value}
-                              onChange={() => {
-                                setReason(value);
-                              }}
-                              className="size-5"
-                            />
-                            <label htmlFor={`motivo-${id}-${value || 'nenhum'}`}>{label}</label>
-                          </div>
-                        ),
-                      )}
-                    </fieldset>
-                    <div className="flex flex-wrap gap-2">
+      <section aria-labelledby="para-registrar">
+        <h2 id="para-registrar" className="mb-2 text-xl font-semibold">
+          Para registrar
+        </h2>
+        {items === undefined && !disconnected && <p aria-live="polite">Carregando…</p>}
+        {items?.length === 0 && <p>Nada para registrar agora.</p>}
+        {items !== undefined && items.length > 0 && (
+          <ul className="divide-y divide-line">
+            {items.map((occurrence) => {
+              const id = occurrence.occurrence_id;
+              const busy = pending !== undefined;
+              const mine = pending?.occurrenceId === id;
+              return (
+                <li key={id} className="py-3">
+                  <p className="font-semibold">
+                    {occurrence.medication_name_snapshot}{' '}
+                    <span className="font-normal">· {occurrence.dose_text_snapshot}</span>
+                  </p>
+                  <p>{whenText(occurrence, today)}</p>
+                  {occurrence.status === 'NO_RESPONSE' && (
+                    <p className="text-sm text-muted">Sem resposta no prazo de 60 minutos.</p>
+                  )}
+                  {declining === id ? (
+                    <div className="mt-2">
+                      <fieldset className="mb-2">
+                        <legend className="mb-1 font-medium">Motivo (opcional)</legend>
+                        {[['', 'Prefiro não informar'] as const, ...NOT_TAKEN_REASONS].map(
+                          ([value, label]) => (
+                            <div key={value} className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                id={`motivo-${id}-${value || 'nenhum'}`}
+                                name={`motivo-${id}`}
+                                value={value}
+                                checked={reason === value}
+                                onChange={() => {
+                                  setReason(value);
+                                }}
+                                className="size-5"
+                              />
+                              <label htmlFor={`motivo-${id}-${value || 'nenhum'}`}>{label}</label>
+                            </div>
+                          ),
+                        )}
+                      </fieldset>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() =>
+                            void respond(occurrence, 'NOT_TAKEN', reason === '' ? null : reason)
+                          }
+                          className="rounded bg-accent px-3 py-1 font-medium text-white disabled:opacity-70"
+                        >
+                          {mine ? 'Registrando…' : 'Confirmar'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDeclining(undefined);
+                          }}
+                          className="rounded border border-line px-3 py-1"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-2 flex flex-wrap gap-2">
                       <button
                         type="button"
                         disabled={busy}
-                        onClick={() =>
-                          void respond(occurrence, 'NOT_TAKEN', reason === '' ? null : reason)
-                        }
+                        onClick={() => void respond(occurrence, 'TAKEN', null)}
                         className="rounded bg-accent px-3 py-1 font-medium text-white disabled:opacity-70"
                       >
-                        {mine ? 'Registrando…' : 'Confirmar'}
+                        {mine && pending.type === 'TAKEN' ? 'Registrando…' : 'Tomei'}
                       </button>
                       <button
                         type="button"
+                        disabled={busy}
                         onClick={() => {
-                          setDeclining(undefined);
+                          setReason('');
+                          setDeclining(id);
                         }}
-                        className="rounded border border-line px-3 py-1"
+                        className="rounded border border-line px-3 py-1 disabled:opacity-70"
                       >
-                        Cancelar
+                        Não tomei
                       </button>
                     </div>
-                  </div>
-                ) : (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => void respond(occurrence, 'TAKEN', null)}
-                      className="rounded bg-accent px-3 py-1 font-medium text-white disabled:opacity-70"
-                    >
-                      {mine && pending.type === 'TAKEN' ? 'Registrando…' : 'Tomei'}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => {
-                        setReason('');
-                        setDeclining(id);
-                      }}
-                      className="rounded border border-line px-3 py-1 disabled:opacity-70"
-                    >
-                      Não tomei
-                    </button>
-                  </div>
-                )}
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {truncated && (
+          <p className="mt-4 text-sm text-muted">
+            Mostrando as {PAGE_LIMIT} mais recentes. As anteriores ficam no histórico.
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="remedios-de-hoje" className="mt-8">
+        <h2 id="remedios-de-hoje" className="mb-2 text-xl font-semibold">
+          Remédios de hoje
+        </h2>
+        {day === undefined && !disconnected && <p aria-live="polite">Carregando…</p>}
+        {day?.length === 0 && <p>Nenhum remédio previsto para hoje.</p>}
+        {day !== undefined && day.length > 0 && (
+          <ul className="divide-y divide-line">
+            {day.map((occurrence) => (
+              <li
+                key={occurrence.occurrence_id}
+                className="flex flex-wrap items-baseline justify-between gap-2 py-2"
+              >
+                <span>
+                  <span className="font-semibold tabular-nums">{occurrence.local_time}</span>{' '}
+                  {occurrence.medication_name_snapshot} · {occurrence.dose_text_snapshot}
+                </span>
+                <span className="text-sm">{dayStatusText(occurrence, now)}</span>
               </li>
-            );
-          })}
-        </ul>
-      )}
-      {truncated && (
-        <p className="mt-4 text-sm text-muted">
-          Mostrando as {PAGE_LIMIT} mais recentes. As anteriores ficam no histórico.
-        </p>
-      )}
+            ))}
+          </ul>
+        )}
+        {dayTruncated && (
+          <p className="mt-4 text-sm text-muted">Mostrando {PAGE_LIMIT} dos horários do dia.</p>
+        )}
+      </section>
     </>
   );
 }
