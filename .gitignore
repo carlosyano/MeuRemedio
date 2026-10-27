@@ -18,3 +18,6 @@ reports/
 apps/web/.next/
 test-results/
 playwright-report/
+
+# configuracao local do Claude Code (permissoes da maquina de cada um)
+.claude/settings.local.json

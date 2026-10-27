@@ -11,3 +11,4 @@ Scripts operacionais versionados.
 | `license-policy.mjs` | Política de licenças (permissivas; exceções revisadas por versão), usada pelo `sbom.mjs` (DC-048) |
 | `sarif-gate.mjs` | `node tools/scripts/sarif-gate.mjs <dir>`: reprova SARIF do CodeQL com achado de `security-severity` >= 7.0 (QG-005, DC-049) |
 | `trace-check.mjs` | `npm run trace:check`: rastreabilidade dos testes (`// @trace` com IDs da matriz ou operationIds, toda operação com teste, RF e TS sem teste só quando planejados) (QG-011, DC-060) |
+| `cloud-setup.sh` | `bash tools/scripts/cloud-setup.sh`: prepara o container da nuvem do Claude Code (Node 24 com SHA-256 conferido, `dockerd`, imagem `postgres:17` com fallback para `mirror.gcr.io` e `npm ci`). Idempotente; pode virar hook SessionStart |
