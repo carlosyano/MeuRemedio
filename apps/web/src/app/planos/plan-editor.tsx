@@ -14,6 +14,7 @@
 // que mantem prescritor e inicio. Nada e inferido: as ajudas so preenchem campos editaveis.
 // Situacao do plano (DEC-036): cancelar, interromper e retomar com motivo (PlanStatusPanel); plano
 // cancelado ou interrompido nao se edita, so mostra a situacao e pode ser retomado ou excluido.
+// Periodicidade (DEC-037): todos os dias, dias da semana marcados ou a cada N dias (do inicio).
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, type SubmitEvent } from 'react';
@@ -38,6 +39,8 @@ import {
   INTERVAL_HOURS,
   MAX_SCHEDULE_TIMES,
   MEDICATION_FORMS,
+  RECURRENCE_KINDS,
+  WEEKDAY_OPTIONS,
   describeRoutine,
   durationDays,
   endDateForDays,
@@ -52,6 +55,7 @@ import {
   type Plan,
   type PlanFormInput,
   type PlanPayload,
+  type RecurrenceKind,
 } from '@/lib/plan-form';
 import { statusReasonText } from '@/lib/plan-status';
 import { loginPath, useAccount } from '@/lib/use-account';
@@ -73,6 +77,7 @@ const FIELDS = [
   'start_date',
   'end_date',
   'schedule_times',
+  'recurrence',
 ];
 
 type LoadState =
@@ -134,6 +139,9 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
   const [endDate, setEndDate] = useState('');
   const [days, setDays] = useState('');
   const [intervalHours, setIntervalHours] = useState('');
+  const [recurrenceKind, setRecurrenceKind] = useState<RecurrenceKind>('DAILY');
+  const [weekdays, setWeekdays] = useState<readonly string[]>([]);
+  const [intervalDays, setIntervalDays] = useState('');
   const [notice, setNotice] = useState<string | undefined>();
   // Botao que enviou a criacao: "proximo" volta ao formulario para o proximo item da receita.
   const afterCreate = useRef<'list' | 'next'>('list');
@@ -159,6 +167,9 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
     setEndDate(initial.end_date);
     setDays(daysOf(initial.start_date, initial.end_date));
     setIntervalHours('');
+    setRecurrenceKind(initial.recurrence_kind ?? 'DAILY');
+    setWeekdays(initial.weekdays ?? []);
+    setIntervalDays(initial.interval_days ?? '');
     setFormKey((key) => key + 1);
   }, []);
 
@@ -329,6 +340,9 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
       end_date: textOf(form, 'end_date'),
       // Um unico campo vazio e "nenhum horario".
       schedule_times: times.every((time) => time === '') ? [] : times,
+      recurrence_kind: recurrenceKind,
+      weekdays,
+      interval_days: intervalDays,
     };
     const invalid: Record<string, string> = { ...validatePlanForm(input) };
     if (days.trim() !== '' && parseDays(days) === undefined)
@@ -415,6 +429,9 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
     start_date: startDate,
     end_date: endDate,
     schedule_times: times.every((time) => time === '') ? [] : times,
+    recurrence_kind: recurrenceKind,
+    weekdays,
+    interval_days: intervalDays,
   };
   const summary =
     Object.keys(validatePlanForm(summaryInput)).length === 0
@@ -567,6 +584,15 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
               Adicionar horário
             </button>
           </fieldset>
+          <RecurrenceFields
+            kind={recurrenceKind}
+            weekdays={weekdays}
+            intervalDays={intervalDays}
+            error={errors['recurrence']}
+            onKindChange={setRecurrenceKind}
+            onWeekdaysChange={setWeekdays}
+            onIntervalDaysChange={setIntervalDays}
+          />
           <TextField
             id="start_date"
             label="Data de início"
@@ -811,5 +837,96 @@ function StatusSummary(props: {
       <p>Motivo: {statusReasonText(plan.status, props.reason)}</p>
       {plan.status_note !== null && <p>Observação: {plan.status_note}</p>}
     </section>
+  );
+}
+
+/** Grupo "Periodicidade" (DEC-037): todos os dias, dias da semana ou a cada N dias. */
+function RecurrenceFields(props: {
+  readonly kind: RecurrenceKind;
+  readonly weekdays: readonly string[];
+  readonly intervalDays: string;
+  readonly error: string | undefined;
+  readonly onKindChange: (kind: RecurrenceKind) => void;
+  readonly onWeekdaysChange: (weekdays: readonly string[]) => void;
+  readonly onIntervalDaysChange: (value: string) => void;
+}) {
+  const errorId = props.error === undefined ? undefined : 'periodicidade-erro';
+  return (
+    <fieldset
+      className="mb-4"
+      aria-describedby={
+        errorId === undefined ? 'periodicidade-descricao' : `periodicidade-descricao ${errorId}`
+      }
+    >
+      <legend className="mb-1 font-medium">Periodicidade</legend>
+      <p id="periodicidade-descricao" className="mb-2 text-sm text-muted">
+        Os horários valem em cada dia escolhido. “A cada N dias” conta a partir da data de início.
+      </p>
+      {RECURRENCE_KINDS.map(([value, label]) => (
+        <div key={value} className="flex items-center gap-2">
+          <input
+            type="radio"
+            id={`periodicidade-${value}`}
+            name="recurrence_kind"
+            value={value}
+            checked={props.kind === value}
+            onChange={() => {
+              props.onKindChange(value as RecurrenceKind);
+            }}
+            className="size-5"
+          />
+          <label htmlFor={`periodicidade-${value}`}>{label}</label>
+        </div>
+      ))}
+      {props.kind === 'WEEKDAYS' && (
+        <fieldset className="mt-2 ml-7">
+          <legend className="mb-1">Em quais dias</legend>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {WEEKDAY_OPTIONS.map(([value, label]) => (
+              <div key={value} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id={`dia-${value}`}
+                  checked={props.weekdays.includes(value)}
+                  onChange={(event) => {
+                    props.onWeekdaysChange(
+                      event.target.checked
+                        ? [...props.weekdays, value]
+                        : props.weekdays.filter((day) => day !== value),
+                    );
+                  }}
+                  className="size-5"
+                />
+                <label htmlFor={`dia-${value}`}>{label}</label>
+              </div>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      {props.kind === 'EVERY_N_DAYS' && (
+        <div className="mt-2 ml-7">
+          <label htmlFor="interval_days" className="mb-1 block">
+            A cada quantos dias
+          </label>
+          <input
+            id="interval_days"
+            inputMode="numeric"
+            maxLength={3}
+            value={props.intervalDays}
+            onChange={(event) => {
+              props.onIntervalDaysChange(event.target.value);
+            }}
+            aria-invalid={props.error === undefined ? undefined : true}
+            aria-describedby={errorId}
+            className="w-24 rounded border border-line p-2 aria-invalid:border-danger"
+          />
+        </div>
+      )}
+      {props.error !== undefined && (
+        <p id={errorId} className="mt-1 text-sm font-medium text-danger">
+          {props.error}
+        </p>
+      )}
+    </fieldset>
   );
 }

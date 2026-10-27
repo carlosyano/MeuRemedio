@@ -1,6 +1,7 @@
 // Formulario de plano na web (TL-004; DC-054): regras espelhadas do contrato (PlanWrite) e da API
 // (termino >= inicio, ERR-009), montagem do payload e rotulos em pt-BR. A API valida tudo de novo;
 // o CRM so tem o formato conferido, sem consulta externa (RN-001, TS-012).
+// Periodicidade (DEC-037): todos os dias (padrao), dias da semana ou a cada N dias (2 a 365).
 
 /** Mesmo formato de FieldErrors de forms.ts (sem importar: este modulo roda nos testes). */
 export type FieldErrors = Readonly<Record<string, string>>;
@@ -16,7 +17,21 @@ export interface PlanFormInput {
   readonly start_date: string;
   readonly end_date: string;
   readonly schedule_times: readonly string[];
+  /** Periodicidade escolhida; omitida vale todos os dias. */
+  readonly recurrence_kind?: RecurrenceKind;
+  /** Dias marcados em "Dias da semana" (valores de Weekday). */
+  readonly weekdays?: readonly string[];
+  /** Texto digitado em "A cada quantos dias". */
+  readonly interval_days?: string;
 }
+
+export type RecurrenceKind = 'DAILY' | 'WEEKDAYS' | 'EVERY_N_DAYS';
+
+/** Schema PlanRecurrence do contrato. */
+export type PlanRecurrence =
+  | { readonly kind: 'DAILY' }
+  | { readonly kind: 'WEEKDAYS'; readonly weekdays: readonly string[] }
+  | { readonly kind: 'EVERY_N_DAYS'; readonly interval_days: number };
 
 /** Corpo de createPlan e updatePlan (sem o token de duplicidade). */
 export interface PlanPayload {
@@ -30,6 +45,8 @@ export interface PlanPayload {
   readonly start_date: string;
   readonly end_date: string | null;
   readonly schedule_times: readonly string[];
+  /** Omitida, a API usa todos os dias. */
+  readonly recurrence?: PlanRecurrence;
 }
 
 /** Plano como a API devolve (schema Plan). */
@@ -86,6 +103,35 @@ export const ADMINISTRATION_ROUTES: Options = [
 
 export const MAX_SCHEDULE_TIMES = 10;
 
+/** Enum Weekday do contrato, de segunda a domingo, com o nome do dia. */
+export const WEEKDAY_OPTIONS: Options = [
+  ['MONDAY', 'Segunda'],
+  ['TUESDAY', 'Terça'],
+  ['WEDNESDAY', 'Quarta'],
+  ['THURSDAY', 'Quinta'],
+  ['FRIDAY', 'Sexta'],
+  ['SATURDAY', 'Sábado'],
+  ['SUNDAY', 'Domingo'],
+];
+
+export const RECURRENCE_KINDS: Options = [
+  ['DAILY', 'Todos os dias'],
+  ['WEEKDAYS', 'Dias da semana'],
+  ['EVERY_N_DAYS', 'A cada N dias'],
+];
+
+const MIN_INTERVAL_DAYS = 2;
+const MAX_INTERVAL_DAYS = 365;
+const INTERVAL_INVALID = 'Informe um número inteiro de dias, de 2 a 365.';
+
+/** "A cada quantos dias" digitado: inteiro de 2 a 365; qualquer outra coisa e invalido. */
+function parseIntervalDays(text: string): number | undefined {
+  const trimmed = text.trim();
+  if (!/^\d{1,3}$/.test(trimmed)) return undefined;
+  const days = Number(trimmed);
+  return days >= MIN_INTERVAL_DAYS && days <= MAX_INTERVAL_DAYS ? days : undefined;
+}
+
 export const labelOf = (options: Options, value: string): string =>
   options.find(([option]) => option === value)?.[1] ?? value;
 
@@ -133,6 +179,14 @@ export function validatePlanForm(input: PlanFormInput): FieldErrors {
   } else if (times.length > MAX_SCHEDULE_TIMES) {
     errors['schedule_times'] = `Informe no máximo ${String(MAX_SCHEDULE_TIMES)} horários.`;
   }
+  if (input.recurrence_kind === 'WEEKDAYS' && (input.weekdays ?? []).length === 0) {
+    errors['recurrence'] = 'Escolha pelo menos um dia da semana.';
+  } else if (
+    input.recurrence_kind === 'EVERY_N_DAYS' &&
+    parseIntervalDays(input.interval_days ?? '') === undefined
+  ) {
+    errors['recurrence'] = INTERVAL_INVALID;
+  }
   return errors;
 }
 
@@ -153,7 +207,23 @@ export function toPlanPayload(input: PlanFormInput): PlanPayload {
     start_date: input.start_date,
     end_date: optional(input.end_date),
     schedule_times: [...input.schedule_times].sort(),
+    recurrence: recurrenceOf(input),
   };
+}
+
+function recurrenceOf(input: PlanFormInput): PlanRecurrence {
+  if (input.recurrence_kind === 'WEEKDAYS') {
+    const chosen = new Set(input.weekdays ?? []);
+    return {
+      kind: 'WEEKDAYS',
+      weekdays: WEEKDAY_OPTIONS.map(([value]) => value).filter((value) => chosen.has(value)),
+    };
+  }
+  const days =
+    input.recurrence_kind === 'EVERY_N_DAYS'
+      ? parseIntervalDays(input.interval_days ?? '')
+      : undefined;
+  return days === undefined ? { kind: 'DAILY' } : { kind: 'EVERY_N_DAYS', interval_days: days };
 }
 
 /** Plano carregado como valores iniciais do formulario. */
@@ -169,6 +239,10 @@ export function toFormInput(plan: PlanPayload): PlanFormInput {
     start_date: plan.start_date,
     end_date: plan.end_date ?? '',
     schedule_times: plan.schedule_times,
+    recurrence_kind: plan.recurrence?.kind ?? 'DAILY',
+    weekdays: plan.recurrence?.kind === 'WEEKDAYS' ? plan.recurrence.weekdays : [],
+    interval_days:
+      plan.recurrence?.kind === 'EVERY_N_DAYS' ? String(plan.recurrence.interval_days) : '',
   };
 }
 
@@ -263,5 +337,36 @@ export function describeRoutine(plan: PlanPayload): string {
         ? `por 1 dia, em ${formatDate(plan.start_date)}`
         : `por ${String(days)} dias, de ${formatDate(plan.start_date)} a ${formatDate(plan.end_date)}`;
   }
-  return `Tomar ${plan.dose_text}, ${route}, ${frequency} (${joinTimes(plan.schedule_times)}), ${period}.`;
+  const days = recurrencePhrase(plan.recurrence);
+  const when = days === undefined ? '' : `, ${days}`;
+  return `Tomar ${plan.dose_text}, ${route}, ${frequency} (${joinTimes(plan.schedule_times)})${when}, ${period}.`;
+}
+
+/** Plural com artigo de cada dia: "às segundas", "aos sábados". */
+const WEEKDAY_PHRASES: Readonly<Record<string, string>> = {
+  MONDAY: 'às segundas',
+  TUESDAY: 'às terças',
+  WEDNESDAY: 'às quartas',
+  THURSDAY: 'às quintas',
+  FRIDAY: 'às sextas',
+  SATURDAY: 'aos sábados',
+  SUNDAY: 'aos domingos',
+};
+
+const joinWords = (words: readonly string[]): string =>
+  words.length <= 1
+    ? (words[0] ?? '')
+    : `${words.slice(0, -1).join(', ')} e ${words[words.length - 1] ?? ''}`;
+
+/** "às segundas e às quintas", "a cada 3 dias"; todos os dias nao precisa de complemento. */
+function recurrencePhrase(recurrence: PlanRecurrence | undefined): string | undefined {
+  if (recurrence === undefined || recurrence.kind === 'DAILY') return undefined;
+  if (recurrence.kind === 'EVERY_N_DAYS') return `a cada ${String(recurrence.interval_days)} dias`;
+  return joinWords(recurrence.weekdays.map((day) => WEEKDAY_PHRASES[day] ?? day));
+}
+
+/** Periodicidade para a lista de planos: "Todos os dias", "Às segundas e às quintas"... */
+export function describeRecurrence(recurrence: PlanRecurrence | undefined): string {
+  const phrase = recurrencePhrase(recurrence) ?? 'todos os dias';
+  return phrase.charAt(0).toUpperCase() + phrase.slice(1);
 }

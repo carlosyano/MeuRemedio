@@ -225,3 +225,14 @@ Pedido do mantenedor: os planos só tinham as situações ativo e excluído, sem
 Efeitos: OpenAPI `02.33.8` (arquivo renomeado; oasdiff com as incompatibilidades do enum `PlanStatus` aprovadas em `tools/oasdiff/approved-breaking.txt`), matriz `2.1.15` (hashes das quatro fontes, DEC-036, operação `changePlanStatus` e seus vínculos com RF-003, CA-018, TS-038, TS-041 e o catálogo de erros), `maxProperties` de `decisions` no schema (35 → 36), `AGENTS.md` 1.9 (referências à OpenAPI vigente; `changePlanStatus` nas listas de concorrência otimista e de idempotência, §12 e §13), Especificação (DEC-036 e nota no Anexo C), regras R08, R09 e R13 do TS-040, TS-023 com a nova operação privada, `validate_all.py`, workflow de rastreabilidade e `CLAUDE.md`.
 
 **Aprovação:** pedido do mantenedor em 27/10/2026, que autorizou o merge com a CI verde.
+
+## DEC-037 e revisão 02.33.9 da OpenAPI: periodicidade do plano (27/10/2026)
+
+Pedido do mantenedor: todo plano gerava horários todos os dias, sem como cadastrar um medicamento tomado só em alguns dias da semana ou a cada N dias.
+
+1. **DEC-037:** `PlanWrite`, `CreatePlanRequest` e `Plan` ganham `recurrence` (`PlanRecurrence`, `oneOf` por `kind`): `DAILY` (todos os dias, o padrão quando omitido), `WEEKDAYS` (dias da semana escolhidos, de 1 a 7, devolvidos de segunda a domingo) ou `EVERY_N_DAYS` (`interval_days` de 2 a 365, contados da data de início). Os horários valem em cada dia da periodicidade; mudar a periodicidade em `updatePlan` cancela as ocorrências futuras `PROGRAMMED` e regera o horizonte. Periodicidades maiores (doses em datas definidas, anual, a cada vários anos) ficaram para depois, a pedido do mantenedor.
+2. **Implementação:** migração `0015_plan_recurrence` (enum `plan_recurrence_kind`, dias da semana em máscara de bits e intervalo, com constraints nomeadas); `occurrenceSlots` filtra os dias pela periodicidade, no calendário civil; na web, grupo "Periodicidade" no editor, frase de conferência ("às segundas e às quintas", "a cada 7 dias") e a periodicidade na lista de planos.
+
+Efeitos: OpenAPI `02.33.9` (arquivo renomeado; oasdiff sem incompatibilidade, pois `recurrence` é opcional na escrita), matriz `2.1.16` (hashes das quatro fontes, referências vigentes, DEC-037 no catálogo e em `listPlans`, `createPlan`, `getPlan` e `updatePlan`), `maxProperties` de `decisions` no schema (36 → 37), `AGENTS.md` 1.10 (referências vigentes e versões históricas), Especificação (DEC-037 e nota no Anexo C), ADR (referências vigentes), `validate_all.py`, workflow de rastreabilidade e `CLAUDE.md`. A descrição de `listPlans` passou a citar os planos cancelados e interrompidos (DEC-036).
+
+**Aprovação:** pedido do mantenedor em 27/10/2026, que autorizou o merge com a CI verde.

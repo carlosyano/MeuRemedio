@@ -153,6 +153,9 @@ Plano declaratório, período, status e versão.
 | `deleted_at` | timestamptz | não | us UTC | RFC 3339 UTC | null | não | - | operacional | exclusão lógica (FL-002) |
 | `status_reason` | plan_status_reason | não | - | MEDICAL_ADVICE\|SIDE_EFFECT\|IMPROVED\|COST_OR_ACCESS\|OWN_DECISION\|OTHER | null | não | - | saúde sensível | motivo da última mudança de situação (DEC-036); obrigatório em CANCELED e INTERRUPTED |
 | `status_note` | varchar | não | 1..200 | texto | null | não | - | saúde sensível | observação opcional da última mudança; só com motivo |
+| `recurrence_kind` | plan_recurrence_kind | sim | - | DAILY\|WEEKDAYS\|EVERY_N_DAYS | DAILY | não | - | saúde sensível | periodicidade (DEC-037) |
+| `recurrence_weekdays` | smallint | não | 1..127 | máscara de bits: segunda = 1, terça = 2, ..., domingo = 64 | null | não | - | saúde sensível | só em WEEKDAYS |
+| `recurrence_interval_days` | smallint | não | 2..365 | dias | null | não | - | saúde sensível | só em EVERY_N_DAYS; contado da `start_date` |
 | `status_changed_at` | timestamptz | não | us UTC | RFC 3339 UTC | null | não | - | operacional | instante da última mudança; num plano ACTIVE, marca a retomada: o gerador só cria horários posteriores a ele |
 | `created_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | UTC |
 | `updated_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | atualizado a cada escrita |
@@ -164,6 +167,9 @@ Plano declaratório, período, status e versão.
 - `plans_status_change_pair_chk`: CHECK((status_reason IS NULL) = (status_changed_at IS NULL))
 - `plans_status_note_chk`: CHECK(status_note IS NULL OR (char_length(status_note) BETWEEN 1 AND 200 AND status_reason IS NOT NULL))
 - `plans_stopped_requires_reason_chk`: CHECK(status NOT IN ('CANCELED','INTERRUPTED') OR status_reason IS NOT NULL)
+- `plans_recurrence_shape_chk`: cada periodicidade com exatamente o seu parâmetro (DAILY sem dias nem intervalo; WEEKDAYS só com `recurrence_weekdays`; EVERY_N_DAYS só com `recurrence_interval_days`)
+- `plans_recurrence_weekdays_chk`: CHECK(recurrence_weekdays BETWEEN 1 AND 127)
+- `plans_recurrence_interval_chk`: CHECK(recurrence_interval_days BETWEEN 2 AND 365)
 - Só a última mudança de situação fica guardada, sem o histórico das anteriores (limitação aceita na DEC-036)
 - Índice (user_id,status)
 - Índice (user_id,medication_name_norm,dose_text_norm) WHERE status='ACTIVE'
@@ -463,6 +469,7 @@ Perfil versionado e reproduzível de desempenho.
 | `apps/api/migrations/0011_performance_profiles.sql` | ENT-017 `performance_profiles` (imutável depois de registrado, DC-064) | Implementada e coberta por `tests/integration/db-performance.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0012_rights_requests.sql` | ENT-016 `external_rights_requests` (DC-066) | Implementada e coberta por `tests/integration/db-rights.spec.ts` e `tests/security/ts-032.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0013_incidents.sql` | ENT-015 `security.incident_records` (DC-067) | Implementada e coberta por `tests/integration/db-incidents.spec.ts` e `tests/security/ts-030.spec.ts` (PostgreSQL 17 real) |
+| `apps/api/migrations/0015_plan_recurrence.sql` | Periodicidade de ENT-005 (`recurrence_kind`, `recurrence_weekdays`, `recurrence_interval_days`, DEC-037) | Implementada e coberta por `tests/integration/plans-recurrence.spec.ts` e `tests/integration/db-core.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0014_plan_status.sql` | Situação de ENT-005 (CANCELED, INTERRUPTED, `status_reason`, `status_note`, `status_changed_at`) e `changePlanStatus` em `idempotency_records_operation_chk` (DEC-036) | Implementada e coberta por `tests/integration/plans-status.spec.ts` e `tests/integration/db-core.spec.ts` (PostgreSQL 17 real) |
 | Demais entidades | ENT-003 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
 

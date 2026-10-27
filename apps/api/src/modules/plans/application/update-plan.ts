@@ -20,6 +20,7 @@ import {
   type IdempotentResponse,
   type RequestHasher,
 } from '../../../platform/idempotency/idempotency.js';
+import { recurrenceColumns } from './plan-recurrence.js';
 import { etagOf, findPlan, toPlanView } from './plan-view.js';
 import {
   addScheduleTimes,
@@ -82,6 +83,7 @@ export class UpdatePlan {
     now: string,
   ): Promise<IdempotentResponse> {
     const { planId, request } = input;
+    const recurrence = recurrenceColumns(request.recurrence);
     const plan = await lockOwnPlan(client, { ...input, now });
     if (plan === undefined || plan.status === 'DELETED') return NOT_FOUND;
     if (etagOf(Number(plan.row_version)) !== input.ifMatch) {
@@ -94,6 +96,7 @@ export class UpdatePlan {
           SET medication_name = $2, medication_name_norm = $3, dose_text = $4, dose_text_norm = $5,
               medication_form = $6, administration_route = $7, instructions = $8,
               prescriber_name = $9, prescriber_crm = $10, start_date = $11, end_date = $12,
+              recurrence_kind = $14, recurrence_weekdays = $15, recurrence_interval_days = $16,
               row_version = row_version + 1, updated_at = $13
         WHERE id = $1`,
       [
@@ -110,6 +113,9 @@ export class UpdatePlan {
         request.start_date,
         request.end_date ?? null,
         now,
+        recurrence.kind,
+        recurrence.weekdays,
+        recurrence.intervalDays,
       ],
     );
     // Retira primeiro, para o limite de 10 horarios ativos (RN-006) valer sobre o conjunto final.

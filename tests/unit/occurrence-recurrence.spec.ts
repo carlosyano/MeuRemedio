@@ -8,6 +8,7 @@ import {
   InvalidCivilInputError,
   occurrenceSlots,
   type OccurrenceSlotsInput,
+  type Recurrence,
   type Weekday,
 } from '../../packages/domain/src/index.js';
 
@@ -139,9 +140,9 @@ describe('DEC-037 entradas invalidas', () => {
     ['intervalo 366', { kind: 'EVERY_N_DAYS', intervalDays: 366 }],
     ['intervalo fracionado', { kind: 'EVERY_N_DAYS', intervalDays: 2.5 }],
   ])('%s', (_nome, recurrence) => {
-    expect(() =>
-      occurrenceSlots(base({ recurrence: recurrence as OccurrenceSlotsInput['recurrence'] })),
-    ).toThrow(InvalidCivilInputError);
+    expect(() => occurrenceSlots(base({ recurrence: recurrence as Recurrence }))).toThrow(
+      InvalidCivilInputError,
+    );
   });
 
   it('valida mesmo quando a janela nao produz slots', () => {

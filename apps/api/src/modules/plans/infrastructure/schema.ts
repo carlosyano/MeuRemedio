@@ -1,11 +1,28 @@
-// Mapeamento Drizzle de ENT-005 medication_plans e ENT-006 schedule_times (migracoes 0001_core e
-// 0014_plan_status) e da tabela de plataforma plan_duplicate_confirmations (migracao 0005_plans,
-// RN-016, DC-028).
+// Mapeamento Drizzle de ENT-005 medication_plans e ENT-006 schedule_times (migracoes 0001_core,
+// 0014_plan_status e 0015_plan_recurrence) e da tabela de plataforma plan_duplicate_confirmations
+// (migracao 0005_plans, RN-016, DC-028).
 // O SQL e a fonte do esquema: constraints, FKs, triggers e indices vivem nas migracoes.
-import { bigint, date, pgEnum, pgTable, time, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  bigint,
+  date,
+  pgEnum,
+  pgTable,
+  smallint,
+  time,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { bytea } from '../../../platform/db/types.js';
 
 export const planStatus = pgEnum('plan_status', ['ACTIVE', 'CANCELED', 'INTERRUPTED', 'DELETED']);
+
+// Migracao 0015_plan_recurrence (DEC-037).
+export const planRecurrenceKind = pgEnum('plan_recurrence_kind', [
+  'DAILY',
+  'WEEKDAYS',
+  'EVERY_N_DAYS',
+]);
 
 // Migracao 0014_plan_status (DEC-036).
 export const planStatusReason = pgEnum('plan_status_reason', [
@@ -63,6 +80,10 @@ export const medicationPlans = pgTable('medication_plans', {
   statusReason: planStatusReason('status_reason'),
   statusNote: varchar('status_note'),
   statusChangedAt: timestamp('status_changed_at', { withTimezone: true }),
+  recurrenceKind: planRecurrenceKind('recurrence_kind').notNull().default('DAILY'),
+  /** Dias da semana em mascara de bits (segunda = 1, ..., domingo = 64). */
+  recurrenceWeekdays: smallint('recurrence_weekdays'),
+  recurrenceIntervalDays: smallint('recurrence_interval_days'),
   rowVersion: bigint('row_version', { mode: 'number' }).notNull().default(1),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
