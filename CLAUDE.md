@@ -19,6 +19,7 @@ npm run test:contract       # vitest --project contract     (tests/contract)
 npm run test:integration    # vitest --project integration  (tests/integration, PostgreSQL 17 real)
 npm run test:schemathesis   # TS-040 com Schemathesis contra a API em execucao (pip install -r tools/schemathesis/requirements.txt)
 npm run test:e2e            # Playwright + axe contra PostgreSQL, API e web reais (npx playwright install chromium)
+npm run infra:check         # Terraform fmt, validate e terraform test (provedor simulado) em infra/terraform (DC-071)
 npm run test:containers     # constroi o Dockerfile (api, web) e sobe migracao, API, worker e web contra PostgreSQL 17 (DC-070)
 npm run openapi:lint        # Spectral na OpenAPI normativa
 npm run openapi:diff        # oasdiff contra o merge-base com origin/main (ou OPENAPI_DIFF_BASE)

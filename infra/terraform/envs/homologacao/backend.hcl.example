@@ -1,0 +1,7 @@
+# Copie para backend.hcl (ignorado pelo git). O bucket do estado e criado uma vez, a mao, com
+# versionamento, cifragem e bloqueio de acesso publico (infra/terraform/README.md, passo 1).
+bucket       = "meuremedio-terraform-state-111111111111"
+key          = "homologacao/terraform.tfstate"
+region       = "sa-east-1"
+encrypt      = true
+use_lockfile = true

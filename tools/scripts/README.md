@@ -12,3 +12,5 @@ Scripts operacionais versionados.
 | `sarif-gate.mjs` | `node tools/scripts/sarif-gate.mjs <dir>`: reprova SARIF do CodeQL com achado de `security-severity` >= 7.0 (QG-005, DC-049) |
 | `trace-check.mjs` | `npm run trace:check`: rastreabilidade dos testes (`// @trace` com IDs da matriz ou operationIds, toda operação com teste, RF e TS sem teste só quando planejados) (QG-011, DC-060) |
 | `cloud-setup.sh` | `bash tools/scripts/cloud-setup.sh`: prepara o container da nuvem do Claude Code (Node 24 com SHA-256 conferido, `dockerd`, imagem `postgres:17` com fallback para `mirror.gcr.io` e `npm ci`) e indica as variáveis do `test:containers` (espelho da imagem base e CA do proxy). Idempotente; pode virar hook SessionStart |
+| `terraform-bin.mjs` | Download do Terraform fixado com verificação de SHA-256 (usado pelo `infra-check.mjs`) |
+| `infra-check.mjs` | `npm run infra:check`: `fmt -check`, `init -backend=false`, `validate` e `terraform test` em `infra/terraform` (DC-071) |

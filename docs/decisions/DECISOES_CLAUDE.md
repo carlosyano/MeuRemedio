@@ -761,3 +761,27 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Prova:** `tests/containers/images.spec.ts` (`npm run test:containers`, job próprio na CI) constrói as duas imagens e as sobe contra um PostgreSQL 17 real numa rede isolada. A migração aplica e é idempotente, a API responde `getHealth`, o worker fica no ar, a web serve `/entrar` com CSP e encaminha `/api/*`, e nenhum processo roda como root.
 - **Riscos:** a imagem da API tem cerca de 470 MB (NestJS e os dois clientes da AWS). A web precisa de um build por ambiente, porque a URL da API entra no build. A varredura de vulnerabilidades da imagem (por exemplo, Trivy ou ECR scan) entra com o CD, e o job novo ainda não é obrigatório no ruleset da `main`.
 - **Aplica-se a:** `Dockerfile`, `.dockerignore`, `apps/api/src/migrate-main.ts`, `vitest.config.ts`, `package.json`, `.github/workflows/ci.yml`, `tools/scripts/cloud-setup.sh`, `docs/architecture/TOOLCHAIN.md`, `CLAUDE.md` e ao teste `tests/containers/images.spec.ts`.
+
+## DC-071 — Infraestrutura AWS em Terraform (27/10/2026)
+
+- **Contexto:** a ADR-001 (OA-010) fixa AWS em `sa-east-1`, ECS Fargate, RDS, S3, SES, KMS, Secrets Manager, CloudWatch e Terraform. Não havia infraestrutura no repositório. O agente não tem conta AWS, então o código precisa ser provado sem credencial, e o `registry.terraform.io` não é alcançável na nuvem do Claude Code.
+- **Alternativas:** módulos da comunidade (`terraform-aws-modules`) ou recursos diretos; um módulo por serviço ou um módulo da plataforma; provar com `terraform test` e provedor simulado, com `plan` contra uma conta real ou com Checkov/tfsec.
+- **Decisão:**
+  - **Recursos diretos** num módulo `modules/platform`, chamado por `envs/<ambiente>`. Isso evita dependência de terceiros na infraestrutura e deixa cada recurso à vista na revisão.
+  - **Rede:** VPC própria em duas zonas. O ALB e o NAT ficam nas sub-redes públicas, e as tarefas e o banco nas privadas, sem IP público. O tráfego do S3 sai pelo endpoint de gateway. Os grupos de segurança seguem as camadas: internet → ALB → web → API → banco, e o worker → banco.
+  - **Entrada:** ALB com TLS 1.3 (`ELBSecurityPolicy-TLS13-1-3-2021-06`, RNF-002), HTTP só redireciona e os cabeçalhos inválidos são descartados. A API não tem entrada pública: a web a alcança pelo Service Connect (`http://api:3000`).
+  - **Banco:** RDS PostgreSQL 17 cifrado com a chave do projeto e `rds.force_ssl=1`. A senha mestre fica gerenciada pelo RDS no Secrets Manager, fora do estado. A conexão usa TLS `verify-full` com a CA do RDS de `sa-east-1` embarcada na imagem, e o usuário e a senha chegam em `PGUSER` e `PGPASSWORD`, que o driver `pg` lê quando a URL não os traz. O texto das consultas não vai para os logs. Há proteção contra exclusão, snapshot final e backups de 7 a 35 dias.
+  - **Exportações:** bucket sem acesso público, sem ACL, sem versionamento (um PDF apagado não pode sobreviver como versão antiga), SSE-KMS padrão e exigido pela política, só TLS, e ciclo de vida de 7 dias como rede de segurança.
+  - **Segredos HMAC:** recipientes no Secrets Manager com o JSON `{"current","previous"}`. O ECS injeta `NOME` e `NOME_PREVIOUS` (DC-065), e o valor é gravado pelo operador, nunca pelo Terraform.
+  - **Papéis:** o papel de execução só puxa imagem, lê os segredos e escreve logs. A API tem S3 no prefixo `exports/` (com o `ListBucket` restrito, DC-068) e KMS. O worker tem o mesmo e mais `ses:SendEmail`, condicionado ao remetente. A web e a migração não têm política.
+  - **Tarefas:** usuário `node`, sistema de arquivos somente leitura na API, no worker e na migração (a web grava o cache do Next), sem ECS Exec e com circuit breaker com rollback. A migração é uma definição de tarefa avulsa (DC-070).
+  - **SES:** identidade e DKIM pela API v1 (a lista `dkim_tokens` funciona no plano), configuration set com TLS obrigatório, métricas de reputação e supressão de bounce e reclamação.
+  - **Prova:** `terraform test` com `mock_provider` e `apply` simulado: 9 blocos sobre KMS com rotação, bucket privado e cifrado, banco privado com TLS, TLS 1.3, isolamento de rede, segredos fora do `environment`, usuário não root, menor privilégio e logs. Uma mutação manual (banco público, S3 em `*`) reprova os blocos correspondentes. `npm run infra:check` roda na CI.
+  - **Ferramentas fixadas:** Terraform 1.16.5 e provedor aws 6.68.0, com o SHA256SUMS assinado pela HashiCorp conferido. O lockfile traz os hashes `zh:` de todas as plataformas.
+- **Riscos:**
+  - O provedor simulado não prova o comportamento real (quotas, nomes, permissões, ordem de criação). O primeiro `apply` em conta real pode exigir ajustes.
+  - A aplicação e a migração usam o usuário mestre do banco. Um papel próprio, com menos privilégio, fica pendente.
+  - Ficam fora do módulo: WAF, alarmes, backup entre regiões e o consumidor dos eventos do SES (DEC-005).
+  - O custo mínimo é dominado pelo NAT e pelo RDS.
+  - A retenção dos logs (180 dias) e a dos backups seguem provisórias até o GX-003.
+- **Aplica-se a:** `infra/terraform/**`, `apps/api/assets/rds-ca-sa-east-1.pem`, `tools/scripts/{terraform-bin,infra-check}.mjs`, `package.json`, `.github/workflows/ci.yml`, `.gitignore`, `docs/operations/KEY_ROTATION.md` §5, `docs/architecture/TOOLCHAIN.md` e `CLAUDE.md`.

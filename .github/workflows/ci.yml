@@ -97,6 +97,19 @@ jobs:
       - run: npm ci
       - run: npm run test:containers
 
+  infra:
+    name: Infraestrutura (Terraform fmt, validate e test; DC-071)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run infra:check
+
   schemathesis:
     name: QG-001 Schemathesis (TS-040 contra a API em execucao)
     needs: build
