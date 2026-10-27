@@ -2,9 +2,9 @@
 
 ## Política operacional para agentes de desenvolvimento, testes e integração contínua
 
-**Versão:** 1.8  
+**Versão:** 1.9  
 **Status:** Baseline operacional aprovada  
-**Baseline contratual:** OpenAPI 02.33.7  
+**Baseline contratual:** OpenAPI 02.33.8  
 **Baseline funcional:** Especificação Funcional 02.33  
 **Baseline arquitetural:** ADR-001 v1.5  
 **Última atualização:** 27/10/2026
@@ -31,9 +31,9 @@ São requisitos obrigatórios:
 
 A prevalência deverá ser determinada de acordo com o assunto tratado.
 
-### 2.1 OpenAPI 02.33.7
+### 2.1 OpenAPI 02.33.8
 
-A OpenAPI 02.33.7 deverá prevalecer para:
+A OpenAPI 02.33.8 deverá prevalecer para:
 
 - rotas;
 - métodos HTTP;
@@ -85,10 +85,10 @@ Quando houver conflito entre documentos, deverá ser aplicada a seguinte regra:
 Para a superfície HTTP, deverá ser utilizado exclusivamente o seguinte contrato:
 
 ```text
-MeuRemedio_OpenAPI_02.33.7_COMPLETO.yaml
+MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
 ```
 
-Reproduções históricas da OpenAPI (02.32, 02.33, 02.33.1, 02.33.2, 02.33.3, 02.33.4 e 02.33.5) não deverão ser utilizadas como fonte normativa para:
+Reproduções históricas da OpenAPI (02.32, 02.33, 02.33.1, 02.33.2, 02.33.3, 02.33.4, 02.33.5 e 02.33.6) não deverão ser utilizadas como fonte normativa para:
 
 - implementação;
 - geração de código;
@@ -439,16 +439,17 @@ Os testes sentinela não deverão ser removidos, ignorados ou marcados como inst
 
 ## 12. Concorrência
 
-Na OpenAPI 02.33.7, a operação abaixo deverá utilizar concorrência otimista:
+Na OpenAPI 02.33.8, as operações abaixo deverão utilizar concorrência otimista:
 
 ```http
 PUT /plans/{plan_id}
+POST /plans/{plan_id}/status-changes
 ```
 
 O contrato deverá utilizar:
 
 - `ETag` nas respostas aplicáveis;
-- `If-Match` na operação de atualização.
+- `If-Match` nas operações de atualização e de mudança de situação do plano (DEC-036).
 
 Deverão ser observadas as seguintes regras:
 
@@ -492,6 +493,7 @@ A utilização de `Idempotency-Key` deverá ser obrigatória nas seguintes opera
 POST /accounts
 POST /plans
 PUT /plans/{plan_id}
+POST /plans/{plan_id}/status-changes
 POST /occurrences/{occurrence_id}/responses
 POST /exports
 POST /account-deletions
@@ -577,7 +579,7 @@ A implementação deverá assegurar:
 - TLS 1.3 em trânsito;
 - criptografia em repouso;
 - `correlation_id` nas respostas e registros aplicáveis;
-- proteção CSRF nas mutações autenticadas (cookie `mr_csrf` com `X-CSRF-Token` e validação de `Origin`, conforme ADR-001 v1.5 OA-008 e OpenAPI 02.33.7);
+- proteção CSRF nas mutações autenticadas (cookie `mr_csrf` com `X-CSRF-Token` e validação de `Origin`, conforme ADR-001 v1.5 OA-008 e OpenAPI 02.33.8);
 - ownership validado no servidor;
 - menor privilégio;
 - gestão segura de segredos;

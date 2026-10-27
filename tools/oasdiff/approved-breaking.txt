@@ -106,3 +106,14 @@ PUT /preferences/accessibility added the new `INTERNAL_ERROR` enum value to the 
 PUT /preferences/accessibility added the new `INTERNAL_ERROR` enum value to the `code` response property for the response status `401`
 PUT /preferences/accessibility added the new `INTERNAL_ERROR` enum value to the `code` response property for the response status `403`
 PUT /preferences/accessibility added the new `INTERNAL_ERROR` enum value to the `code` response property for the response status `429`
+
+# DEC-036 (OpenAPI 02.33.8, 27/10/2026; merge autorizado pelo mantenedor): PlanStatus ganha CANCELED e INTERRUPTED
+# (situacao do plano). Uma entrada por resposta que devolve Plan.
+GET /plans added the new `CANCELED` enum value to the `items/items/status` response property for the response status `200`
+GET /plans added the new `INTERRUPTED` enum value to the `items/items/status` response property for the response status `200`
+POST /plans added the new `CANCELED` enum value to the `status` response property for the response status `201`
+POST /plans added the new `INTERRUPTED` enum value to the `status` response property for the response status `201`
+GET /plans/{plan_id} added the new `CANCELED` enum value to the `status` response property for the response status `200`
+GET /plans/{plan_id} added the new `INTERRUPTED` enum value to the `status` response property for the response status `200`
+PUT /plans/{plan_id} added the new `CANCELED` enum value to the `status` response property for the response status `200`
+PUT /plans/{plan_id} added the new `INTERRUPTED` enum value to the `status` response property for the response status `200`

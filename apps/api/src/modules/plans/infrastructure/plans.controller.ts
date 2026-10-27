@@ -1,4 +1,4 @@
-// Rotas de planos (OpenAPI 02.33.7, tag Plans).
+// Rotas de planos (OpenAPI 02.33.8, tag Plans).
 import {
   Body,
   Controller,
@@ -18,6 +18,10 @@ import { sessionOf } from '../../../platform/http/access.guard.js';
 import { correlationIdOf } from '../../../platform/http/correlation.js';
 import { DEFAULT_PAGE_LIMIT } from '../../../platform/http/keyset-cursor.js';
 import { OperationId } from '../../../platform/http/operation-id.js';
+import {
+  ChangePlanStatus,
+  type ChangePlanStatusRequest,
+} from '../application/change-plan-status.js';
 import { CreatePlan, type CreatePlanRequest } from '../application/create-plan.js';
 import { DeletePlan } from '../application/delete-plan.js';
 import { ReadPlans, type PlanPage } from '../application/read-plans.js';
@@ -32,6 +36,7 @@ export class PlansController {
     @Inject(ReadPlans) private readonly readPlans: ReadPlans,
     @Inject(UpdatePlan) private readonly updatePlan: UpdatePlan,
     @Inject(DeletePlan) private readonly deletePlan: DeletePlan,
+    @Inject(ChangePlanStatus) private readonly changePlanStatus: ChangePlanStatus,
   ) {}
 
   @Get('plans')
@@ -110,5 +115,27 @@ export class PlansController {
       correlationId: correlationIdOf(request.raw),
     });
     void reply.status(204);
+  }
+
+  @Post('plans/:plan_id/status-changes')
+  @OperationId('changePlanStatus')
+  async changeStatus(
+    @Req() request: FastifyRequest,
+    @Param('plan_id') planId: string,
+    @Body() body: ChangePlanStatusRequest,
+    @Headers('if-match') ifMatch: string,
+    @Headers('idempotency-key') idempotencyKey: string,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<unknown> {
+    const response = await this.changePlanStatus.execute({
+      userId: sessionOf(request).userId,
+      planId,
+      ifMatch,
+      idempotencyKey,
+      correlationId: correlationIdOf(request.raw),
+      request: body,
+    });
+    void reply.headers(response.headers).status(response.status);
+    return response.body;
   }
 }

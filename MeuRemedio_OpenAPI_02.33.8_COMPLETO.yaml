@@ -1,5 +1,5 @@
-# MeuRemedio OpenAPI 02.33.7 - completo
-# Base: MeuRemedio_OpenAPI_02.33.6_COMPLETO.yaml
+# MeuRemedio OpenAPI 02.33.8 - completo
+# Base: MeuRemedio_OpenAPI_02.33.7_COMPLETO.yaml
 # Mudancas 02.33.3 (decisao de 04/10/2026): removido o 410 de createResponse (GAP-008); X-Correlation-ID em toda resposta, inclusive 202, 204 e getHealth (GAP-009).
 # Mudancas 02.33.4 (decisao de 06/10/2026, DEC-026, GAP-010): falha inesperada documentada em toda operacao,
 # com 500 INTERNAL_ERROR (ERR-016, resposta InternalError) e 503 DEPENDENCY_UNAVAILABLE (ERR-011).
@@ -9,12 +9,15 @@
 # ExportRequestPage, para o titular listar os proprios pedidos de exportacao.
 # Mudancas 02.33.7 (decisao de 27/10/2026, DEC-035): parametro opcional local_date em listOccurrences, para
 # listar as ocorrencias de um dia civil no fuso da conta, inclusive as ainda nao alcancadas.
-# Mantem os operationId da 02.33.2 e acrescenta listExports (28 operacoes).
+# Mudancas 02.33.8 (decisao de 27/10/2026, DEC-036): situacao do plano. PlanStatus ganha CANCELED e
+# INTERRUPTED; Plan ganha status_reason, status_note e status_changed_at; nova operacao changePlanStatus
+# (POST /plans/{plan_id}/status-changes) para cancelar, interromper e retomar, sempre com motivo.
+# Mantem os operationId da 02.33.2 e acrescenta listExports e changePlanStatus (29 operacoes).
 openapi: 3.1.1
 info:
   title: MeuRemedio API
-  version: 02.33.7
-  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.7
+  version: 02.33.8
+  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.8
   description: API declaratoria para conta individual, planos de medicamentos, ocorrencias, respostas, historico,
     exportacoes e privacidade. Nao prescreve, nao valida medicamentos ou interacoes e nao substitui orientacao profissional.
     Todas as mutacoes autenticadas exigem protecao CSRF (cookie mr_csrf + cabecalho X-CSRF-Token) e validacao do
@@ -677,6 +680,70 @@ paths:
       - sessionCookie: []
         csrfToken: []
       description: 'Exclusao logica: cancela ocorrencias futuras PROGRAMMED e preserva snapshots historicos.'
+  /plans/{plan_id}/status-changes:
+    post:
+      tags:
+      - Plans
+      summary: Mudar situacao do plano
+      operationId: changePlanStatus
+      responses:
+        '200':
+          description: Situacao alterada
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      parameters:
+      - $ref: '#/components/parameters/PlanId'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePlanStatusRequest'
+      x-traceability:
+      - RF-003
+      - DEC-036
+      - TS-038
+      - CA-018
+      - TS-041
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+      - CSRF X-CSRF-Token + Origin
+      security:
+      - sessionCookie: []
+        csrfToken: []
+      description: 'Cancela o plano que ainda nao comecou (CANCEL), interrompe o que esta em andamento (INTERRUPT)
+        ou retoma o interrompido que ainda nao terminou (RESUME), sempre com motivo (DEC-036). Transicao invalida
+        retorna 409 STATE_CONFLICT. Cancelar e interromper cancelam as ocorrencias futuras PROGRAMMED; a retomada
+        so gera horarios a partir dela. Concorrencia otimista como em updatePlan: If-Match ausente ou malformado
+        retorna 400 VALIDATION_FAILED; ETag obsoleto retorna 409 VERSION_CONFLICT.'
   /occurrences:
     get:
       tags:
@@ -1712,7 +1779,40 @@ components:
       type: string
       enum:
       - ACTIVE
+      - CANCELED
+      - INTERRUPTED
       - DELETED
+    PlanStatusReason:
+      type: string
+      description: Motivo declarado da ultima mudanca de situacao do plano (DEC-036).
+      enum:
+      - MEDICAL_ADVICE
+      - SIDE_EFFECT
+      - IMPROVED
+      - COST_OR_ACCESS
+      - OWN_DECISION
+      - OTHER
+    ChangePlanStatusRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        action:
+          type: string
+          enum:
+          - CANCEL
+          - INTERRUPT
+          - RESUME
+        reason:
+          $ref: '#/components/schemas/PlanStatusReason'
+        note:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 200
+          - type: 'null'
+      required:
+      - action
+      - reason
     MedicationForm:
       type: string
       enum:
@@ -1893,6 +1993,19 @@ components:
           minItems: 1
           maxItems: 10
           uniqueItems: true
+        status_reason:
+          anyOf:
+          - $ref: '#/components/schemas/PlanStatusReason'
+          - type: 'null'
+        status_note:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+        status_changed_at:
+          anyOf:
+          - $ref: '#/components/schemas/Instant'
+          - type: 'null'
         row_version:
           $ref: '#/components/schemas/RowVersion'
         created_at:
@@ -1902,6 +2015,9 @@ components:
       required:
       - plan_id
       - status
+      - status_reason
+      - status_note
+      - status_changed_at
       - medication_name
       - dose_text
       - medication_form
