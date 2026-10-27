@@ -1,4 +1,4 @@
-// @trace TS-001 TS-025 RN-002 RN-003 RN-004 RN-006 RN-007 RN-008 RN-009 RN-013 RF-001 RF-002 RF-003 RF-004 RF-006 DEC-036
+// @trace TS-001 TS-025 RN-002 RN-003 RN-004 RN-006 RN-007 RN-008 RN-009 RN-013 RF-001 RF-002 RF-003 RF-004 RF-006 DEC-036 DEC-037
 // Esquema central no PostgreSQL 17 REAL (docs/architecture/DATA_MODEL.md: ENT-001 e ENT-004 a ENT-008).
 // Base de banco do TS-001 (concorrencia TAKEN x NOT_TAKEN): o teste HTTP completo vem com a API.
 import pg from 'pg';
@@ -139,6 +139,7 @@ describe('enums do banco coincidem com a OpenAPI', () => {
     account_status: 'AccountStatus',
     plan_status: 'PlanStatus',
     plan_status_reason: 'PlanStatusReason',
+    plan_recurrence_kind: 'PlanRecurrenceKind',
     medication_form: 'MedicationForm',
     administration_route: 'AdministrationRoute',
     occurrence_status: 'OccurrenceStatus',
@@ -388,6 +389,80 @@ describe('medication_plans (ENT-005)', () => {
     await expect(
       insert('medication_plans', planRow(userId, { ...changed, status_note: 'x'.repeat(200) })),
     ).resolves.toBeTypeOf('string');
+  });
+
+  it('periodicidade (DEC-037): DAILY por padrao, sem dias nem intervalo', async () => {
+    const userId = await insert('users', userRow());
+    const planId = await insert('medication_plans', planRow(userId));
+    const row = await pool.query<{ k: string; w: number | null; i: number | null }>(
+      `SELECT recurrence_kind AS k, recurrence_weekdays AS w, recurrence_interval_days AS i
+         FROM medication_plans WHERE id = $1`,
+      [planId],
+    );
+    expect(row.rows).toEqual([{ k: 'DAILY', w: null, i: null }]);
+  });
+
+  it.each([
+    ['DAILY com dias', { recurrence_weekdays: 1 }],
+    ['DAILY com intervalo', { recurrence_interval_days: 3 }],
+    ['WEEKDAYS sem dias', { recurrence_kind: 'WEEKDAYS' }],
+    [
+      'WEEKDAYS com intervalo',
+      { recurrence_kind: 'WEEKDAYS', recurrence_weekdays: 1, recurrence_interval_days: 3 },
+    ],
+    ['EVERY_N_DAYS sem intervalo', { recurrence_kind: 'EVERY_N_DAYS' }],
+    [
+      'EVERY_N_DAYS com dias',
+      { recurrence_kind: 'EVERY_N_DAYS', recurrence_interval_days: 3, recurrence_weekdays: 1 },
+    ],
+  ])('periodicidade (DEC-037): %s viola o formato', async (_nome, over) => {
+    const userId = await insert('users', userRow());
+    await expectPgError(insert('medication_plans', planRow(userId, over)), {
+      code: '23514',
+      constraint: 'plans_recurrence_shape_chk',
+    });
+  });
+
+  it('periodicidade (DEC-037): dias de 1 a 127 (mascara de segunda a domingo)', async () => {
+    const userId = await insert('users', userRow());
+    for (const mask of [0, 128]) {
+      await expectPgError(
+        insert(
+          'medication_plans',
+          planRow(userId, { recurrence_kind: 'WEEKDAYS', recurrence_weekdays: mask }),
+        ),
+        { code: '23514', constraint: 'plans_recurrence_weekdays_chk' },
+      );
+    }
+    for (const mask of [1, 127]) {
+      await expect(
+        insert(
+          'medication_plans',
+          planRow(userId, { recurrence_kind: 'WEEKDAYS', recurrence_weekdays: mask }),
+        ),
+      ).resolves.toBeTypeOf('string');
+    }
+  });
+
+  it('periodicidade (DEC-037): intervalo de 2 a 365 dias', async () => {
+    const userId = await insert('users', userRow());
+    for (const days of [1, 366]) {
+      await expectPgError(
+        insert(
+          'medication_plans',
+          planRow(userId, { recurrence_kind: 'EVERY_N_DAYS', recurrence_interval_days: days }),
+        ),
+        { code: '23514', constraint: 'plans_recurrence_interval_chk' },
+      );
+    }
+    for (const days of [2, 365]) {
+      await expect(
+        insert(
+          'medication_plans',
+          planRow(userId, { recurrence_kind: 'EVERY_N_DAYS', recurrence_interval_days: days }),
+        ),
+      ).resolves.toBeTypeOf('string');
+    }
   });
 
   it.each(['CANCELED', 'INTERRUPTED'])('situacao %s exige motivo (DEC-036)', async (status) => {

@@ -1,4 +1,4 @@
-// @trace TL-003 TL-004 RF-003 RN-001 RN-016 CA-005 CA-006 CA-012 CA-013 CA-017 TS-008 TS-010 TS-019 TS-022 TS-037 TS-043 ERR-001 ERR-003 ERR-005 ERR-009 ERR-011 ERR-014 DEC-036 listPlans createPlan getPlan updatePlan deletePlan changePlanStatus
+// @trace TL-003 TL-004 RF-003 RN-001 RN-016 CA-005 CA-006 CA-012 CA-013 CA-017 TS-008 TS-010 TS-019 TS-022 TS-037 TS-043 ERR-001 ERR-003 ERR-005 ERR-009 ERR-011 ERR-014 DEC-036 listPlans createPlan getPlan updatePlan deletePlan changePlanStatus DEC-037
 // Planos (TL-003) e editor de plano (TL-004) na aplicacao web (DC-054), contra a API e o
 // PostgreSQL reais: lista vazia e lista, validacao, criacao, confirmacao de possivel duplicidade,
 // edicao com If-Match e conflito de versao, exclusao logica, plano de outro titular (404), servico
@@ -391,5 +391,52 @@ test.describe('TL-004 situacao do plano (DEC-036)', () => {
 
     await page.goto('/planos');
     await expect(page.getByRole('region', { name: 'Cancelados' })).toContainText('Amoxicilina');
+  });
+});
+
+test.describe('TL-004 periodicidade (DEC-037)', () => {
+  test('dias da semana: escolher os dias, conferir a frase e ver na lista', async ({ page }) => {
+    await signedIn(page, '/planos/novo');
+    await fillPlan(page, { name: 'Metotrexato 2,5 mg', dose: '4 comprimidos' });
+    await page.getByLabel('Data de início').fill('2030-01-07');
+    const periodicity = page.getByRole('group', { name: 'Periodicidade' });
+    await periodicity.getByLabel('Dias da semana').check();
+    await save(page);
+    await expect(alertIn(page)).toBeVisible();
+    await expect(periodicity).toContainText('Escolha pelo menos um dia da semana.');
+    await periodicity.getByLabel('Segunda').check();
+    await periodicity.getByLabel('Quinta').check();
+    await expect(page.getByRole('region', { name: 'Confira antes de salvar' })).toContainText(
+      'Tomar 4 comprimidos, via oral, 1 vez ao dia (08:00), às segundas e às quintas, uso contínuo a partir de 07/01/2030.',
+    );
+    await expectNoA11yViolations(page);
+    await save(page);
+    await expect(statusIn(page)).toHaveText('Plano criado.');
+    const item = page.getByRole('listitem').filter({ hasText: 'Metotrexato' });
+    await expect(item).toContainText('Às segundas e às quintas');
+
+    await item.getByRole('link', { name: 'Metotrexato 2,5 mg' }).click();
+    await expect(
+      page.getByRole('group', { name: 'Periodicidade' }).getByLabel('Quinta'),
+    ).toBeChecked();
+  });
+
+  test('a cada N dias, contados do inicio', async ({ page }) => {
+    await signedIn(page, '/planos/novo');
+    await fillPlan(page, { name: 'Vitamina D 50.000 UI', dose: '1 cápsula' });
+    const periodicity = page.getByRole('group', { name: 'Periodicidade' });
+    await periodicity.getByLabel('A cada N dias').check();
+    await periodicity.getByLabel('A cada quantos dias').fill('1');
+    await save(page);
+    await expect(periodicity).toContainText('Informe um número inteiro de dias, de 2 a 365.');
+    await periodicity.getByLabel('A cada quantos dias').fill('7');
+    await expect(page.getByRole('region', { name: 'Confira antes de salvar' })).toContainText(
+      '1 vez ao dia (08:00), a cada 7 dias',
+    );
+    await save(page);
+    await expect(statusIn(page)).toHaveText('Plano criado.');
+    await expect(page.getByRole('listitem').filter({ hasText: 'Vitamina D' })).toContainText(
+      'A cada 7 dias',
+    );
   });
 });
