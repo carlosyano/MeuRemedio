@@ -58,7 +58,7 @@
     "glob": "13.0.6"
   },
   "overrides": {
-    "qs": "6.16.0",
+    "qs": "6.16.1",
     "playwright-core": "1.63.0"
   }
 }
