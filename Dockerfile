@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # Imagens da API (com o worker e a migracao) e da web (DC-070). Build pela raiz do repositorio:
 #   docker build --target api -t meuremedio-api .
 #   docker build --target web --build-arg MEUREMEDIO_API_URL=http://api.interno:3000 -t meuremedio-web .
@@ -47,11 +46,14 @@ RUN --mount=type=secret,id=npm_ca,required=false \
     npm ci --omit=dev --ignore-scripts --no-audit -w @meuremedio/api -w @meuremedio/domain \
     && mkdir -p apps/api/node_modules
 
+# O binario do SWC e dependencia opcional do next: se o download falha, o npm segue sem ele e a
+# web so quebra na subida. A checagem final falha o build nesse caso.
 FROM manifests AS web-deps
 RUN --mount=type=secret,id=npm_ca,required=false \
     NODE_EXTRA_CA_CERTS=$(test -f /run/secrets/npm_ca && echo /run/secrets/npm_ca) \
     npm ci --omit=dev --ignore-scripts --no-audit -w @meuremedio/web \
-    && mkdir -p apps/web/node_modules
+    && mkdir -p apps/web/node_modules \
+    && node -e "require.resolve('@next/swc-linux-' + process.arch + '-gnu')"
 
 # API: `node apps/api/dist/main.js` (padrao); worker: `node apps/api/dist/worker-main.js`;
 # migracao: `node apps/api/dist/migrate-main.js`; operacao: `node apps/api/dist/ops-main.js`.

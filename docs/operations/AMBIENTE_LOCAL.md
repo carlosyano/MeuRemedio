@@ -39,6 +39,12 @@ Use `localhost`, não `127.0.0.1`: o cookie de sessão é `Secure`, e os navegad
 | `docker compose down` | Para tudo e mantém os dados |
 | `docker compose down -v` | Para tudo e **apaga** banco, exportações e e-mails |
 
+## Se o build falhar
+
+- **`frontend grpc server closed unexpectedly`** ou o build parado por minutos: o Docker Desktop ficou sem memória. Reinicie o Docker Desktop e construa uma imagem por vez: `docker compose build migrate`, `docker compose build web` e depois `docker compose up`. Se voltar a acontecer, aumente a memória do WSL 2 (arquivo `%UserProfile%\.wslconfig`, por exemplo `memory=6GB`) e reinicie o WSL com `wsl --shutdown`.
+- **`Cannot find module '@next/swc-linux-...'`** no build da web: o download do compilador do Next falhou. Rode o build de novo.
+- Não rode `npm install <pacote>` para corrigir erro de build: isso altera o `package-lock.json`. Desfaça com `git checkout package.json package-lock.json`.
+
 ## Limites
 
 - Só para teste na própria máquina: as portas escutam apenas em `127.0.0.1`, e a senha do banco é fixa no `compose.yaml`.

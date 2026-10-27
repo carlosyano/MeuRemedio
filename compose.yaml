@@ -10,11 +10,11 @@ name: meuremedio
 
 x-database-url: &database-url postgres://meuremedio:meuremedio-local@db:5432/meuremedio
 
+# A imagem da API e construida uma vez so, pelo servico migrate; api e worker reusam a mesma
+# imagem (pull_policy: never). Tres builds iguais em paralelo esgotavam a memoria do Docker Desktop.
 x-api-image: &api-image
   image: meuremedio-api:local
-  build:
-    context: .
-    target: api
+  pull_policy: never
 
 services:
   db:
@@ -32,7 +32,10 @@ services:
       retries: 30
 
   migrate:
-    <<: *api-image
+    image: meuremedio-api:local
+    build:
+      context: .
+      target: api
     command: ['node', 'apps/api/dist/migrate-main.js']
     environment:
       DATABASE_URL: *database-url
