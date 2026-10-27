@@ -1,4 +1,4 @@
-// @trace TL-003 TL-004 RF-003 RN-016 CA-005 CA-006 CA-012 CA-013 CA-017 TS-008 TS-010 TS-019 TS-022 TS-037 TS-043 ERR-001 ERR-003 ERR-005 ERR-009 ERR-011 ERR-014 listPlans createPlan getPlan updatePlan deletePlan
+// @trace TL-003 TL-004 RF-003 RN-001 RN-016 CA-005 CA-006 CA-012 CA-013 CA-017 TS-008 TS-010 TS-019 TS-022 TS-037 TS-043 ERR-001 ERR-003 ERR-005 ERR-009 ERR-011 ERR-014 listPlans createPlan getPlan updatePlan deletePlan
 // Planos (TL-003) e editor de plano (TL-004) na aplicacao web (DC-054), contra a API e o
 // PostgreSQL reais: lista vazia e lista, validacao, criacao, confirmacao de possivel duplicidade,
 // edicao com If-Match e conflito de versao, exclusao logica, plano de outro titular (404), servico
@@ -264,5 +264,66 @@ test.describe('TL-004 editor de plano', () => {
     await save(page);
     await expect(statusIn(page)).toHaveText('Plano criado.');
     await expect(page.getByRole('listitem').filter({ hasText: 'Losartana' })).toHaveCount(1);
+  });
+});
+
+test.describe('TL-004 cadastro no formato da receita (DC-074)', () => {
+  test('a cada 8 horas por 5 dias, conferencia e proximo item da mesma receita', async ({
+    page,
+  }) => {
+    await signedIn(page, '/planos/novo');
+    await page.getByLabel('Medicamento').fill('Codein 3 mg/mL');
+    await page.getByLabel('Dose').fill('3 ml');
+    await page.getByLabel('Forma farmacêutica').selectOption({ label: 'Líquido' });
+    await page.getByLabel('Via de administração').selectOption({ label: 'Oral' });
+    await page.getByLabel('Intervalo').selectOption({ label: 'De 8 em 8 horas' });
+    await page.getByLabel('Primeiro horário').fill('08:00');
+    await page.getByRole('button', { name: 'Preencher horários' }).click();
+    await expect(page.getByLabel('Horário 1', { exact: true })).toHaveValue('08:00');
+    await expect(page.getByLabel('Horário 2', { exact: true })).toHaveValue('16:00');
+    await expect(page.getByLabel('Horário 3', { exact: true })).toHaveValue('00:00');
+    await page.getByLabel('Data de início').fill('2030-01-10');
+    await page.getByLabel('Duração em dias').fill('5');
+    await expect(page.getByLabel('Data de término')).toHaveValue('2030-01-14');
+    await page.getByLabel('Nome de quem prescreveu').fill('Bruno Costa');
+    await page.getByLabel('CRM de quem prescreveu').fill('SP-123456');
+    const summary = page.getByRole('region', { name: 'Confira antes de salvar' });
+    await expect(summary).toContainText('Codein 3 mg/mL');
+    await expect(summary).toContainText(
+      'Tomar 3 ml, via oral, 3 vezes ao dia (00:00, 08:00 e 16:00), por 5 dias, de 10/01/2030 a 14/01/2030.',
+    );
+    await expectNoA11yViolations(page);
+
+    await page.getByRole('button', { name: 'Salvar e cadastrar outro item' }).click();
+    await expect(statusIn(page)).toHaveText(
+      'Plano criado: Codein 3 mg/mL. Cadastre o próximo item da receita.',
+    );
+    await expect(page.getByLabel('Medicamento')).toHaveValue('');
+    await expect(page.getByLabel('Medicamento')).toBeFocused();
+    await expect(page.getByLabel('Nome de quem prescreveu')).toHaveValue('Bruno Costa');
+    await expect(page.getByLabel('CRM de quem prescreveu')).toHaveValue('SP-123456');
+    await expect(page.getByLabel('Data de início')).toHaveValue('2030-01-10');
+    await expect(page.getByLabel('Data de término')).toHaveValue('');
+
+    await fillPlan(page, { name: 'Prednisona 20 mg', dose: '1 comprimido' });
+    await page.getByLabel('Duração em dias').fill('5');
+    await save(page);
+    await expect(statusIn(page)).toHaveText('Plano criado.');
+    const codein = page.getByRole('listitem').filter({ hasText: 'Codein' });
+    await expect(codein).toContainText('00:00, 08:00, 16:00');
+    await expect(codein).toContainText('De 10/01/2030 a 14/01/2030');
+    await expect(page.getByRole('listitem').filter({ hasText: 'Prednisona' })).toContainText(
+      'De 10/01/2030 a 14/01/2030',
+    );
+  });
+
+  test('item repetido na receita cai na confirmacao de duplicidade (RN-016)', async ({ page }) => {
+    await signedIn(page, '/planos/novo');
+    await fillPlan(page, { name: 'Levofloxacino 500 mg', dose: '1 comprimido' });
+    await page.getByRole('button', { name: 'Salvar e cadastrar outro item' }).click();
+    await expect(statusIn(page)).toContainText('Plano criado: Levofloxacino 500 mg.');
+    await fillPlan(page, { name: 'Levofloxacino 500 mg', dose: '1 comprimido' });
+    await page.getByRole('button', { name: 'Salvar e cadastrar outro item' }).click();
+    await expect(page.getByRole('region', { name: 'Já existe um plano parecido' })).toBeVisible();
   });
 });
