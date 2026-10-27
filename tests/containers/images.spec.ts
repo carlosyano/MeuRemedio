@@ -19,6 +19,19 @@ const WEB_IMAGE = `meuremedio-web:test-${suffix}`;
 const docker = (...args: string[]): string =>
   execFileSync('docker', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
 
+// MEUREMEDIO_BASE_IMAGE: espelho da imagem base com o mesmo digest (ex.: mirror.gcr.io).
+const baseImageOverride = process.env['MEUREMEDIO_BASE_IMAGE'];
+const baseImage =
+  baseImageOverride === undefined || baseImageOverride === ''
+    ? []
+    : ['--build-arg', `BASE_IMAGE=${baseImageOverride}`];
+// MEUREMEDIO_BUILD_CA: CA do proxy de saida (PEM) para o npm ci dentro do build.
+const buildCa = process.env['MEUREMEDIO_BUILD_CA'];
+const buildArgs = [
+  ...baseImage,
+  ...(buildCa === undefined || buildCa === '' ? [] : ['--secret', `id=npm_ca,src=${buildCa}`]),
+];
+
 const secret = (): string => randomBytes(32).toString('base64');
 const DATABASE_URL = `postgres://postgres:postgres@${DB}:5432/meuremedio`;
 const apiEnv = [
@@ -57,9 +70,10 @@ const uid = (container: string): string => docker('exec', container, 'id', '-u')
 
 describe('imagens de container', () => {
   beforeAll(() => {
-    docker('build', '--target', 'api', '-t', API_IMAGE, '.');
+    docker('build', ...buildArgs, '--target', 'api', '-t', API_IMAGE, '.');
     docker(
       'build',
+      ...buildArgs,
       '--target',
       'web',
       '--build-arg',

@@ -10,6 +10,7 @@
 | npm | o que acompanha o Node 24 (11.x) | Lockfile v3. |
 | PostgreSQL | 17 (`postgres:17` nos testes; 17.11 validada em 04/10/2026) | Testcontainers sobe o banco real. |
 | Docker | Docker Desktop | Necessário a partir dos testes de integração. |
+| Imagem base dos containers | `node:24.22.1-bookworm-slim`, fixada por digest no `Dockerfile` | Debian 12 slim com o Node 24 oficial (DC-070). Atualizar = trocar tag e digest no mesmo PR, como o Node do `cloud-setup.sh`. |
 | Python | o definido em `.github/workflows/traceability-validation.yml` | Para `validate_all.py` e para o Schemathesis. |
 
 ## 2. Dependências de desenvolvimento (fundação)

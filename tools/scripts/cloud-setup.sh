@@ -47,6 +47,17 @@ if docker info > /dev/null 2>&1 && ! docker image inspect postgres:17 > /dev/nul
   fi
 fi
 
+# Build das imagens (DC-070) neste ambiente: base pelo espelho, com o mesmo digest do Dockerfile,
+# e a CA do proxy de saida para o npm ci dentro do build.
+BASE_DIGEST="$(sed -n 's/^ARG BASE_IMAGE=node:[^@]*@//p' Dockerfile)"
+BASE_TAG="$(sed -n 's/^ARG BASE_IMAGE=node:\([^@]*\)@.*/\1/p' Dockerfile)"
+if [ -n "${CLAUDE_ENV_FILE:-}" ] && [ -n "$BASE_DIGEST" ]; then
+  echo "export MEUREMEDIO_BASE_IMAGE=mirror.gcr.io/library/node:$BASE_TAG@$BASE_DIGEST" >> "$CLAUDE_ENV_FILE"
+  if [ -f /root/.ccr/ca-bundle.crt ]; then
+    echo "export MEUREMEDIO_BUILD_CA=/root/.ccr/ca-bundle.crt" >> "$CLAUDE_ENV_FILE"
+  fi
+fi
+
 # Dependencias npm exatas do lockfile (nunca reescreve o package-lock.json)
 npm ci --no-audit --no-fund
 
@@ -56,3 +67,4 @@ if ! python3 -c "import yaml, jsonschema" > /dev/null 2>&1; then
 fi
 
 echo "Ambiente pronto. Para usar o Node 24 neste shell: export PATH=\"$NODE_DIR/bin:\$PATH\""
+echo "Para npm run test:containers: export MEUREMEDIO_BASE_IMAGE=mirror.gcr.io/library/node:$BASE_TAG@$BASE_DIGEST MEUREMEDIO_BUILD_CA=/root/.ccr/ca-bundle.crt"
