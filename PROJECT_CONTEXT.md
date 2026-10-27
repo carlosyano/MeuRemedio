@@ -4,7 +4,7 @@
 |---|---|
 | Versão do documento | 1.3 |
 | Última atualização | 27/10/2026 (DEC-036: situação do plano, OpenAPI 02.33.8) |
-| Baseline descrita | Especificação 02.33 · OpenAPI 02.33.8 · ADR-001 v1.5 · AGENTS.md 1.9 · Matriz 2.1.15 |
+| Baseline descrita | Especificação 02.33 · OpenAPI 02.33.9 · ADR-001 v1.5 · AGENTS.md 1.9 · Matriz 2.1.15 |
 | Commit da baseline | _preencher no merge do PR que aplica esta revisão_ |
 
 ## 1. Finalidade
@@ -20,7 +20,7 @@ Este documento fornece contexto operacional para continuidade do projeto **MeuRe
 | Projeto | MeuRemedio |
 | Repositório | `https://github.com/carlosyano/MeuRemedio` |
 | Branch principal | `main` |
-| Fase atual | Fundação técnica Test-First em andamento (baseline 02.33.8; §12, passos 5 a 7) |
+| Fase atual | Fundação técnica Test-First em andamento (baseline 02.33.9; §12, passos 5 a 7) |
 | Modelo de engenharia | Contract-First, Test-First e IA-First com aprovação humana |
 | Matriz de rastreabilidade | versão `2.1.6` |
 | Autorização de produção | Não concedida |
@@ -54,7 +54,7 @@ A prevalência depende do assunto tratado.
 
 | Assunto | Fonte normativa | Prevalece para |
 |---|---|---|
-| Superfície HTTP | `MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml` | paths, métodos, `operationId`, parâmetros, cabeçalhos, cookies, payloads, schemas, enums, códigos HTTP, `Problem.code` e segurança da API |
+| Superfície HTTP | `MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml` | paths, métodos, `operationId`, parâmetros, cabeçalhos, cookies, payloads, schemas, enums, códigos HTTP, `Problem.code` e segurança da API |
 | Comportamento funcional | `MeuRemedio_Especificacao_Funcional_02.33.docx` | requisitos, regras de negócio, entidades, fluxos, estados de tela, histórias, critérios de aceitação, mensagens, testes sentinela e gates externos |
 | Arquitetura | `ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx` | arquitetura, stack, persistência, processamento assíncrono, infraestrutura e governança arquitetural |
 | Processo operacional | `AGENTS.md` (v1.3) | comportamento de agentes, desenvolvimento, quality gates, testes, rastreabilidade, segurança e aprovação humana |
@@ -95,7 +95,7 @@ docs/
 ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
 AGENTS.md
 MeuRemedio_Especificacao_Funcional_02.33.docx
-MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
 PROJECT_CONTEXT.md
 requirements-validation.txt
 traceability-check.py
@@ -156,7 +156,7 @@ Use a versão de Python definida em `.github/workflows/traceability-validation.y
 6. cobertura de ownership (TS-023) em toda operação privada;
 7. existência de artefato de teste planejado para todo TS.
 
-`validate_all.py` exige o arquivo `MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml` no diretório; ao trocar a versão da OpenAPI, atualize a constante `OPENAPI` e a matriz.
+`validate_all.py` exige o arquivo `MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml` no diretório; ao trocar a versão da OpenAPI, atualize a constante `OPENAPI` e a matriz.
 
 ### 7.3 Significado de PASS
 
@@ -313,7 +313,7 @@ Antes de propor ou alterar código, leia integralmente:
 1. AGENTS.md
 2. PROJECT_CONTEXT.md
 3. traceability-matrix.yaml
-4. MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+4. MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
 5. MeuRemedio_Especificacao_Funcional_02.33.docx
 6. ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
 7. docs/specifications/P0_SENTINEL_TESTS.md e docs/architecture/DATA_MODEL.md

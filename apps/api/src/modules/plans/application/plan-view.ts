@@ -1,4 +1,4 @@
-// Leitura de um plano no formato do schema Plan (OpenAPI 02.33.8) e ETag derivado de row_version.
+// Leitura de um plano no formato do schema Plan (OpenAPI 02.33.9) e ETag derivado de row_version.
 import type { Pool, PoolClient } from 'pg';
 
 /** Situacao do plano (DEC-036); DELETED nunca chega ao titular. */

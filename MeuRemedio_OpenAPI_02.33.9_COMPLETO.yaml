@@ -1,5 +1,5 @@
-# MeuRemedio OpenAPI 02.33.8 - completo
-# Base: MeuRemedio_OpenAPI_02.33.7_COMPLETO.yaml
+# MeuRemedio OpenAPI 02.33.9 - completo
+# Base: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
 # Mudancas 02.33.3 (decisao de 04/10/2026): removido o 410 de createResponse (GAP-008); X-Correlation-ID em toda resposta, inclusive 202, 204 e getHealth (GAP-009).
 # Mudancas 02.33.4 (decisao de 06/10/2026, DEC-026, GAP-010): falha inesperada documentada em toda operacao,
 # com 500 INTERNAL_ERROR (ERR-016, resposta InternalError) e 503 DEPENDENCY_UNAVAILABLE (ERR-011).
@@ -12,12 +12,15 @@
 # Mudancas 02.33.8 (decisao de 27/10/2026, DEC-036): situacao do plano. PlanStatus ganha CANCELED e
 # INTERRUPTED; Plan ganha status_reason, status_note e status_changed_at; nova operacao changePlanStatus
 # (POST /plans/{plan_id}/status-changes) para cancelar, interromper e retomar, sempre com motivo.
+# Mudancas 02.33.9 (decisao de 27/10/2026, DEC-037): periodicidade do plano. PlanWrite, CreatePlanRequest e Plan
+# ganham recurrence (PlanRecurrence): todos os dias (DAILY, padrao quando omitido), dias da semana escolhidos
+# (WEEKDAYS) ou a cada N dias contados da data de inicio (EVERY_N_DAYS, de 2 a 365).
 # Mantem os operationId da 02.33.2 e acrescenta listExports e changePlanStatus (29 operacoes).
 openapi: 3.1.1
 info:
   title: MeuRemedio API
-  version: 02.33.8
-  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.8
+  version: 02.33.9
+  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.9
   description: API declaratoria para conta individual, planos de medicamentos, ocorrencias, respostas, historico,
     exportacoes e privacidade. Nao prescreve, nao valida medicamentos ou interacoes e nao substitui orientacao profissional.
     Todas as mutacoes autenticadas exigem protecao CSRF (cookie mr_csrf + cabecalho X-CSRF-Token) e validacao do
@@ -462,13 +465,14 @@ paths:
       x-traceability:
       - RF-003
       - TS-037
+      - DEC-037
       x-security-requirements:
       - TLS 1.3
       - UTF-8
       - application/problem+json
       - correlation_id
-      description: Lista planos ACTIVE do titular com paginacao por cursor (padrao 20, maximo 100). Planos DELETED
-        nao sao listados.
+      description: Lista os planos do titular (ACTIVE, CANCELED e INTERRUPTED, DEC-036) com paginacao por cursor
+        (padrao 20, maximo 100). Planos DELETED nao sao listados.
     post:
       tags:
       - Plans
@@ -520,6 +524,7 @@ paths:
       - TS-041
       - CA-017
       - TS-043
+      - DEC-037
       description: Se houver candidato de duplicidade e o corpo nao trouxer duplicate_confirmation_token valido,
         retorna 409 com code DUPLICATE_CONFIRMATION_REQUIRED (schema DuplicateConfirmationProblem). Esse 409 nao
         e persistido como snapshot de idempotencia; a confirmacao e reenviada com o token e uma NOVA Idempotency-Key.
@@ -567,6 +572,7 @@ paths:
       - RF-003
       - TS-008
       - TS-037
+      - DEC-037
       x-security-requirements:
       - TLS 1.3
       - UTF-8
@@ -628,6 +634,7 @@ paths:
       - TS-038
       - CA-018
       - TS-041
+      - DEC-037
       x-security-requirements:
       - TLS 1.3
       - UTF-8
@@ -1782,6 +1789,66 @@ components:
       - CANCELED
       - INTERRUPTED
       - DELETED
+    PlanRecurrenceKind:
+      type: string
+      description: Periodicidade do plano (DEC-037).
+      enum:
+      - DAILY
+      - WEEKDAYS
+      - EVERY_N_DAYS
+    Weekday:
+      type: string
+      enum:
+      - MONDAY
+      - TUESDAY
+      - WEDNESDAY
+      - THURSDAY
+      - FRIDAY
+      - SATURDAY
+      - SUNDAY
+    PlanRecurrence:
+      description: 'Periodicidade do plano (DEC-037). DAILY: todos os dias. WEEKDAYS: so nos dias da semana escolhidos,
+        no calendario civil da conta (a leitura devolve os dias na ordem de segunda a domingo). EVERY_N_DAYS: a cada
+        interval_days dias contados da data de inicio (o inicio e o primeiro dia). Os horarios valem em cada dia
+        da periodicidade. Omitido em PlanWrite e CreatePlanRequest, vale DAILY.'
+      oneOf:
+      - type: object
+        additionalProperties: false
+        properties:
+          kind:
+            $ref: '#/components/schemas/PlanRecurrenceKind'
+            const: DAILY
+        required:
+        - kind
+      - type: object
+        additionalProperties: false
+        properties:
+          kind:
+            $ref: '#/components/schemas/PlanRecurrenceKind'
+            const: WEEKDAYS
+          weekdays:
+            type: array
+            items:
+              $ref: '#/components/schemas/Weekday'
+            minItems: 1
+            maxItems: 7
+            uniqueItems: true
+        required:
+        - kind
+        - weekdays
+      - type: object
+        additionalProperties: false
+        properties:
+          kind:
+            $ref: '#/components/schemas/PlanRecurrenceKind'
+            const: EVERY_N_DAYS
+          interval_days:
+            type: integer
+            minimum: 2
+            maximum: 365
+        required:
+        - kind
+        - interval_days
     PlanStatusReason:
       type: string
       description: Motivo declarado da ultima mudanca de situacao do plano (DEC-036).
@@ -1885,6 +1952,8 @@ components:
           minItems: 1
           maxItems: 10
           uniqueItems: true
+        recurrence:
+          $ref: '#/components/schemas/PlanRecurrence'
       required: &id001
       - medication_name
       - dose_text
@@ -1937,6 +2006,8 @@ components:
           minItems: 1
           maxItems: 10
           uniqueItems: true
+        recurrence:
+          $ref: '#/components/schemas/PlanRecurrence'
         duplicate_confirmation_token:
           type: string
           minLength: 16
@@ -1993,6 +2064,8 @@ components:
           minItems: 1
           maxItems: 10
           uniqueItems: true
+        recurrence:
+          $ref: '#/components/schemas/PlanRecurrence'
         status_reason:
           anyOf:
           - $ref: '#/components/schemas/PlanStatusReason'
@@ -2024,6 +2097,7 @@ components:
       - administration_route
       - start_date
       - schedule_times
+      - recurrence
       - row_version
       - created_at
       - updated_at

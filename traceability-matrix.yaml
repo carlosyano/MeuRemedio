@@ -1,32 +1,32 @@
 schema_version: 1.0.0
-matrix_version: 2.1.15
+matrix_version: 2.1.16
 status: baseline-development-and-testing
 generated_from:
   functional_specification: MeuRemedio_Especificacao_Funcional_02.33.docx
   functional_specification_version: '02.33'
-  openapi: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
-  openapi_version: 02.33.8
+  openapi: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
+  openapi_version: 02.33.9
   architecture: ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
   architecture_version: '1.5'
   agents_policy: AGENTS.md
-  agents_policy_version: '1.9'
+  agents_policy_version: '1.10'
   source_integrity:
     algorithm: sha256
     artifacts:
       functional_specification:
         file: MeuRemedio_Especificacao_Funcional_02.33.docx
-        sha256: 477eb47569d03677331a0a2ed2010fd4cc3159996ef1fb934d699e43b4dcce5e
+        sha256: 730df0f86fc7414d3f2500e1a89c477fa6ad8e1519ea9971c246a28961406af0
       openapi:
-        file: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
-        sha256: 448737a0d2088db5cdb1b93b9f35eaf7925b4630c8ebe331c4d5cd3aff0946aa
+        file: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
+        sha256: 98c0a4e4bd16ecf515cffdb9a874aa33688f10d876acfd429c5061e9c1373396
       architecture:
         file: ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
-        sha256: 6e45cc46ee8d0f4316b5595da42eb4512921c08faf5154e0027ee074a7b5388d
+        sha256: 592b53e2f9c3954e9c56e15e66def4e055aa6e80128271735d4f17f29303f9dc
       agents_policy:
         file: AGENTS.md
-        sha256: dd7dd5a459039e38b8d4f0dd8454573d47885d16543b64d8c88c968f95981902
+        sha256: ecb6b81e755f6451875d6ba5547a6550785fd0bc6ce482663d637071124c0942
 governance:
-  http_source_of_truth: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+  http_source_of_truth: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
   functional_source_of_truth: MeuRemedio_Especificacao_Funcional_02.33.docx
   architecture_source_of_truth: ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
   production_authorization: blocked-until-GX-001-through-GX-006-closed
@@ -2205,7 +2205,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1accounts/post'
   verifyAccount:
     method: POST
@@ -2238,7 +2238,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1accounts~1verify/post'
   resendVerification:
     method: POST
@@ -2267,7 +2267,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1accounts~1verification-resends/post'
   requestPasswordReset:
     method: POST
@@ -2294,7 +2294,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1password-reset-requests/post'
   confirmPasswordReset:
     method: POST
@@ -2327,7 +2327,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1password-resets/post'
   createSession:
     method: POST
@@ -2365,7 +2365,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1sessions/post'
   deleteCurrentSession:
     method: DELETE
@@ -2398,7 +2398,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1sessions~1current/delete'
     cross_cutting_controls:
     - CA-012
@@ -2438,7 +2438,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1preferences~1accessibility/get'
     cross_cutting_controls:
     - CA-012
@@ -2487,7 +2487,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1preferences~1accessibility/put'
     cross_cutting_controls:
     - CA-012
@@ -2510,6 +2510,7 @@ operations:
     traceability:
     - RF-003
     - TS-037
+    - DEC-037
     requirements:
     - RF-003
     acceptance_criteria: []
@@ -2530,7 +2531,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1plans/get'
     cross_cutting_controls:
     - CA-012
@@ -2560,6 +2561,7 @@ operations:
     - TS-041
     - CA-017
     - TS-043
+    - DEC-037
     requirements:
     - RF-003
     acceptance_criteria:
@@ -2591,7 +2593,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1plans/post'
     cross_cutting_controls:
     - CA-012
@@ -2615,6 +2617,7 @@ operations:
     - RF-003
     - TS-008
     - TS-037
+    - DEC-037
     requirements:
     - RF-003
     acceptance_criteria: []
@@ -2636,7 +2639,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1plans~1{plan_id}/get'
     cross_cutting_controls:
     - CA-012
@@ -2665,6 +2668,7 @@ operations:
     - TS-038
     - CA-018
     - TS-041
+    - DEC-037
     requirements:
     - RF-003
     acceptance_criteria:
@@ -2696,7 +2700,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1plans~1{plan_id}/put'
     cross_cutting_controls:
     - CA-012
@@ -2748,7 +2752,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1plans~1{plan_id}~1status-changes/post'
     cross_cutting_controls:
     - CA-012
@@ -2799,7 +2803,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1plans~1{plan_id}/delete'
     cross_cutting_controls:
     - CA-012
@@ -2843,7 +2847,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1occurrences/get'
     cross_cutting_controls:
     - CA-012
@@ -2904,7 +2908,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1occurrences~1{occurrence_id}~1responses/post'
     cross_cutting_controls:
     - CA-012
@@ -2947,7 +2951,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1history/get'
     cross_cutting_controls:
     - CA-012
@@ -3002,7 +3006,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1exports/post'
     cross_cutting_controls:
     - CA-012
@@ -3044,7 +3048,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1exports/get'
     cross_cutting_controls:
     - CA-012
@@ -3085,7 +3089,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1exports~1{export_id}/get'
     cross_cutting_controls:
     - CA-012
@@ -3137,7 +3141,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1exports~1{export_id}/delete'
     cross_cutting_controls:
     - CA-012
@@ -3187,7 +3191,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1exports~1{export_id}~1file/get'
     cross_cutting_controls:
     - CA-012
@@ -3229,7 +3233,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1privacy/get'
     cross_cutting_controls:
     - CA-012
@@ -3285,7 +3289,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1account-deletions/post'
     cross_cutting_controls:
     - CA-012
@@ -3322,7 +3326,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1health/get'
   getCurrentAccount:
     method: GET
@@ -3351,7 +3355,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1accounts~1me/get'
     cross_cutting_controls:
     - CA-012
@@ -3400,7 +3404,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1accounts~1me/put'
     cross_cutting_controls:
     - CA-012
@@ -3450,7 +3454,7 @@ operations:
     mapping_provenance:
       operation: explicit-openapi
       traceability: explicit-openapi-x-traceability
-      source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+      source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
       source_pointer: '#/paths/~1sessions~1revocations/post'
     cross_cutting_controls:
     - CA-012
@@ -3580,35 +3584,35 @@ trace_links:
   to: createAccount
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/createAccount/x-traceability
     mapping_type: explicit-openapi
 - from: RF-001
   to: getCurrentAccount
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/getCurrentAccount/x-traceability
     mapping_type: explicit-openapi
 - from: RF-001
   to: resendVerification
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/resendVerification/x-traceability
     mapping_type: explicit-openapi
 - from: RF-001
   to: updateCurrentAccount
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/updateCurrentAccount/x-traceability
     mapping_type: explicit-openapi
 - from: RF-001
   to: verifyAccount
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/verifyAccount/x-traceability
     mapping_type: explicit-openapi
 - from: RF-002
@@ -3671,35 +3675,35 @@ trace_links:
   to: confirmPasswordReset
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/confirmPasswordReset/x-traceability
     mapping_type: explicit-openapi
 - from: RF-002
   to: createSession
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/createSession/x-traceability
     mapping_type: explicit-openapi
 - from: RF-002
   to: deleteCurrentSession
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/deleteCurrentSession/x-traceability
     mapping_type: explicit-openapi
 - from: RF-002
   to: requestPasswordReset
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/requestPasswordReset/x-traceability
     mapping_type: explicit-openapi
 - from: RF-002
   to: revokeAllSessions
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/revokeAllSessions/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
@@ -3776,42 +3780,42 @@ trace_links:
   to: createPlan
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/createPlan/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
   to: deletePlan
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/deletePlan/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
   to: getPlan
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/getPlan/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
   to: listPlans
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/listPlans/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
   to: changePlanStatus
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/changePlanStatus/x-traceability
     mapping_type: explicit-openapi
 - from: RF-003
   to: updatePlan
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/updatePlan/x-traceability
     mapping_type: explicit-openapi
 - from: RF-004
@@ -3895,7 +3899,7 @@ trace_links:
   to: listOccurrences
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/listOccurrences/x-traceability
     mapping_type: explicit-openapi
 - from: RF-005
@@ -3965,7 +3969,7 @@ trace_links:
   to: listOccurrences
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/listOccurrences/x-traceability
     mapping_type: explicit-openapi
 - from: RF-006
@@ -4028,7 +4032,7 @@ trace_links:
   to: createResponse
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/createResponse/x-traceability
     mapping_type: explicit-openapi
 - from: RF-007
@@ -4056,7 +4060,7 @@ trace_links:
   to: getHistory
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/getHistory/x-traceability
     mapping_type: explicit-openapi
 - from: RF-008
@@ -4105,35 +4109,35 @@ trace_links:
   to: cancelExport
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/cancelExport/x-traceability
     mapping_type: explicit-openapi
 - from: RF-008
   to: createExport
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/createExport/x-traceability
     mapping_type: explicit-openapi
 - from: RF-008
   to: downloadExport
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/downloadExport/x-traceability
     mapping_type: explicit-openapi
 - from: RF-008
   to: listExports
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/listExports/x-traceability
     mapping_type: explicit-openapi
 - from: RF-008
   to: getExport
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/getExport/x-traceability
     mapping_type: explicit-openapi
 - from: RF-009
@@ -4147,7 +4151,7 @@ trace_links:
   to: updateAccessibilityPreferences
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/updateAccessibilityPreferences/x-traceability
     mapping_type: explicit-openapi
 - from: RF-010
@@ -4196,14 +4200,14 @@ trace_links:
   to: getPrivacy
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/getPrivacy/x-traceability
     mapping_type: explicit-openapi
 - from: RF-010
   to: requestAccountDeletion
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/requestAccountDeletion/x-traceability
     mapping_type: explicit-openapi
 - from: RF-011
@@ -4217,7 +4221,7 @@ trace_links:
   to: getPrivacy
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/getPrivacy/x-traceability
     mapping_type: explicit-openapi
 - from: RF-012
@@ -4665,7 +4669,7 @@ trace_links:
   to: getAccessibilityPreferences
   relationship: implemented_by
   provenance:
-    source: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+    source: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
     location: operation/getAccessibilityPreferences/x-traceability
     mapping_type: explicit-openapi
 - from: RF-010
@@ -5090,7 +5094,7 @@ production_gates:
 validator:
   schema: traceability-matrix.schema.json
   executable: traceability-check.py
-  ci_command: python traceability-check.py traceability-matrix.yaml MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+  ci_command: python traceability-check.py traceability-matrix.yaml MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
   fail_on:
   - schema-error
   - source-hash-mismatch
@@ -5579,6 +5583,7 @@ catalog_completeness:
     - DEC-034
     - DEC-035
     - DEC-036
+    - DEC-037
     actual_ids:
     - DEC-001
     - DEC-002
@@ -5616,6 +5621,7 @@ catalog_completeness:
     - DEC-034
     - DEC-035
     - DEC-036
+    - DEC-037
     status: complete
   approved_questions:
     authoritative_source: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -6543,6 +6549,15 @@ decisions:
       source: MeuRemedio_Especificacao_Funcional_02.33.docx
       table_index: 2
       row_index: 36
+      mapping_type: explicit-catalog-row
+  DEC-037:
+    criticidade: Média
+    problema_causa: 'Todo plano gerava horários todos os dias: o titular não conseguia cadastrar um medicamento tomado só em alguns dias da semana ou a cada N dias sem receber horários e lembretes nos dias sem dose.'
+    decis_o_adotada: 'Periodicidade do plano (OpenAPI 02.33.9): PlanWrite, CreatePlanRequest e Plan ganham recurrence (PlanRecurrence), com kind DAILY (todos os dias, o padrão quando omitido), WEEKDAYS (só nos dias da semana escolhidos, de 1 a 7, no calendário civil da conta; a leitura devolve os dias de segunda a domingo) ou EVERY_N_DAYS (a cada interval_days dias, de 2 a 365, contados da data de início, que é o primeiro dia). Os horários do plano valem em cada dia da periodicidade, e o gerador só cria ocorrências nesses dias; lembretes, histórico e exportação seguem as ocorrências geradas. Mudar a periodicidade em updatePlan cancela as ocorrências futuras PROGRAMMED e regera o horizonte (RN-018). Periodicidades maiores, como doses em datas definidas, anual ou a cada vários anos, ficam fora desta decisão.'
+    provenance:
+      source: MeuRemedio_Especificacao_Funcional_02.33.docx
+      table_index: 2
+      row_index: 37
       mapping_type: explicit-catalog-row
 approved_questions:
   Q-001:
