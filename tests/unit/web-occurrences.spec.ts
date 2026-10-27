@@ -1,9 +1,15 @@
-// @trace TL-005 RF-005 RF-006 RN-009 createResponse
+// @trace TL-005 RF-005 RF-006 RN-009 DEC-035 createResponse listOccurrences
 // Textos da tela de ocorrencias (TL-005; DC-055): quando (hoje ou data em pt-BR, com o horario
 // local da ocorrencia, sem conversao de fuso), motivos do NOT_TAKEN em pt-BR na ordem do contrato
 // e corpo da resposta (TAKEN sempre com reason null).
 import { describe, expect, it } from 'vitest';
-import { NOT_TAKEN_REASONS, responseBody, whenText } from '../../apps/web/src/lib/occurrences.js';
+import {
+  NOT_TAKEN_REASONS,
+  dayItems,
+  dayStatusText,
+  responseBody,
+  whenText,
+} from '../../apps/web/src/lib/occurrences.js';
 
 describe('whenText', () => {
   it('hoje mostra so o horario local; outro dia mostra a data', () => {
@@ -32,5 +38,37 @@ describe('motivos e corpo da resposta', () => {
     expect(responseBody('TAKEN', 'FORGOT')).toEqual({ type: 'TAKEN', reason: null });
     expect(responseBody('NOT_TAKEN', 'FORGOT')).toEqual({ type: 'NOT_TAKEN', reason: 'FORGOT' });
     expect(responseBody('NOT_TAKEN', null)).toEqual({ type: 'NOT_TAKEN', reason: null });
+  });
+});
+
+describe('remedios do dia (DEC-035)', () => {
+  const NOW = '2026-10-15T14:00:00Z';
+  const at = (local_time: string, scheduled_at: string, status: string) => ({
+    local_time,
+    scheduled_at,
+    status: status as 'PROGRAMMED' | 'NO_RESPONSE' | 'TAKEN' | 'NOT_TAKEN' | 'CANCELED',
+  });
+
+  it('ordena pelo horario local, do mais cedo para o mais tarde', () => {
+    const items = [
+      at('20:00', '2026-10-15T23:00:00Z', 'PROGRAMMED'),
+      at('08:00', '2026-10-15T11:00:00Z', 'TAKEN'),
+      at('14:00', '2026-10-15T17:00:00Z', 'PROGRAMMED'),
+    ];
+    expect(dayItems(items).map((o) => o.local_time)).toEqual(['08:00', '14:00', '20:00']);
+    // nao altera a lista recebida
+    expect(items[0]?.local_time).toBe('20:00');
+  });
+
+  it('situacao em pt-BR; programada so vira "A registrar" quando o horario chega', () => {
+    expect(dayStatusText(at('08:00', '2026-10-15T11:00:00Z', 'TAKEN'), NOW)).toBe('Tomado');
+    expect(dayStatusText(at('08:00', '2026-10-15T11:00:00Z', 'NOT_TAKEN'), NOW)).toBe('Não tomado');
+    expect(dayStatusText(at('08:00', '2026-10-15T11:00:00Z', 'NO_RESPONSE'), NOW)).toBe(
+      'Sem resposta',
+    );
+    expect(dayStatusText(at('11:00', '2026-10-15T14:00:00Z', 'PROGRAMMED'), NOW)).toBe(
+      'A registrar',
+    );
+    expect(dayStatusText(at('20:00', '2026-10-15T23:00:00Z', 'PROGRAMMED'), NOW)).toBe('Previsto');
   });
 });

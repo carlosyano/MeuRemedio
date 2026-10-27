@@ -1,8 +1,9 @@
-// @trace TL-005 RF-004 RF-005 RF-006 RN-008 RN-009 RN-015 CA-007 CA-013 TS-001 TS-007 TS-010 TS-022 ERR-007 ERR-011 listOccurrences createResponse
+// @trace TL-005 RF-004 RF-005 RF-006 RN-008 RN-009 RN-015 CA-007 CA-013 TS-001 TS-007 TS-010 TS-022 ERR-007 ERR-011 DEC-035 listOccurrences createResponse
 // Ocorrencias na tela Hoje (TL-005; DC-055), contra a API e o PostgreSQL reais: vazio, acionaveis
 // (so as ja alcancadas, sem CANCELED), resposta TAKEN e NOT_TAKEN com motivo, conflito com outra
 // sessao (RN-008), desconectado sem declarar sucesso (RN-015, TS-010), consulta a cada 60 s
-// (RF-005) e tempo limite com reenvio idempotente (CA-013); axe sem violacoes WCAG 2.2 A/AA.
+// (RF-005) e tempo limite com reenvio idempotente (CA-013); remedios do dia com a situacao de cada
+// horario (DEC-035); axe sem violacoes WCAG 2.2 A/AA.
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoA11yViolations } from './support/a11y.js';
 import { PASSWORD, activeUser, planWithOccurrences, uniqueEmail } from './support/seed.js';
@@ -10,7 +11,24 @@ import { PASSWORD, activeUser, planWithOccurrences, uniqueEmail } from './suppor
 const alertIn = (page: Page) => page.getByRole('main').getByRole('alert');
 const statusIn = (page: Page) => page.getByRole('main').getByRole('status');
 const itemFor = (page: Page, name: string) =>
-  page.getByRole('main').getByRole('listitem').filter({ hasText: name });
+  page
+    .getByRole('region', { name: 'Para registrar' })
+    .getByRole('listitem')
+    .filter({ hasText: name });
+const dayList = (page: Page) => page.getByRole('region', { name: 'Remédios de hoje' });
+
+/** Minutos desde a meia-noite em America/Sao_Paulo (fuso da conta dos testes). */
+function minutesOfDay(): number {
+  const [hour = '0', minute = '0'] = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Sao_Paulo',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  })
+    .format(new Date())
+    .split(':');
+  return Number(hour) * 60 + Number(minute);
+}
 
 async function signedIn(page: Page): Promise<string> {
   const email = uniqueEmail();
@@ -48,6 +66,36 @@ test.describe('TL-005 ocorrencias', () => {
     await expect(items.nth(0)).toContainText('50 mg');
     await expect(items.nth(1)).toContainText(late?.localTime ?? '');
     await expect(items.nth(1)).toContainText('Sem resposta no prazo de 60 minutos.');
+    await expectNoA11yViolations(page);
+  });
+
+  test('remedios de hoje: todos os horarios do dia com a situacao, sem cancelados (DEC-035)', async ({
+    page,
+  }) => {
+    const userId = await signedIn(page);
+    await expect(dayList(page).getByText('Nenhum remédio previsto para hoje.')).toBeVisible();
+    // Horarios no meio da manha ja passada e da noite que falta, sempre no mesmo dia civil.
+    const now = minutesOfDay();
+    const before = Math.max(2, Math.floor(now / 2));
+    const after = Math.max(2, Math.floor((24 * 60 - now) / 2));
+    const [taken, , future] = await planWithOccurrences(
+      userId,
+      { name: 'Losartana', dose: '50 mg' },
+      [
+        { minutesAgo: before, response: { type: 'TAKEN' } },
+        { minutesAgo: before - 1, status: 'CANCELED' },
+        { minutesAgo: -after },
+      ],
+    );
+    await page.reload();
+    const items = dayList(page).getByRole('listitem');
+    await expect(items).toHaveCount(2);
+    await expect(items.nth(0)).toContainText(`${taken?.localTime ?? ''} Losartana · 50 mg`);
+    await expect(items.nth(0)).toContainText('Tomado');
+    await expect(items.nth(1)).toContainText(`${future?.localTime ?? ''} Losartana · 50 mg`);
+    await expect(items.nth(1)).toContainText('Previsto');
+    // A lista do dia so informa: registrar continua em "Para registrar".
+    await expect(dayList(page).getByRole('button')).toHaveCount(0);
     await expectNoA11yViolations(page);
   });
 

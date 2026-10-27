@@ -56,3 +56,27 @@ export function responseBody(
 ): { readonly type: ResponseType; readonly reason: NotTakenReason | null } {
   return { type, reason: type === 'TAKEN' ? null : reason };
 }
+
+/** Remedios do dia (DEC-035): do horario local mais cedo para o mais tarde, sem alterar a lista. */
+export function dayItems<T extends Pick<Occurrence, 'local_time'>>(items: readonly T[]): T[] {
+  return [...items].sort((a, b) => a.local_time.localeCompare(b.local_time));
+}
+
+/** Situacao de um horario do dia; PROGRAMMED so pede registro quando o horario ja chegou. */
+export function dayStatusText(
+  occurrence: Pick<Occurrence, 'status' | 'scheduled_at'>,
+  now: string,
+): string {
+  switch (occurrence.status) {
+    case 'TAKEN':
+      return 'Tomado';
+    case 'NOT_TAKEN':
+      return 'Não tomado';
+    case 'NO_RESPONSE':
+      return 'Sem resposta';
+    case 'CANCELED':
+      return 'Cancelado';
+    case 'PROGRAMMED':
+      return Date.parse(occurrence.scheduled_at) <= Date.parse(now) ? 'A registrar' : 'Previsto';
+  }
+}

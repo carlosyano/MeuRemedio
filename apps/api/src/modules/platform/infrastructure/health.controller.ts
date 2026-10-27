@@ -1,4 +1,4 @@
-// getHealth (OpenAPI 02.33.6, RNF-015, DEC-028): sonda o PostgreSQL com tempo-limite e compara o
+// getHealth (OpenAPI 02.33.7, RNF-015, DEC-028): sonda o PostgreSQL com tempo-limite e compara o
 // Clock da API com o now() do banco.
 import { Controller, Get, Inject, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';

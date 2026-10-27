@@ -1,4 +1,4 @@
-// Rotas de sessao (OpenAPI 02.33.6, tag Sessions).
+// Rotas de sessao (OpenAPI 02.33.7, tag Sessions).
 import { Body, Controller, Delete, Headers, Inject, Post, Req, Res } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { sessionOf } from '../../../platform/http/access.guard.js';

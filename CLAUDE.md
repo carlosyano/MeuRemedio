@@ -40,7 +40,7 @@ npx vitest run --project integration tests/integration/ts-024.spec.ts -t "reexec
 
 ## Fontes normativas e integridade
 
-- Na raiz: `MeuRemedio_OpenAPI_02.33.6_COMPLETO.yaml` (superfície HTTP), `MeuRemedio_Especificacao_Funcional_02.33.docx` (regras, RF/RN/CA/TS/DEC), `ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx` (arquitetura) e `AGENTS.md`.
+- Na raiz: `MeuRemedio_OpenAPI_02.33.7_COMPLETO.yaml` (superfície HTTP), `MeuRemedio_Especificacao_Funcional_02.33.docx` (regras, RF/RN/CA/TS/DEC), `ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx` (arquitetura) e `AGENTS.md`.
 - `traceability-matrix.yaml` guarda o SHA-256 dessas quatro fontes (`source_integrity`) e o catálogo de IDs (RF, RN, TS, DEC, operações...). Qualquer edição numa fonte normativa exige atualizar o hash e o conteúdo correspondente na matriz. Caso contrário, `validate_all.py` falha com `source-hash-mismatch`. `traceability-matrix.schema.json` limita contagens (por exemplo, `maxProperties` de `decisions`).
 - Uma nova decisão (DEC-xxx) é registrada na tabela de decisões e no Anexo C da Especificação, na matriz, em `docs/CHANGELOG_02.33.md` e em `PROJECT_CONTEXT.md`. Alterações normativas só entram com aprovação do mantenedor no PR (CODEOWNERS).
 - Documentos de apoio, subordinados à Especificação: `docs/architecture/DATA_MODEL.md` (modelo físico), `docs/specifications/P0_SENTINEL_TESTS.md` (cenários, fixtures e o estado "Estado (PR n)" de cada teste sentinela bloqueador) e `docs/architecture/TOOLCHAIN.md` (versões).
