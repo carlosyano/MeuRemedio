@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-matrix_version: 2.1.12
+matrix_version: 2.1.13
 status: baseline-development-and-testing
 generated_from:
   functional_specification: MeuRemedio_Especificacao_Funcional_02.33.docx
@@ -1711,7 +1711,7 @@ sentinel_tests:
       path: tests/security/ts-030.spec.ts
       level: security
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1729,7 +1729,7 @@ sentinel_tests:
       path: tests/security/ts-031.spec.ts
       level: security
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1748,7 +1748,7 @@ sentinel_tests:
       path: tests/security/ts-032.spec.ts
       level: security
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
@@ -1978,7 +1978,7 @@ sentinel_tests:
       path: tests/performance/ts-039.spec.ts
       level: performance
       owner: '@carlosyano'
-      status: planned
+      status: implemented
       evidence: null
       last_execution: null
     mapping_provenance:
