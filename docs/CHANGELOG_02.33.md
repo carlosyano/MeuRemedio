@@ -188,3 +188,18 @@ Seguem `planned` o TS-030, o TS-031, o TS-032 e o TS-039.
 Efeitos: matriz `2.1.12` (`matrix_version`, `status` dos 16 ERR e `test_artifact`/`status` de 21 `ownership_test`). Especificação, OpenAPI, ADR, AGENTS.md e schema não mudam.
 
 **Aprovação:** proposta em 22/10/2026; aprovação formal no pull request desta revisão.
+
+## Matriz 2.1.13: artefatos de TS-030, TS-031, TS-032 e TS-039 (23/10/2026)
+
+Os PRs #71 a #74 materializaram os quatro testes sentinela que seguiam `planned`, nos caminhos que a matriz já previa:
+
+1. **TS-039 (desempenho, `tests/performance/ts-039.spec.ts`):** evidência sem perfil é inválida. A evidência é validada contra o PP-001 registrado em `performance_profiles` (ENT-017) pela chave, pela versão e pelo SHA-256 da definição, e só a válida é confrontada com o RNF-004 e o RNF-005 (DC-064). A execução da carga no ambiente do perfil continua pendente da infraestrutura.
+2. **TS-031 (rotação de chave, `tests/security/ts-031.spec.ts`):** os segredos HMAC da API aceitam as chaves anteriores só na verificação, e a leitura autorizada se mantém durante e depois da rotação (RNF-012, DC-065, `docs/operations/KEY_ROTATION.md`). A rotação das chaves gerenciadas (KMS) do RNF-002 fica com a infraestrutura.
+3. **TS-032 (direito externo, `tests/security/ts-032.spec.ts`):** o protocolo `DSR-AAAAMMDD-NNNN` é criado e avançado pelos scripts operacionais sem expor dado do titular na saída, nos erros, na tabela ou na auditoria (RF-011, ENT-016, DC-066).
+4. **TS-030 (incidente, `tests/security/ts-030.spec.ts`):** registro no schema `security`, contenção, decisão e relatório pós-incidente pelos scripts operacionais (RF-012, ENT-015, DC-067). O conteúdo final de `incident_records` depende do GX-006.
+
+Com isso, nenhum TS segue `planned`, e o `trace:check` não lista mais pendências.
+
+Efeitos: matriz `2.1.13` (`matrix_version` e `status` dos artefatos `TS-030-PRIMARY`, `TS-031-PRIMARY`, `TS-032-PRIMARY` e `TS-039-PRIMARY`). Especificação, OpenAPI, ADR, AGENTS.md e schema não mudam.
+
+**Aprovação:** proposta em 23/10/2026; aprovação formal no pull request desta revisão.
