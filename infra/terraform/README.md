@@ -23,7 +23,8 @@ Nada disso pode ser feito pelo agente:
 2. Copiar `envs/homologacao/terraform.tfvars.example` para `terraform.tfvars` e preencher.
 3. `terraform init -backend-config=backend.hcl` e `terraform apply` em `envs/homologacao`. Na primeira vez, as tarefas não sobem, porque ainda não há imagem no ECR nem valor nos segredos.
 4. Gravar os três segredos HMAC (`KEY_ROTATION.md` §5).
-5. Publicar as imagens e implantar pelo CD. A migração roda como tarefa avulsa antes dos serviços. A imagem da web é construída com `MEUREMEDIO_API_URL=http://api:3000`, o nome interno da API no Service Connect.
+5. No GitHub, em Settings > Environments, criar o environment `homologacao` com você como **revisor obrigatório** e as variáveis `AWS_DEPLOY_ROLE_ARN` (saída `deploy_role_arn`), `TF_STATE_BUCKET`, `DOMAIN_NAME`, `HOSTED_ZONE_ID`, `EMAIL_FROM`, `EMAIL_DOMAIN` e `RIGHTS_CHANNEL_URL`. Não há segredo: o papel é assumido por OIDC (DC-072).
+6. Acionar o workflow `deploy` (Actions > deploy > Run workflow) e aprovar. Ele publica as imagens no ECR, bloqueia achado CRITICAL da varredura, roda a migração como tarefa avulsa e só então atualiza os serviços. A imagem da web é construída com `MEUREMEDIO_API_URL=http://api:3000`, o nome interno da API no Service Connect.
 
 ## Decisões e limites
 

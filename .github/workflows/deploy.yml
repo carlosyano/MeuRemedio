@@ -1,0 +1,41 @@
+name: deploy
+
+# Implantacao manual em homologacao (DC-072). O job usa o environment homologacao do GitHub, que
+# deve ter o mantenedor como revisor obrigatorio: so depois da aprovacao o token OIDC e emitido e
+# o papel do CD pode ser assumido. Nenhum segredo de longa duracao fica no repositorio.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-homologacao
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Implantar em homologacao
+    runs-on: ubuntu-latest
+    environment: homologacao
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ENVIRONMENT: homologacao
+      TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+      TF_VAR_domain_name: ${{ vars.DOMAIN_NAME }}
+      TF_VAR_hosted_zone_id: ${{ vars.HOSTED_ZONE_ID }}
+      TF_VAR_email_from: ${{ vars.EMAIL_FROM }}
+      TF_VAR_email_domain: ${{ vars.EMAIL_DOMAIN }}
+      TF_VAR_rights_channel_url: ${{ vars.RIGHTS_CHANNEL_URL }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: sa-east-1
+      - run: bash tools/scripts/deploy.sh

@@ -785,3 +785,23 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - O custo mínimo é dominado pelo NAT e pelo RDS.
   - A retenção dos logs (180 dias) e a dos backups seguem provisórias até o GX-003.
 - **Aplica-se a:** `infra/terraform/**`, `apps/api/assets/rds-ca-sa-east-1.pem`, `tools/scripts/{terraform-bin,infra-check}.mjs`, `package.json`, `.github/workflows/ci.yml`, `.gitignore`, `docs/operations/KEY_ROTATION.md` §5, `docs/architecture/TOOLCHAIN.md` e `CLAUDE.md`.
+
+## DC-072 — Implantação contínua com GitHub Actions e OIDC (27/10/2026)
+
+- **Contexto:** a ADR-001 (OA-010) prevê CD com GitHub Actions e OIDC. A DC-070 entregou as imagens e a DC-071 a infraestrutura, mas faltava o caminho do commit até o ambiente, com a migração antes dos serviços e sem chave de acesso guardada no GitHub.
+- **Alternativas:** chave de acesso de um usuário IAM nos segredos do GitHub ou papel assumido por OIDC; implantação a cada merge na `main` ou acionamento manual; atualizar os serviços pelo `aws ecs update-service` ou pelo `terraform apply`.
+- **Decisão:**
+  - **OIDC sem segredo:** o workflow `deploy` assume o papel `meuremedio-<ambiente>-deploy`. A confiança exige `aud` igual a `sts.amazonaws.com` e `sub` igual a `repo:carlosyano/MeuRemedio:environment:<ambiente>`, sem curinga, então nenhuma branch, PR ou fork assume o papel. O provedor OIDC é criado no ambiente, um por conta.
+  - **Aprovação humana:** o job roda no environment `homologacao` do GitHub, que deve ter o mantenedor como revisor obrigatório. O token só é emitido depois da aprovação. Por enquanto, o acionamento é manual (`workflow_dispatch`), nunca em push.
+  - **Ordem** (`tools/scripts/deploy.sh`):
+    1. Imagens com a tag do commit no ECR imutável.
+    2. Varredura do ECR: achado CRITICAL aborta.
+    3. `terraform apply` só da definição de migração, seguido da migração como tarefa avulsa. Se ela terminar com código diferente de 0, a implantação para e os serviços continuam na versão anterior.
+    4. `terraform apply` completo com as imagens por digest e espera dos serviços estáveis. O circuit breaker do ECS desfaz uma versão que não sobe.
+  - **Permissões do papel:** o `apply` gerencia todos os serviços do módulo, então o papel tem `PowerUserAccess` e IAM restrito aos papéis `meuremedio-<ambiente>-*`.
+  - **Prova:** `tests/unit/deploy-workflow.spec.ts` (toda action fixada por SHA, `id-token: write` só no job de implantação, acionamento só manual, environment obrigatório, nenhum `secrets.` nem chave de acesso) e um bloco novo no `terraform test` (confiança do papel).
+- **Riscos:**
+  - O papel do CD é, na prática, administrador do ambiente: pode alterar a própria política. O controle real é a revisão obrigatória no environment do GitHub e a confiança presa a ele. Uma configuração errada do environment (sem revisor) remove essa barreira.
+  - O fluxo não foi executado contra uma conta real. A primeira implantação depende do `apply` inicial feito pelo operador (`infra/terraform/README.md`).
+  - Uma migração que quebre a versão em execução (sem compatibilidade retroativa) derruba os serviços antigos entre os passos 3 e 4. As migrações precisam continuar aditivas.
+- **Aplica-se a:** `.github/workflows/deploy.yml`, `tools/scripts/deploy.sh`, `infra/terraform/modules/platform/deploy.tf`, `infra/terraform/envs/homologacao/github_oidc.tf`, `infra/terraform/README.md` e aos testes `tests/unit/deploy-workflow.spec.ts` e `infra/terraform/modules/platform/tests/security.tftest.hcl`.

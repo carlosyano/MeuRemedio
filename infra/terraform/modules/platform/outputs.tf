@@ -36,3 +36,12 @@ output "exports_bucket" {
 output "web_url" {
   value = local.web_origin
 }
+
+output "deploy_role_arn" {
+  description = "Papel que o workflow deploy assume por OIDC (variavel AWS_DEPLOY_ROLE_ARN do environment)."
+  value       = aws_iam_role.deploy.arn
+}
+
+output "api_security_group_id" {
+  value = aws_security_group.api.id
+}
