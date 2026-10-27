@@ -183,3 +183,73 @@ export function formatPeriod(start: string, end: string | null): string {
     ? `A partir de ${formatDate(start)}`
     : `De ${formatDate(start)} a ${formatDate(end)}`;
 }
+
+// Ajudas para transcrever a receita (DC-074). So montam o que a pessoa digitou: nao sugerem dose,
+// horario nem duracao, e o resultado aparece nos campos para ser conferido antes de salvar.
+
+/** Intervalos "de N em N horas" que fecham o dia com no maximo 10 horarios. */
+export const INTERVAL_HOURS: readonly number[] = [4, 6, 8, 12, 24];
+
+/** Horarios a cada `hours` horas a partir de `first`, na ordem do dia de tomada. */
+export function timesEvery(hours: number, first: string): readonly string[] {
+  if (!INTERVAL_HOURS.includes(hours) || !TIME_PATTERN.test(first)) return [];
+  const [hour = 0, minute = 0] = first.split(':').map(Number);
+  return Array.from({ length: 24 / hours }, (_item, index) => {
+    const next = (hour + index * hours) % 24;
+    return `${String(next).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  });
+}
+
+const MAX_DAYS = 3650;
+const DAY_MS = 86_400_000;
+
+// Data civil como dias desde a epoca, em UTC: sem efeito do fuso do navegador.
+const toEpochDay = (date: string): number => {
+  const [year = 0, month = 1, day = 1] = date.split('-').map(Number);
+  return Date.UTC(year, month - 1, day) / DAY_MS;
+};
+
+export function addDays(date: string, days: number): string {
+  return new Date((toEpochDay(date) + days) * DAY_MS).toISOString().slice(0, 10);
+}
+
+/** "Por N dias" a partir do inicio: o termino e o N-esimo dia, inclusive. */
+export const endDateForDays = (start: string, days: number): string => addDays(start, days - 1);
+
+/** Dias de tratamento entre inicio e termino, inclusive. */
+export const durationDays = (start: string, end: string): number =>
+  toEpochDay(end) - toEpochDay(start) + 1;
+
+/** Duracao digitada: inteiro de 1 a 3650; qualquer outra coisa e "sem duracao". */
+export function parseDays(text: string): number | undefined {
+  const trimmed = text.trim();
+  if (!/^\d{1,4}$/.test(trimmed)) return undefined;
+  const days = Number(trimmed);
+  return days >= 1 && days <= MAX_DAYS ? days : undefined;
+}
+
+const joinTimes = (times: readonly string[]): string =>
+  times.length === 1
+    ? (times[0] ?? '')
+    : `${times.slice(0, -1).join(', ')} e ${times[times.length - 1] ?? ''}`;
+
+/** Frase de conferencia no formato da receita, a partir do payload que sera enviado. */
+export function describeRoutine(plan: PlanPayload): string {
+  const route =
+    plan.administration_route === 'OTHER'
+      ? 'por outra via'
+      : `via ${labelOf(ADMINISTRATION_ROUTES, plan.administration_route).toLowerCase()}`;
+  const count = plan.schedule_times.length;
+  const frequency = `${String(count)} ${count === 1 ? 'vez' : 'vezes'} ao dia`;
+  let period: string;
+  if (plan.end_date === null) {
+    period = `uso contínuo a partir de ${formatDate(plan.start_date)}`;
+  } else {
+    const days = durationDays(plan.start_date, plan.end_date);
+    period =
+      days === 1
+        ? `por 1 dia, em ${formatDate(plan.start_date)}`
+        : `por ${String(days)} dias, de ${formatDate(plan.start_date)} a ${formatDate(plan.end_date)}`;
+  }
+  return `Tomar ${plan.dose_text}, ${route}, ${frequency} (${joinTimes(plan.schedule_times)}), ${period}.`;
+}

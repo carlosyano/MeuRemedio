@@ -824,3 +824,17 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - A senha do PostgreSQL local é fixa no arquivo. O banco não publica porta, então ela só vale dentro da rede do compose.
   - O ambiente local não substitui a homologação: não prova TLS, IAM, SES nem S3.
 - **Aplica-se a:** `compose.yaml`, `apps/api/src/platform/email/mailpit-email-sender.ts`, `apps/api/src/platform/email/ses-email-sender.ts` (`emailSenderFromEnv`), `tools/scripts/local-env.mjs`, `Dockerfile` e `docs/operations/AMBIENTE_LOCAL.md`.
+
+## DC-074 — Cadastro de plano no formato da receita (27/10/2026)
+
+- **Contexto:** testando o ambiente local, o mantenedor achou o cadastro de remédio trabalhoso em comparação com a receita. A receita traz, por item, nome e concentração, forma, quantidade por vez, via, frequência ("1 vez ao dia", "de 8/8h", "à noite"), duração ("por 5 dias") e às vezes uso conforme necessidade ("conforme tosse"). O contrato `PlanWrite` já cobre quase tudo (nome, `dose_text`, forma, via, horários fixos diários, início e término), mas a tela pedia horário por horário e a data de término calculada à mão, e cada item da receita recomeçava do zero.
+- **Alternativas:** (a) só textos de ajuda; (b) ajudas na tela sobre o mesmo contrato, que só preenchem campos editáveis; (c) novos campos no contrato (intervalo, duração, quantidade estruturada); (d) leitura automática do texto da posologia.
+- **Decisão:** (b), aprovada pelo mantenedor em 27/10/2026, sem mudança normativa:
+  - **De N em N horas:** intervalo (4, 6, 8, 12 ou 24 h, os que fecham o dia com até 10 horários) e primeiro horário, ambos informados pela pessoa. "Preencher horários" substitui a lista, que continua editável. Sem horário padrão.
+  - **Duração em dias:** inteiro de 1 a 3650. O término é o N-ésimo dia, inclusive (início + N − 1), em data civil sem efeito de fuso. Mudar o início recalcula o término; editar o término recalcula a duração; apagar a duração apaga o término.
+  - **Conferência:** "Confira antes de salvar" mostra o nome e a frase no formato da receita ("Tomar 1 comprimido, via oral, 1 vez ao dia (08:00), por 5 dias, de 27/10/2026 a 31/10/2026."), montada só com o que vai no payload.
+  - **Próximo item da receita:** na criação, "Salvar e cadastrar outro item" grava, avisa "Plano criado: <nome>. Cadastre o próximo item da receita." e reabre o formulário com prescritor, CRM e início mantidos. As chaves de idempotência recomeçam, então um item repetido na receita passa pela confirmação de duplicidade (RN-016) em vez de devolver o plano já criado.
+  - **Textos:** "Medicamento" pede nome e concentração; "Dose" pede quanto tomar de cada vez. A dose continua texto livre: o app nunca sugere nem calcula dose.
+- **Fora desta decisão:** (c) não é necessário agora. (d) fica fora: OCR está fora do escopo da Especificação, e uma leitura errada vira dose errada ("1 vez à noite por 7 noites, conforme tosse" é ambígua). O uso conforme necessidade não cabe no modelo atual, em que todo plano gera ocorrências, lembretes e NO_RESPONSE; o mantenedor escolheu tratá-lo num PR normativo próprio.
+- **Riscos:** a pessoa pode transcrever errado. A frase de conferência reduz o risco, mas não o elimina. Intervalos que não fecham o dia (como 36/36h ou dias alternados) continuam sem suporte.
+- **Aplica-se a:** `apps/web/src/lib/plan-form.ts`, `apps/web/src/app/planos/plan-editor.tsx`, `apps/web/src/components/fields.tsx` (campo controlado) e aos testes `tests/unit/web-plan-routine.spec.ts` e `tests/e2e/plans.spec.ts`.
