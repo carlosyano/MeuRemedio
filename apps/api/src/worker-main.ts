@@ -1,10 +1,10 @@
 // Ponto de entrada do processo do worker (DC-022): PostgreSQL de DATABASE_URL, pg-boss no mesmo
-// banco e link de verificacao a partir de WEB_BASE_URL. Sem provedor de e-mail configurado, os jobs
-// de e-mail falham e o pg-boss os refaz (o adaptador SES entra com a infraestrutura, OA-004).
+// banco e link de verificacao a partir de WEB_BASE_URL. Sem provedor de e-mail configurado
+// (EMAIL_PROVIDER), os jobs de e-mail falham e o pg-boss os refaz.
 import pg from 'pg';
 import { PgBoss } from 'pg-boss';
 import { systemClock } from './platform/clock.js';
-import { unconfiguredEmailSender } from './platform/email/email-sender.js';
+import { emailSenderFromEnv } from './platform/email/ses-email-sender.js';
 import { objectStorageFromEnv } from './platform/storage/s3-object-storage.js';
 import { startWorker } from './worker.js';
 
@@ -24,7 +24,8 @@ const worker = await startWorker({
   pool: new pg.Pool({ connectionString: databaseUrl }),
   boss,
   clock: systemClock,
-  email: unconfiguredEmailSender,
+  // EMAIL_PROVIDER=ses com EMAIL_FROM; sem provedor, os jobs de e-mail falham
+  email: emailSenderFromEnv(process.env),
   webBaseUrl: required('WEB_BASE_URL'),
   emailPepper,
   // EXPORT_STORAGE_BUCKET (S3) ou EXPORT_STORAGE_DIR (diretorio local em desenvolvimento)

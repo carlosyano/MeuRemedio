@@ -1,5 +1,5 @@
-// Porta de envio de e-mail (OA-004: SES em homologacao e producao; o adaptador entra com a
-// infraestrutura AWS). Logs nunca levam o destinatario completo nem o conteudo (ADR-001 secao 7).
+// Porta de envio de e-mail (OA-004: SES em homologacao e producao, em ses-email-sender.ts).
+// Logs nunca levam o destinatario completo nem o conteudo (ADR-001 secao 7).
 
 export interface EmailMessage {
   readonly to: string;

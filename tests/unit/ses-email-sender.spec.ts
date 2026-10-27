@@ -104,7 +104,7 @@ describe('SesEmailSender', () => {
       .catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(EmailRejectedError);
-    expect(String((error as Error).message)).toContain(name);
+    expect((error as Error).message).toContain(name);
   });
 
   it('falha do servidor do SES fica incerta (nao e EmailRejectedError)', async () => {
