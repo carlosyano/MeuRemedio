@@ -1,0 +1,24 @@
+# Contexto do build das imagens (DC-070): so o que o build precisa, nunca segredos nem artefatos
+# locais. Os .docx e a matriz ficam de fora; a OpenAPI normativa entra (o contrato e lido em
+# tempo de execucao).
+**/node_modules
+**/dist
+**/.next
+**/*.tsbuildinfo
+.git
+.github
+.claude
+.env
+.env.*
+*.docx
+docs
+tests
+tools
+validation-report
+coverage
+reports
+sbom
+test-results
+playwright-report
+.stryker-tmp
+__pycache__

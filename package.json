@@ -28,6 +28,7 @@
     "test:contract": "vitest run --project contract",
     "test:integration": "vitest run --project integration",
     "test:schemathesis": "vitest run --project schemathesis",
+    "test:containers": "vitest run --project containers",
     "test:ownership": "vitest run --project integration tests/security/ts-023.spec.ts",
     "sbom": "node tools/scripts/sbom.mjs",
     "test:mutation": "stryker run",

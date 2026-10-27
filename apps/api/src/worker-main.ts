@@ -1,28 +1,17 @@
 // Ponto de entrada do processo do worker (DC-022): PostgreSQL de DATABASE_URL, pg-boss no mesmo
-// banco e link de verificacao a partir de WEB_BASE_URL. Sem provedor de e-mail configurado, os jobs
-// de e-mail falham e o pg-boss os refaz (o adaptador SES entra com a infraestrutura, OA-004).
+// banco e link de verificacao a partir de WEB_BASE_URL. Sem provedor de e-mail configurado
+// (EMAIL_PROVIDER), os jobs de e-mail falham e o pg-boss os refaz.
 import pg from 'pg';
 import { PgBoss } from 'pg-boss';
 import { systemClock } from './platform/clock.js';
-import { unconfiguredEmailSender } from './platform/email/email-sender.js';
-import {
-  FileSystemObjectStorage,
-  unconfiguredObjectStorage,
-} from './platform/storage/object-storage.js';
+import { emailSenderFromEnv } from './platform/email/ses-email-sender.js';
+import { objectStorageFromEnv } from './platform/storage/s3-object-storage.js';
 import { startWorker } from './worker.js';
 
 const required = (name: string): string => {
   const value = process.env[name];
   if (value === undefined || value === '') throw new Error(`${name} nao definida`);
   return value;
-};
-
-// EXPORT_STORAGE_DIR: diretorio local dos PDFs em desenvolvimento (o S3 entra com a infraestrutura).
-const storageFromEnv = () => {
-  const dir = process.env['EXPORT_STORAGE_DIR'];
-  return dir === undefined || dir === ''
-    ? unconfiguredObjectStorage
-    : new FileSystemObjectStorage(dir);
 };
 
 // EMAIL_PEPPER: o mesmo segredo da API (base64, 32+ bytes); HMAC do e-mail no tombstone (RN-019).
@@ -35,10 +24,12 @@ const worker = await startWorker({
   pool: new pg.Pool({ connectionString: databaseUrl }),
   boss,
   clock: systemClock,
-  email: unconfiguredEmailSender,
+  // EMAIL_PROVIDER=ses com EMAIL_FROM; sem provedor, os jobs de e-mail falham
+  email: emailSenderFromEnv(process.env),
   webBaseUrl: required('WEB_BASE_URL'),
   emailPepper,
-  storage: storageFromEnv(),
+  // EXPORT_STORAGE_BUCKET (S3) ou EXPORT_STORAGE_DIR (diretorio local em desenvolvimento)
+  storage: objectStorageFromEnv(process.env),
 });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {

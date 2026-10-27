@@ -5,7 +5,7 @@ import pg from 'pg';
 import { createApp } from './app.js';
 import { systemClock } from './platform/clock.js';
 import { secretsFromEnv } from './platform/secrets.js';
-import { FileSystemObjectStorage } from './platform/storage/object-storage.js';
+import { objectStorageFromEnv } from './platform/storage/s3-object-storage.js';
 
 const optionalNumber = (name: string): number | undefined => {
   const raw = process.env[name];
@@ -27,7 +27,6 @@ if (externalRightsChannel === undefined || externalRightsChannel === '') {
   throw new Error('RIGHTS_CHANNEL_URL nao definida');
 }
 
-const exportStorageDir = process.env['EXPORT_STORAGE_DIR'];
 const clockSkewMaxMs = optionalNumber('CLOCK_SKEW_MAX_MS');
 const healthProbeTimeoutMs = optionalNumber('HEALTH_PROBE_TIMEOUT_MS');
 const app = await createApp({
@@ -36,10 +35,8 @@ const app = await createApp({
   secrets: secretsFromEnv(process.env),
   allowedOrigins,
   externalRightsChannel,
-  // EXPORT_STORAGE_DIR: diretorio local dos PDFs em desenvolvimento (o S3 entra com a infraestrutura).
-  ...(exportStorageDir === undefined || exportStorageDir === ''
-    ? {}
-    : { storage: new FileSystemObjectStorage(exportStorageDir) }),
+  // EXPORT_STORAGE_BUCKET (S3) ou EXPORT_STORAGE_DIR (diretorio local em desenvolvimento)
+  storage: objectStorageFromEnv(process.env),
   ...(clockSkewMaxMs === undefined ? {} : { clockSkewMaxMs }),
   ...(healthProbeTimeoutMs === undefined ? {} : { healthProbeTimeoutMs }),
 });

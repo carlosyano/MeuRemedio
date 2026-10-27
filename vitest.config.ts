@@ -38,6 +38,17 @@ export default defineConfig({
       {
         resolve,
         test: {
+          // Imagens de container (DC-070): constroem e sobem as imagens do Dockerfile; requer Docker.
+          name: 'containers',
+          include: ['tests/containers/**/*.spec.ts'],
+          environment: 'node',
+          testTimeout: 120_000,
+          hookTimeout: 900_000,
+        },
+      },
+      {
+        resolve,
+        test: {
           name: 'integration',
           // tests/security: cenarios de seguranca (TS-033, TS-041...); tests/api: catalogo de erros
           // (ERR-001..ERR-016). Todos contra PostgreSQL real.

@@ -719,3 +719,45 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Sem dado de titular:** o resumo, a decisão e a referência da evidência recusam e-mail e CPF. A auditoria leva só o operador, a severidade ou o estado, nunca o resumo nem a decisão, e os erros não ecoam valores.
 - **Riscos:** a recusa de dado pessoal é heurística (e-mail e CPF) e não substitui a revisão de quem registra. O conteúdo do relatório e os prazos de comunicação podem mudar com o GX-006 e o parecer jurídico.
 - **Aplica-se a:** `apps/api/migrations/0013_incidents.sql`, `apps/api/src/modules/audit/{application/incidents.ts,infrastructure/schema.ts}`, `apps/api/src/ops/{args,ops-cli,rights-commands,incident-commands}.ts`, `platform/audit/audit.ts`, `platform/db/schema.ts`, `DATA_MODEL.md`, `RIGHTS_AND_INCIDENTS.md` e aos testes `tests/security/ts-030.spec.ts`, `tests/integration/db-incidents.spec.ts` e `tests/integration/drizzle-schema.spec.ts`.
+
+## DC-068 — Adaptador S3 do armazenamento privado das exportações (27/10/2026)
+
+- **Contexto:** a DC-042 deixou a porta `ObjectStorage` com adaptadores em memória e em disco, e o S3 privado (ADR-001, OA-010) para a infraestrutura. Sem ele, a exportação em PDF (RF-008) não funciona fora do desenvolvimento. O RNF-002 pede criptografia em repouso, e o `file_object_key` é dado de saúde sensível que nunca sai na API.
+- **Alternativas:** (a) AWS SDK v3 (`@aws-sdk/client-s3`); (b) cliente próprio com assinatura SigV4 sobre `fetch`, sem dependência; (c) testar contra um S3 compatível em contêiner (MinIO ou LocalStack) em vez de um dublê.
+- **Decisão:** (a), com teste unitário por dublê do `send`.
+  - **SDK:** a assinatura SigV4 é código de segurança que não vale reescrever. O pacote é grande, mas é o cliente oficial, Apache-2.0, e o `npm audit` segue em 0.
+  - **Cifragem:** todo `PutObject` vai com `ServerSideEncryption: aws:kms` (e `SSEKMSKeyId` quando `EXPORT_STORAGE_KMS_KEY_ID` existe), para a política do bucket poder recusar envio sem KMS. A cifragem padrão do bucket fica com o Terraform.
+  - **Objeto inexistente:** `NoSuchKey` vira `undefined`; qualquer outra falha sobe. O S3 só responde `NoSuchKey` quando o papel tem `s3:ListBucket`; sem isso responde `AccessDenied`, e a política IAM do Terraform precisa conceder o `ListBucket` restrito ao prefixo `exports/`.
+  - **Chave:** vazia ou acima de 512 caracteres (limite do `file_object_key`) é recusada sem chamar o S3, e a mensagem de erro não leva a chave.
+  - **Configuração:** `objectStorageFromEnv` na API e no worker. `EXPORT_STORAGE_BUCKET` escolhe o S3 (região e credenciais pela cadeia padrão da AWS, ou seja, o papel da tarefa no ECS, sem chave de acesso no ambiente), `EXPORT_STORAGE_DIR` escolhe o disco, e as duas juntas impedem a subida.
+  - **Teste em contêiner:** fica de fora. O MinIO anunciou em 2025 o fim das imagens prontas da edição comunitária e o LocalStack anunciou exigir conta a partir de 2026 (a confirmar caso se queira esse teste), e os dois só imitariam o S3. A prova contra o S3 real entra com o ambiente de homologação.
+- **Riscos:** o dublê não prova o comportamento real do S3 (permissões, KMS, região). Uma política IAM sem `ListBucket` transforma "objeto inexistente" em erro, e o download responde 500 em vez de 404.
+- **Aplica-se a:** `apps/api/src/platform/storage/s3-object-storage.ts`, `apps/api/src/main.ts`, `apps/api/src/worker-main.ts`, `apps/api/package.json`, `docs/architecture/TOOLCHAIN.md` e ao teste `tests/unit/s3-object-storage.spec.ts`.
+
+## DC-069 — Adaptador SES do envio de e-mail (27/10/2026)
+
+- **Contexto:** a porta `EmailSender` distingue a recusa definitiva (`EmailRejectedError`: a mensagem com certeza não foi aceita, e o lembrete termina `FAILED PROVIDER_REJECTED`) do envio incerto (qualquer outro erro: o lembrete fica `DELIVERY_UNKNOWN` para a conciliação da DEC-005). O worker usava só `unconfiguredEmailSender`, então nenhum e-mail saía fora dos testes. A ADR (OA-004) fixa o SES em homologação e produção, e a ADR-001 §7 proíbe destinatário e conteúdo nos logs.
+- **Alternativas:** SMTP do SES (credencial SMTP de longa duração no ambiente) ou a API v2 do SES pelo SDK (papel da tarefa, sem segredo); classificar a recusa por lista de nomes de erro do SES ou pela origem da falha (`$fault` cliente ou servidor).
+- **Decisão:** API v2 (`@aws-sdk/client-sesv2`) com a classificação pela origem da falha.
+  - **Recusa definitiva:** `SESv2ServiceException` com `$fault: client` (respostas 4xx, como `MessageRejected`, conta suspensa, remetente não verificado e limite de envio). O SES respondeu e não aceitou, então a mensagem com certeza não saiu.
+  - **Incerto:** falha do servidor (5xx), rede, timeout e qualquer erro fora do SES.
+  - **Sem dado pessoal nos erros:** o texto do SES pode citar o endereço (por exemplo, "Email address is not verified: ..."). O adaptador devolve só o nome do erro e não anexa o erro original nem como `cause`.
+  - **Mensagem:** texto simples em UTF-8, remetente `EMAIL_FROM` (identidade verificada no SES), referência opaca do lembrete como tag `reference` e `EMAIL_CONFIGURATION_SET` opcional para publicar os eventos de entrega usados na conciliação.
+  - **Configuração:** `emailSenderFromEnv` no worker. `EMAIL_PROVIDER=ses` exige `EMAIL_FROM`; provedor desconhecido impede a subida; sem `EMAIL_PROVIDER`, continua o envio sem provedor. Região e credenciais vêm da cadeia padrão da AWS (papel da tarefa no ECS).
+- **Riscos:** o limite de envio (429) conta como recusa, e o lembrete termina `FAILED` sem nova tentativa, embora reenviar fosse seguro. Isso segue a regra de não reenviar às cegas (RN-018) e fica para revisão se o volume real esbarrar no limite. A conciliação pelos eventos do configuration set (SNS/SQS) entra com a infraestrutura. O dublê não prova o comportamento real do SES (sandbox, identidades verificadas).
+- **Aplica-se a:** `apps/api/src/platform/email/ses-email-sender.ts`, `platform/email/email-sender.ts`, `apps/api/src/worker-main.ts`, `apps/api/package.json`, `docs/architecture/TOOLCHAIN.md` e ao teste `tests/unit/ses-email-sender.spec.ts`.
+
+## DC-070 — Imagens de container da API, do worker e da web (27/10/2026)
+
+- **Contexto:** a ADR-001 (OA-010) fixa ECS Fargate em `sa-east-1`, e o AGENTS.md §6 pede a API e o worker em implantações separadas. Não havia imagem nem um ponto de entrada para aplicar as migrações fora dos testes. A API lê a OpenAPI da raiz do repositório em tempo de execução (o contrato nunca é copiado para pacotes), e a web lê `MEUREMEDIO_API_URL` no build.
+- **Alternativas:** uma imagem por processo ou uma imagem da API para API, worker, migração e operação; Next em modo `standalone` ou `next start` com as dependências de produção; base Alpine, Debian slim ou distroless; migração na subida da API ou em tarefa avulsa.
+- **Decisão:**
+  - **`Dockerfile` na raiz** com os alvos `api` e `web`, em estágios: manifestos, dependências completas para compilar, dependências só de produção (`npm ci --omit=dev -w ...`) e a imagem final. Todo `npm ci` roda com `--ignore-scripts`.
+  - **Uma imagem para a API:** o worker (`worker-main.js`), a migração (`migrate-main.js`, novo) e a operação (`ops-main.js`) usam a mesma imagem com outro comando, como o worker já usa o mesmo código (DC-022). A disposição repete a do repositório, com a OpenAPI na raiz.
+  - **Migração em tarefa avulsa** antes de cada implantação, nunca na subida da API: várias instâncias subindo não disputam a migração, e uma migração com falha não derruba o serviço em execução. A saída é o JSON do resultado.
+  - **Web com `next start`** e as dependências de produção. O `standalone` mudaria o `next.config.ts` e o que os testes E2E exercitam; fica para quando o tamanho da imagem importar.
+  - **Base `node:24.22.1-bookworm-slim` fixada por digest.** `BASE_IMAGE` aceita um espelho com o mesmo digest, e o segredo opcional `npm_ca` entra só no `npm ci` (proxy com CA própria, como o da nuvem do Claude Code). Os processos rodam como o usuário `node`, nunca root.
+  - **`.dockerignore`:** fora do contexto ficam `.git`, `.env*`, `.claude`, os `.docx`, `docs`, `tests`, `tools` e os artefatos locais.
+  - **Prova:** `tests/containers/images.spec.ts` (`npm run test:containers`, job próprio na CI) constrói as duas imagens e as sobe contra um PostgreSQL 17 real numa rede isolada. A migração aplica e é idempotente, a API responde `getHealth`, o worker fica no ar, a web serve `/entrar` com CSP e encaminha `/api/*`, e nenhum processo roda como root.
+- **Riscos:** a imagem da API tem cerca de 470 MB (NestJS e os dois clientes da AWS). A web precisa de um build por ambiente, porque a URL da API entra no build. A varredura de vulnerabilidades da imagem (por exemplo, Trivy ou ECR scan) entra com o CD, e o job novo ainda não é obrigatório no ruleset da `main`.
+- **Aplica-se a:** `Dockerfile`, `.dockerignore`, `apps/api/src/migrate-main.ts`, `vitest.config.ts`, `package.json`, `.github/workflows/ci.yml`, `tools/scripts/cloud-setup.sh`, `docs/architecture/TOOLCHAIN.md`, `CLAUDE.md` e ao teste `tests/containers/images.spec.ts`.
