@@ -1,6 +1,7 @@
 // deletePlan (RF-003, FL-002; TS-005, TS-037): exclusao logica idempotente.
-//   - plano ACTIVE do titular -> DELETED com deleted_at; ocorrencias PROGRAMMED futuras
-//     (scheduled_at > instante da acao) sao canceladas; iniciadas, respondidas e snapshots ficam;
+//   - plano ACTIVE, CANCELED ou INTERRUPTED do titular (DEC-036) -> DELETED com deleted_at;
+//     ocorrencias PROGRAMMED futuras (scheduled_at > instante da acao) sao canceladas; iniciadas,
+//     respondidas e snapshots ficam;
 //   - plano ja DELETED do titular -> 204 sem alteracao (DC-034);
 //   - inexistente ou de outro titular -> 404 identico; o de outro titular e auditado (DC-032).
 //   Sem Idempotency-Key no contrato: repetir a chamada e seguro por si.
@@ -21,7 +22,7 @@ export class DeletePlan {
     const found = await withTransaction(this.pool, async (client) => {
       const plan = await lockOwnPlan(client, { ...input, now });
       if (plan === undefined) return false;
-      if (plan.status === 'ACTIVE') {
+      if (plan.status !== 'DELETED') {
         await client.query(
           `UPDATE medication_plans
               SET status = 'DELETED', deleted_at = $2, row_version = row_version + 1,

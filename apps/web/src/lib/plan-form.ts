@@ -35,7 +35,19 @@ export interface PlanPayload {
 /** Plano como a API devolve (schema Plan). */
 export interface Plan extends PlanPayload {
   readonly plan_id: string;
-  readonly status: 'ACTIVE' | 'DELETED';
+  /** Situacao (DEC-036); os tipos ficam em plan-status.ts, repetidos aqui sem importar. */
+  readonly status: 'ACTIVE' | 'CANCELED' | 'INTERRUPTED' | 'DELETED';
+  /** Ultima mudanca de situacao; null se nunca houve. */
+  readonly status_reason:
+    | 'MEDICAL_ADVICE'
+    | 'SIDE_EFFECT'
+    | 'IMPROVED'
+    | 'COST_OR_ACCESS'
+    | 'OWN_DECISION'
+    | 'OTHER'
+    | null;
+  readonly status_note: string | null;
+  readonly status_changed_at: string | null;
   readonly row_version: number;
   readonly created_at: string;
   readonly updated_at: string;

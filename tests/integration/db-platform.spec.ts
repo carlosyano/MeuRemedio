@@ -147,9 +147,10 @@ function contractOperations(): { idempotent: string[]; other: string[] } {
 
 // ---------- contrato x banco ----------
 describe('operation_id coincide com as operacoes idempotentes da OpenAPI', () => {
-  it('o contrato declara Idempotency-Key nas 7 mutacoes do AGENTS §13', () => {
+  it('o contrato declara Idempotency-Key nas 8 mutacoes do AGENTS §13', () => {
     expect(contractOperations().idempotent.sort()).toEqual(
       [
+        'changePlanStatus',
         'createAccount',
         'createExport',
         'createPlan',
@@ -166,7 +167,7 @@ describe('operation_id coincide com as operacoes idempotentes da OpenAPI', () =>
       const scope = operation === 'createAccount' ? 'public' : SCOPE_U1;
       await insert('idempotency_records', idemRow({ operation_id: operation, scope_key: scope }));
     }
-    expect(await count('idempotency_records')).toBe(7);
+    expect(await count('idempotency_records')).toBe(8);
   });
 
   it('rejeita toda operacao do contrato que nao usa Idempotency-Key', async () => {

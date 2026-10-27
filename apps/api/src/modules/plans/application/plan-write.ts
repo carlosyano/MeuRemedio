@@ -5,6 +5,7 @@ import { normalizePlanText } from '@meuremedio/domain';
 import type { PoolClient } from 'pg';
 import { recordAudit } from '../../../platform/audit/audit.js';
 import { ProblemError, type FieldError } from '../../../platform/http/problem-catalog.js';
+import type { PlanStatus } from './plan-view.js';
 
 export interface PlanWriteRequest {
   readonly medication_name: string;
@@ -109,9 +110,9 @@ export async function requestOccurrences(
 export async function lockOwnPlan(
   client: PoolClient,
   input: { userId: string; planId: string; correlationId: string; now: string },
-): Promise<{ status: 'ACTIVE' | 'DELETED'; row_version: string } | undefined> {
+): Promise<{ status: PlanStatus; row_version: string } | undefined> {
   const row = (
-    await client.query<{ user_id: string; status: 'ACTIVE' | 'DELETED'; row_version: string }>(
+    await client.query<{ user_id: string; status: PlanStatus; row_version: string }>(
       'SELECT user_id, status, row_version FROM medication_plans WHERE id = $1 FOR UPDATE',
       [input.planId],
     )

@@ -138,7 +138,7 @@ Plano declaratório, período, status e versão.
 |---|---|---|---|---|---|---|---|---|---|
 | `id` | uuid | sim | 128 bits | UUID v4 | gen_random_uuid() | PK | - | operacional | gerado no servidor |
 | `user_id` | uuid | sim | 128 bits | UUID | - | não | users(id) | operacional | ownership em toda consulta |
-| `status` | plan_status | sim | - | ACTIVE\|DELETED | ACTIVE | não | - | operacional | DELETED oculto da operação |
+| `status` | plan_status | sim | - | ACTIVE\|CANCELED\|INTERRUPTED\|DELETED | ACTIVE | não | - | operacional | DELETED oculto da operação; CANCELED e INTERRUPTED pela changePlanStatus (DEC-036) |
 | `medication_name` | varchar | sim | 1..120 | texto | - | não | - | saúde sensível | trim; 1..120 |
 | `medication_name_norm` | varchar | sim | 1..120 | trim, espaços colapsados, sem diacríticos, minúsculo | - | não | - | saúde sensível | derivado; usado na detecção de duplicidade (RN-016) |
 | `dose_text` | varchar | sim | 1..80 | texto | - | não | - | saúde sensível | trim; 1..80 |
@@ -151,6 +151,9 @@ Plano declaratório, período, status e versão.
 | `start_date` | date | sim | - | YYYY-MM-DD | - | não | - | saúde sensível | data civil no fuso da conta |
 | `end_date` | date | não | - | YYYY-MM-DD | null | não | - | saúde sensível | >= start_date |
 | `deleted_at` | timestamptz | não | us UTC | RFC 3339 UTC | null | não | - | operacional | exclusão lógica (FL-002) |
+| `status_reason` | plan_status_reason | não | - | MEDICAL_ADVICE\|SIDE_EFFECT\|IMPROVED\|COST_OR_ACCESS\|OWN_DECISION\|OTHER | null | não | - | saúde sensível | motivo da última mudança de situação (DEC-036); obrigatório em CANCELED e INTERRUPTED |
+| `status_note` | varchar | não | 1..200 | texto | null | não | - | saúde sensível | observação opcional da última mudança; só com motivo |
+| `status_changed_at` | timestamptz | não | us UTC | RFC 3339 UTC | null | não | - | operacional | instante da última mudança; num plano ACTIVE, marca a retomada: o gerador só cria horários posteriores a ele |
 | `created_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | UTC |
 | `updated_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | atualizado a cada escrita |
 | `row_version` | bigint | sim | 64 bits | >=1 | 1 | não | - | operacional | incrementado 1x por edição; exposto como ETag |
@@ -158,6 +161,10 @@ Plano declaratório, período, status e versão.
 **Constraints e índices:**
 - CHECK(end_date IS NULL OR end_date>=start_date)
 - CHECK(status<>'DELETED' OR deleted_at IS NOT NULL)
+- `plans_status_change_pair_chk`: CHECK((status_reason IS NULL) = (status_changed_at IS NULL))
+- `plans_status_note_chk`: CHECK(status_note IS NULL OR (char_length(status_note) BETWEEN 1 AND 200 AND status_reason IS NOT NULL))
+- `plans_stopped_requires_reason_chk`: CHECK(status NOT IN ('CANCELED','INTERRUPTED') OR status_reason IS NOT NULL)
+- Só a última mudança de situação fica guardada, sem o histórico das anteriores (limitação aceita na DEC-036)
 - Índice (user_id,status)
 - Índice (user_id,medication_name_norm,dose_text_norm) WHERE status='ACTIVE'
 
@@ -290,7 +297,7 @@ Chave, hash da requisição e snapshot da resposta.
 | Campo | Tipo | Obrig. | Tam./prec. | Formato/valores | Padrão | Unicidade | FK | LGPD | Validação |
 |---|---|---|---|---|---|---|---|---|---|
 | `id` | uuid | sim | 128 bits | UUID v4 | gen_random_uuid() | PK | - | operacional | gerado no servidor |
-| `operation_id` | varchar | sim | <=64 | operationId da OpenAPI | - | composta | - | operacional | somente operações mutáveis (7) |
+| `operation_id` | varchar | sim | <=64 | operationId da OpenAPI | - | composta | - | operacional | somente operações mutáveis (8; `changePlanStatus` pela 0014, DEC-036) |
 | `scope_key` | varchar | sim | <=64 | user_id (UUID) ou 'public' | - | composta | - | operacional | createAccount usa 'public' |
 | `key` | varchar | sim | 1..100 | ^[A-Za-z0-9._~:+/=-]+$ | - | composta | - | operacional | validado pelo contrato |
 | `request_hash` | bytea | sim | 32 bytes | SHA-256 do corpo canônico + parâmetros | - | não | - | operacional | divergência => ERR-006 |
@@ -438,7 +445,7 @@ Perfil versionado e reproduzível de desempenho.
 ## 5. Regras de completude
 
 - Cada campo possui as 11 propriedades exigidas pela Especificação §5.1 (campo, tipo, obrigatoriedade, tamanho, formato, padrão, unicidade, FK, LGPD, validação e entidade).
-- Os campos expostos pela API devem ser equivalentes aos schemas da OpenAPI 02.33.7, comprovado por testes de contrato (RNF-014, TS-040).
+- Os campos expostos pela API devem ser equivalentes aos schemas da OpenAPI 02.33.8, comprovado por testes de contrato (RNF-014, TS-040).
 - Pendências explícitas: retenção definitiva de `audit_events` (GX-003; padrão provisório de 180 dias configuráveis) e conteúdo final de `incident_records` (GX-006).
 
 ## 6. Estado de implementação (migrações)
@@ -456,6 +463,7 @@ Perfil versionado e reproduzível de desempenho.
 | `apps/api/migrations/0011_performance_profiles.sql` | ENT-017 `performance_profiles` (imutável depois de registrado, DC-064) | Implementada e coberta por `tests/integration/db-performance.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0012_rights_requests.sql` | ENT-016 `external_rights_requests` (DC-066) | Implementada e coberta por `tests/integration/db-rights.spec.ts` e `tests/security/ts-032.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0013_incidents.sql` | ENT-015 `security.incident_records` (DC-067) | Implementada e coberta por `tests/integration/db-incidents.spec.ts` e `tests/security/ts-030.spec.ts` (PostgreSQL 17 real) |
+| `apps/api/migrations/0014_plan_status.sql` | Situação de ENT-005 (CANCELED, INTERRUPTED, `status_reason`, `status_note`, `status_changed_at`) e `changePlanStatus` em `idempotency_records_operation_chk` (DEC-036) | Implementada e coberta por `tests/integration/plans-status.spec.ts` e `tests/integration/db-core.spec.ts` (PostgreSQL 17 real) |
 | Demais entidades | ENT-003 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |
 
 **Rollback:** as migrações criam apenas objetos novos, sem dados nem dependentes externos; o rollback é uma migração nova que remove os objetos criados (a lista está no cabeçalho de cada arquivo). Uma migração aplicada nunca é editada.
@@ -466,7 +474,7 @@ Decisões de implementação derivadas deste modelo:
 - **Limite de 10 horários ativos:** trigger com bloqueio da linha do plano (serializa inserções concorrentes). O mínimo de 1 horário é regra de serviço, validada junto com o plano.
 - **Limite de 3 sessões ativas:** regra de serviço (transação com bloqueio do titular), não do esquema (TS-018).
 - **Imutabilidade de `responses`:** o trigger bloqueia UPDATE; o DELETE segue permitido para o expurgo em cascata (FL-001).
-- **Idempotência no esquema:** `operation_id` restrito às 7 operações com `Idempotency-Key` na OpenAPI (o teste compara com o contrato); escopo `'public'` só em `createAccount` e UUID do titular nas demais; chave no formato do contrato; `expires_at = created_at + 168 horas` (horas absolutas, independentes do fuso da conexão e do DST), com default `now() + 168 horas` para quando `created_at` também usa o default; quem informa `created_at` (Clock injetável) informa `expires_at`; snapshot sem `Set-Cookie` em qualquer caixa. Como `scope_key` é texto (`'public'` ou UUID) e não admite FK, o trigger `users_purge_idempotency` remove os snapshots do titular no expurgo da conta (FL-001), pois `response_body` pode conter dados de saúde. Não persistir o `409` e não sobrescrever o snapshot são regras de serviço (TS-015).
+- **Idempotência no esquema:** `operation_id` restrito às 8 operações com `Idempotency-Key` na OpenAPI (o teste compara com o contrato); escopo `'public'` só em `createAccount` e UUID do titular nas demais; chave no formato do contrato; `expires_at = created_at + 168 horas` (horas absolutas, independentes do fuso da conexão e do DST), com default `now() + 168 horas` para quando `created_at` também usa o default; quem informa `created_at` (Clock injetável) informa `expires_at`; snapshot sem `Set-Cookie` em qualquer caixa. Como `scope_key` é texto (`'public'` ou UUID) e não admite FK, o trigger `users_purge_idempotency` remove os snapshots do titular no expurgo da conta (FL-001), pois `response_body` pode conter dados de saúde. Não persistir o `409` e não sobrescrever o snapshot são regras de serviço (TS-015).
 - **Outbox:** `payload` é objeto JSON de até 8 KB; `aggregate_id` sem FK (sobrevive ao expurgo); índice parcial dos pendentes sustenta a reivindicação com `FOR UPDATE SKIP LOCKED`. Payload apenas com identificadores é regra de serviço.
 - **Schemas Drizzle:** cada módulo mapeia as próprias tabelas em `apps/api/src/modules/<módulo>/infrastructure/schema.ts`, agregadas em `apps/api/src/platform/db/schema.ts`. O SQL das migrações é a fonte do esquema; o Drizzle só tipa o acesso e não declara constraints, FKs nem índices (as FKs entre módulos ficam só no SQL). `tests/integration/drizzle-schema.spec.ts` exige que tabelas, colunas, tipos, nulidade, presença de default, chave primária e enums do Drizzle coincidam com o banco migrado.
 - **Constraints nomeadas:** cada regra tem nome (`users_email_normalized_chk`, `occurrences_deadline_chk` etc.), e os testes verificam qual regra disparou.

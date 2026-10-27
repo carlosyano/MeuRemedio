@@ -1,4 +1,4 @@
-// @trace TL-003 TL-004 RF-003 RN-001 RN-016 CA-005 CA-006 CA-012 CA-013 CA-017 TS-008 TS-010 TS-019 TS-022 TS-037 TS-043 ERR-001 ERR-003 ERR-005 ERR-009 ERR-011 ERR-014 listPlans createPlan getPlan updatePlan deletePlan
+// @trace TL-003 TL-004 RF-003 RN-001 RN-016 CA-005 CA-006 CA-012 CA-013 CA-017 TS-008 TS-010 TS-019 TS-022 TS-037 TS-043 ERR-001 ERR-003 ERR-005 ERR-009 ERR-011 ERR-014 DEC-036 listPlans createPlan getPlan updatePlan deletePlan changePlanStatus
 // Planos (TL-003) e editor de plano (TL-004) na aplicacao web (DC-054), contra a API e o
 // PostgreSQL reais: lista vazia e lista, validacao, criacao, confirmacao de possivel duplicidade,
 // edicao com If-Match e conflito de versao, exclusao logica, plano de outro titular (404), servico
@@ -331,5 +331,65 @@ test.describe('TL-004 cadastro no formato da receita (DC-074)', () => {
     await fillPlan(page, { name: 'Levofloxacino 500 mg', dose: '1 comprimido' });
     await page.getByRole('button', { name: 'Salvar e cadastrar outro item' }).click();
     await expect(page.getByRole('region', { name: 'Já existe um plano parecido' })).toBeVisible();
+  });
+});
+
+test.describe('TL-004 situacao do plano (DEC-036)', () => {
+  test('interromper com motivo obrigatorio, ver nos interrompidos e retomar', async ({ page }) => {
+    await signedIn(page);
+    await createPlan(page, { name: 'Losartana', dose: '50 mg' });
+    await page.goto('/planos');
+    await expect(page.getByRole('region', { name: 'Em andamento' })).toContainText('Losartana');
+    await page.getByRole('link', { name: 'Losartana' }).click();
+
+    await page.getByRole('button', { name: 'Interromper plano' }).click();
+    const form = page.getByRole('region', { name: 'Interromper este plano?' });
+    await form.getByRole('button', { name: 'Confirmar interrupção' }).click();
+    await expect(form.getByText('Escolha o motivo.')).toBeVisible();
+    await form.getByLabel('Efeito colateral').check();
+    await form.getByLabel('Observação (opcional)').fill('Tontura');
+    await expectNoA11yViolations(page);
+    await form.getByRole('button', { name: 'Confirmar interrupção' }).click();
+    await expect(statusIn(page)).toHaveText('Plano interrompido.');
+    // Interrompido nao se edita: so retomar ou excluir.
+    await expect(page.getByLabel('Medicamento')).toHaveCount(0);
+    await expect(page.getByRole('main')).toContainText('Efeito colateral');
+    await expect(page.getByRole('main')).toContainText('Tontura');
+
+    await page.goto('/planos');
+    const interrupted = page.getByRole('region', { name: 'Interrompidos' });
+    await expect(interrupted).toContainText('Losartana');
+    await expect(interrupted).toContainText('Efeito colateral');
+    await expect(page.getByRole('region', { name: 'Em andamento' })).toHaveCount(0);
+    await expectNoA11yViolations(page);
+
+    await interrupted.getByRole('link', { name: 'Losartana' }).click();
+    await page.getByRole('button', { name: 'Retomar plano' }).click();
+    const resume = page.getByRole('region', { name: 'Retomar este plano?' });
+    await resume.getByLabel('Orientação médica').check();
+    await resume.getByRole('button', { name: 'Confirmar retomada' }).click();
+    await expect(statusIn(page)).toHaveText('Plano retomado.');
+    await expect(page.getByLabel('Medicamento')).toHaveValue('Losartana');
+  });
+
+  test('cancelar o plano que ainda nao comecou', async ({ page }) => {
+    await signedIn(page);
+    await page.goto('/planos/novo');
+    await fillPlan(page, { name: 'Amoxicilina', dose: '500 mg' });
+    await page.getByLabel('Data de início').fill('2099-01-10');
+    await save(page);
+    await expect(statusIn(page)).toHaveText('Plano criado.');
+    await page.getByRole('link', { name: 'Amoxicilina' }).click();
+    await expect(page.getByRole('button', { name: 'Interromper plano' })).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Cancelar plano' }).click();
+    const form = page.getByRole('region', { name: 'Cancelar este plano?' });
+    await form.getByLabel('Orientação médica').check();
+    await form.getByRole('button', { name: 'Confirmar cancelamento' }).click();
+    await expect(statusIn(page)).toHaveText('Plano cancelado.');
+    await expect(page.getByRole('button', { name: 'Retomar plano' })).toHaveCount(0);
+
+    await page.goto('/planos');
+    await expect(page.getByRole('region', { name: 'Cancelados' })).toContainText('Amoxicilina');
   });
 });

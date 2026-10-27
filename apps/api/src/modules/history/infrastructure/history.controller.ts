@@ -1,4 +1,4 @@
-// Rota do historico (OpenAPI 02.33.7, tag History).
+// Rota do historico (OpenAPI 02.33.8, tag History).
 import { Controller, Get, Inject, Query, Req } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 import { sessionOf } from '../../../platform/http/access.guard.js';

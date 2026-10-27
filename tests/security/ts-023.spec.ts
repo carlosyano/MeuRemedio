@@ -1,4 +1,4 @@
-// @trace TS-023 TS-008 RNF-003 CA-012 RN-002 deleteCurrentSession getAccessibilityPreferences updateAccessibilityPreferences listPlans createPlan getPlan updatePlan deletePlan listOccurrences createResponse getHistory listExports createExport getExport cancelExport downloadExport getPrivacy requestAccountDeletion getCurrentAccount updateCurrentAccount revokeAllSessions
+// @trace TS-023 TS-008 RNF-003 CA-012 RN-002 deleteCurrentSession getAccessibilityPreferences updateAccessibilityPreferences listPlans createPlan getPlan updatePlan deletePlan changePlanStatus listOccurrences createResponse getHistory listExports createExport getExport cancelExport downloadExport getPrivacy requestAccountDeletion getCurrentAccount updateCurrentAccount revokeAllSessions
 // TS-023 (BOLA/IDOR em todas as rotas privadas, QG-009), gerado a partir da OpenAPI: cada operacao
 // privada precisa de um caso, ou o teste reprova.
 //   - com identificador no caminho: U2 usa o identificador de U1 -> 404 RESOURCE_NOT_FOUND
@@ -153,6 +153,12 @@ const BY_ID: Record<string, (id: string) => Call> = {
     headers: { 'if-match': fixture.etag, 'idempotency-key': nextKey() },
   }),
   deletePlan: (id) => ({ method: 'DELETE', url: `/plans/${id}` }),
+  changePlanStatus: (id) => ({
+    method: 'POST',
+    url: `/plans/${id}/status-changes`,
+    body: { action: 'INTERRUPT', reason: 'OTHER', note: null },
+    headers: { 'if-match': fixture.etag, 'idempotency-key': nextKey() },
+  }),
   createResponse: (id) => ({
     method: 'POST',
     url: `/occurrences/${id}/responses`,
@@ -166,7 +172,7 @@ const BY_ID: Record<string, (id: string) => Call> = {
 
 /** Identificador de U1 usado em cada operacao por identificador. */
 const anaIdFor = (operationId: string): string => {
-  if (operationId.endsWith('Plan')) return fixture.planId;
+  if (operationId.endsWith('Plan') || operationId === 'changePlanStatus') return fixture.planId;
   if (operationId === 'createResponse') return fixture.occurrenceId;
   return fixture.exportId;
 };

@@ -1,8 +1,10 @@
 // getPlan e listPlans (RF-003; RN-002, CA-012, TS-008, TS-037).
-//   - getPlan: plano ACTIVE do titular com ETag. Inexistente, DELETED ou de outro titular -> 404
-//     identico; a tentativa no recurso de outro titular gera audit_events ownership.denied;
-//   - listPlans: so planos ACTIVE do titular, do mais recente ao mais antigo (created_at, id), com
-//     cursor opaco da ultima posicao entregue (DC-030). Cursor invalido -> 400 VALIDATION_FAILED.
+//   - getPlan: plano do titular com ETag, ativo, cancelado ou interrompido (DEC-036). Inexistente,
+//     DELETED ou de outro titular -> 404 identico; a tentativa no recurso de outro titular gera
+//     audit_events ownership.denied;
+//   - listPlans: planos do titular exceto os DELETED, do mais recente ao mais antigo
+//     (created_at, id), com cursor opaco da ultima posicao entregue (DC-030). Cursor invalido ->
+//     400 VALIDATION_FAILED.
 import type { Pool } from 'pg';
 import { recordAudit } from '../../../platform/audit/audit.js';
 import type { Clock } from '../../../platform/clock.js';
@@ -34,7 +36,7 @@ export class ReadPlans {
     correlationId: string,
   ): Promise<{ plan: PlanView; etag: string }> {
     const row = await findPlan(this.pool, planId);
-    if (row?.user_id === userId && row.status === 'ACTIVE') {
+    if (row?.user_id === userId && row.status !== 'DELETED') {
       return { plan: toPlanView(row), etag: etagOf(Number(row.row_version)) };
     }
     if (row !== undefined && row.user_id !== userId) {
@@ -57,7 +59,7 @@ export class ReadPlans {
       await this.pool.query<PlanRow>(
         `SELECT ${PLAN_COLUMNS}
            FROM medication_plans p
-          WHERE p.user_id = $1 AND p.status = 'ACTIVE'
+          WHERE p.user_id = $1 AND p.status <> 'DELETED'
             AND ($2::timestamptz IS NULL OR (p.created_at, p.id) < ($2::timestamptz, $3::uuid))
           ORDER BY p.created_at DESC, p.id DESC
           LIMIT $4`,

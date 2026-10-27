@@ -1,4 +1,4 @@
-// @trace ERR-006 TS-038 RNF-003 (409 IDEMPOTENCY_KEY_REUSED com payload divergente)
+// @trace ERR-006 TS-038 RNF-003 DEC-036 (409 IDEMPOTENCY_KEY_REUSED com payload divergente)
 // ERR-006: a mesma Idempotency-Key com outro payload responde 409 sem novo efeito nem sobrescrita
 // do resultado guardado, que continua sendo devolvido no replay identico. Em
 // requestAccountDeletion o 202 revoga todas as sessoes, e uma segunda chamada por HTTP so chega
@@ -70,6 +70,14 @@ const SCENARIOS: Record<string, Scenario> = {
       headers: { 'if-match': '"1"' },
       first: { ...PLAN, medication_name: 'Comprimido Novo' },
       divergent: { ...PLAN, medication_name: 'Comprimido Divergente' },
+    }),
+  },
+  changePlanStatus: {
+    prepare: async () => ({
+      url: `/plans/${await createPlan(h, ana)}/status-changes`,
+      headers: { 'if-match': '"1"' },
+      first: { action: 'INTERRUPT', reason: 'SIDE_EFFECT', note: null },
+      divergent: { action: 'INTERRUPT', reason: 'OTHER', note: null },
     }),
   },
   createResponse: {

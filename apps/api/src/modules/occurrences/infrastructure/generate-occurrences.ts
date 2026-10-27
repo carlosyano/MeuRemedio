@@ -2,7 +2,10 @@
 // - idempotente: reexecutar nao insere nem altera linhas (ON CONFLICT no indice parcial
 //   occurrences_slot_active_unique, que e a garantia de RN-007 no banco);
 // - execucoes simultaneas nao duplicam: inserem os slots na mesma ordem e o conflito e absorvido;
-// - plano DELETED ou inexistente nao gera nada; horarios removidos sao ignorados;
+// - so plano ACTIVE gera (DELETED, CANCELED, INTERRUPTED ou inexistente nao gera nada); horarios
+//   removidos sao ignorados;
+// - plano retomado (DEC-036) so gera os horarios posteriores a retomada (status_changed_at): o
+//   periodo interrompido nao renasce;
 // - a linha do plano fica bloqueada (FOR SHARE) durante a geracao, serializando com a edicao;
 // - horario com prazo ja atingido em `now` nasce NO_RESPONSE (DEC-027).
 // generateOccurrencesForHorizon aplica o horizonte de 30 dias da DEC-027; generateOccurrences
@@ -39,6 +42,8 @@ interface PlanRow {
   medication_name: string;
   dose_text: string;
   account_timezone: string;
+  /** Instante da retomada, se houve (num plano ACTIVE, so a retomada grava status_changed_at). */
+  status_changed_at: Date | null;
 }
 
 /** Gera as ocorrencias do horizonte de 30 dias (DEC-027) a partir de `now`, no fuso da conta. */
@@ -81,7 +86,7 @@ async function generate(
         `SELECT p.user_id,
                 to_char(p.start_date, 'YYYY-MM-DD') AS start_date,
                 to_char(p.end_date, 'YYYY-MM-DD') AS end_date,
-                p.medication_name, p.dose_text, u.account_timezone
+                p.medication_name, p.dose_text, u.account_timezone, p.status_changed_at
            FROM medication_plans p
            JOIN users u ON u.id = p.user_id
           WHERE p.id = $1 AND p.status = 'ACTIVE'
@@ -104,6 +109,7 @@ async function generate(
       await client.query('COMMIT');
       return { inserted: 0 };
     }
+    const resumedAt = plan.status_changed_at?.getTime() ?? null;
     const slots = occurrenceSlots({
       timeZone: plan.account_timezone,
       planStartDate: plan.start_date,
@@ -111,7 +117,7 @@ async function generate(
       times: times.rows.map((row) => ({ id: row.id, timeOfDay: row.time_of_day })),
       fromDate: window.fromDate,
       toDate: window.toDate,
-    });
+    }).filter((slot) => resumedAt === null || Date.parse(slot.scheduledAt) > resumedAt);
     if (slots.length === 0) {
       await client.query('COMMIT');
       return { inserted: 0 };

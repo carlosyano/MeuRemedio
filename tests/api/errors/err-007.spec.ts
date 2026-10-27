@@ -1,7 +1,8 @@
-// @trace ERR-007 RN-005 CA-016 TS-042 (409 STATE_CONFLICT pelo estado do recurso)
+// @trace ERR-007 RN-005 CA-016 TS-042 DEC-036 (409 STATE_CONFLICT pelo estado do recurso)
 // ERR-007: a operacao valida no formato, mas incompativel com o estado atual do recurso, responde
 // 409 sem efeito: segunda resposta a mesma ocorrencia (RN-005), cancelamento de exportacao ja
-// concluida (CA-016) e tokens validos de conta fora do estado esperado.
+// concluida (CA-016), tokens validos de conta fora do estado esperado e situacao do plano
+// incompativel com a transicao ou com a edicao (DEC-036).
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   login,
@@ -11,7 +12,14 @@ import {
   type LoggedIn,
 } from '../../integration/support/http.js';
 import { catalogEntry, expectProblem, persistedState } from './support/catalog.js';
-import { completedExport, issueToken, mutate, occurrenceOn } from './support/fixtures.js';
+import {
+  PLAN,
+  completedExport,
+  createPlan,
+  issueToken,
+  mutate,
+  occurrenceOn,
+} from './support/fixtures.js';
 
 const NOW = '2026-10-05T11:05:15Z';
 const entry = catalogEntry('ERR-007');
@@ -26,6 +34,29 @@ const SCENARIOS: Record<string, () => Promise<() => Promise<HttpResult>>> = {
     const taken = await mutate(h, ana, 'createResponse', url, { type: 'TAKEN', reason: null });
     expect(taken.status).toBe(201);
     return () => mutate(h, ana, 'createResponse', url, { type: 'NOT_TAKEN', reason: 'FORGOT' });
+  },
+  changePlanStatus: async () => {
+    // Plano ja iniciado: cancelar so antes do inicio (DEC-036).
+    const url = `/plans/${await createPlan(h, ana)}/status-changes`;
+    const body = { action: 'CANCEL', reason: 'OTHER', note: null };
+    return () => mutate(h, ana, 'changePlanStatus', url, body, { 'if-match': '"1"' });
+  },
+  updatePlan: async () => {
+    // Plano interrompido nao aceita edicao (DEC-036).
+    const planId = await createPlan(h, ana);
+    const interrupt = { action: 'INTERRUPT', reason: 'OTHER', note: null };
+    const interrupted = await mutate(
+      h,
+      ana,
+      'changePlanStatus',
+      `/plans/${planId}/status-changes`,
+      interrupt,
+      {
+        'if-match': '"1"',
+      },
+    );
+    expect(interrupted.status).toBe(200);
+    return () => mutate(h, ana, 'updatePlan', `/plans/${planId}`, PLAN, { 'if-match': '"2"' });
   },
   cancelExport: async () => {
     const url = `/exports/${await completedExport(h, ana)}`;

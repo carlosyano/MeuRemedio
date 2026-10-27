@@ -1,4 +1,4 @@
-// @trace TS-001 TS-025 RN-002 RN-003 RN-004 RN-006 RN-007 RN-008 RN-009 RN-013 RF-001 RF-002 RF-003 RF-004 RF-006
+// @trace TS-001 TS-025 RN-002 RN-003 RN-004 RN-006 RN-007 RN-008 RN-009 RN-013 RF-001 RF-002 RF-003 RF-004 RF-006 DEC-036
 // Esquema central no PostgreSQL 17 REAL (docs/architecture/DATA_MODEL.md: ENT-001 e ENT-004 a ENT-008).
 // Base de banco do TS-001 (concorrencia TAKEN x NOT_TAKEN): o teste HTTP completo vem com a API.
 import pg from 'pg';
@@ -138,6 +138,7 @@ describe('enums do banco coincidem com a OpenAPI', () => {
   const MAP: Readonly<Record<string, string>> = {
     account_status: 'AccountStatus',
     plan_status: 'PlanStatus',
+    plan_status_reason: 'PlanStatusReason',
     medication_form: 'MedicationForm',
     administration_route: 'AdministrationRoute',
     occurrence_status: 'OccurrenceStatus',
@@ -357,6 +358,54 @@ describe('medication_plans (ENT-005)', () => {
       code: '23514',
       constraint: 'plans_deleted_requires_ts_chk',
     });
+  });
+
+  it('situacao (DEC-036): motivo e instante andam juntos', async () => {
+    const userId = await insert('users', userRow());
+    await expectPgError(insert('medication_plans', planRow(userId, { status_reason: 'OTHER' })), {
+      code: '23514',
+      constraint: 'plans_status_change_pair_chk',
+    });
+    await expectPgError(
+      insert('medication_plans', planRow(userId, { status_changed_at: '2026-10-05T11:00:00Z' })),
+      { code: '23514', constraint: 'plans_status_change_pair_chk' },
+    );
+  });
+
+  it('situacao (DEC-036): observacao de 1 a 200 caracteres e so com motivo', async () => {
+    const userId = await insert('users', userRow());
+    const changed = { status_reason: 'OTHER', status_changed_at: '2026-10-05T11:00:00Z' };
+    for (const note of ['', 'x'.repeat(201)]) {
+      await expectPgError(
+        insert('medication_plans', planRow(userId, { ...changed, status_note: note })),
+        { code: '23514', constraint: 'plans_status_note_chk' },
+      );
+    }
+    await expectPgError(insert('medication_plans', planRow(userId, { status_note: 'Nota' })), {
+      code: '23514',
+      constraint: 'plans_status_note_chk',
+    });
+    await expect(
+      insert('medication_plans', planRow(userId, { ...changed, status_note: 'x'.repeat(200) })),
+    ).resolves.toBeTypeOf('string');
+  });
+
+  it.each(['CANCELED', 'INTERRUPTED'])('situacao %s exige motivo (DEC-036)', async (status) => {
+    const userId = await insert('users', userRow());
+    await expectPgError(insert('medication_plans', planRow(userId, { status })), {
+      code: '23514',
+      constraint: 'plans_stopped_requires_reason_chk',
+    });
+    await expect(
+      insert(
+        'medication_plans',
+        planRow(userId, {
+          status,
+          status_reason: 'SIDE_EFFECT',
+          status_changed_at: '2026-10-05T11:00:00Z',
+        }),
+      ),
+    ).resolves.toBeTypeOf('string');
   });
 
   it.each(['SP-123', 'sp-12345', 'SP12345', 'SPP-12345', 'SP-1234a'])(
