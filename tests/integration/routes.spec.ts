@@ -1,4 +1,4 @@
-// @trace TS-040 RNF-014 DEC-034 listExports (Especificacao 02.33 secao 13; AGENTS.md secoes 13 e 14)
+// @trace TS-040 RNF-014 DEC-034 DEC-036 listExports changePlanStatus (Especificacao 02.33 secao 13; AGENTS.md secoes 13 e 14)
 // TS-040, rotas da aplicacao em execucao x OpenAPI: a API montada responde por todas as operacoes
 // do contrato (nenhuma sem implementacao). Rota extra, metodo, caminho ou operationId divergentes
 // impedem a subida (assertRoutesMatchContract, provado em tests/contract/http-foundation.spec.ts).
@@ -18,8 +18,8 @@ afterAll(async () => {
 const fastifyPath = (path: string): string => path.replace(/\{([^}]+)\}/g, ':$1');
 
 describe('TS-040 rotas da aplicacao x OpenAPI', () => {
-  it('o contrato tem as 28 operacoes da baseline (DEC-034)', () => {
-    expect(h.contract.operations).toHaveLength(28);
+  it('o contrato tem as 29 operacoes da baseline (DEC-036)', () => {
+    expect(h.contract.operations).toHaveLength(29);
   });
 
   it('toda operacao do contrato esta registrada na API em execucao', () => {
