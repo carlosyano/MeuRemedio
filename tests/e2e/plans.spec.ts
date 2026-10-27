@@ -276,10 +276,16 @@ test.describe('TL-004 cadastro no formato da receita (DC-074)', () => {
     await page.getByLabel('Dose').fill('3 ml');
     await page.getByLabel('Forma farmacêutica').selectOption({ label: 'Líquido' });
     await page.getByLabel('Via de administração').selectOption({ label: 'Oral' });
+    // O intervalo calcula a lista a partir do Horario 1, sem campo nem botao a mais
+    await expect(page.getByLabel('Primeiro horário')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Preencher horários' })).toHaveCount(0);
     await page.getByLabel('Intervalo').selectOption({ label: 'De 8 em 8 horas' });
-    await page.getByLabel('Primeiro horário').fill('08:00');
-    await page.getByRole('button', { name: 'Preencher horários' }).click();
-    await expect(page.getByLabel('Horário 1', { exact: true })).toHaveValue('08:00');
+    await expect(
+      page.getByText('Informe o Horário 1: os demais são calculados a partir dele.'),
+    ).toBeVisible();
+    await page.getByLabel('Horário 1', { exact: true }).fill('07:00');
+    await expect(page.getByLabel('Horário 2', { exact: true })).toHaveValue('15:00');
+    await page.getByLabel('Horário 1', { exact: true }).fill('08:00');
     await expect(page.getByLabel('Horário 2', { exact: true })).toHaveValue('16:00');
     await expect(page.getByLabel('Horário 3', { exact: true })).toHaveValue('00:00');
     await page.getByLabel('Data de início').fill('2030-01-10');

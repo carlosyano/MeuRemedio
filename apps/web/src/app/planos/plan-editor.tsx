@@ -55,7 +55,6 @@ const VALIDATION = 'Revise os campos destacados e tente novamente.';
 const TIMEOUT =
   'A resposta demorou demais e não sabemos se o plano foi salvo. Tente salvar de novo: o envio repetido não cria outro plano.';
 const DAYS_INVALID = 'Informe um número inteiro de dias, de 1 a 3650.';
-const INTERVAL_INCOMPLETE = 'Escolha o intervalo e o primeiro horário.';
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const FIELDS = [
   'medication_name',
@@ -123,8 +122,6 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
   const [endDate, setEndDate] = useState('');
   const [days, setDays] = useState('');
   const [intervalHours, setIntervalHours] = useState('');
-  const [firstTime, setFirstTime] = useState('');
-  const [intervalError, setIntervalError] = useState<string | undefined>();
   const [notice, setNotice] = useState<string | undefined>();
   // Botao que enviou a criacao: "proximo" volta ao formulario para o proximo item da receita.
   const afterCreate = useRef<'list' | 'next'>('list');
@@ -145,8 +142,6 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
     setEndDate(initial.end_date);
     setDays(daysOf(initial.start_date, initial.end_date));
     setIntervalHours('');
-    setFirstTime('');
-    setIntervalError(undefined);
     setFormKey((key) => key + 1);
   }, []);
 
@@ -208,14 +203,20 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
     setDays(daysOf(startDate, value));
   }
 
-  function fillInterval(): void {
-    const generated = timesEvery(Number(intervalHours), firstTime);
-    if (generated.length === 0) {
-      setIntervalError(INTERVAL_INCOMPLETE);
+  // Com intervalo escolhido, a lista sai do Horario 1; sem Horario 1 valido, fica como esta.
+  function applyInterval(hours: string, first: string): void {
+    const generated = hours === '' ? [] : timesEvery(Number(hours), first);
+    setTimes((current) => (generated.length > 0 ? generated : [first, ...current.slice(1)]));
+  }
+
+  function changeTime(index: number, value: string): void {
+    if (index === 0 && intervalHours !== '') {
+      applyInterval(intervalHours, value);
       return;
     }
-    setIntervalError(undefined);
-    setTimes(generated);
+    // Editar outro horario quebra a regularidade: volta a "Sem intervalo fixo"
+    if (index > 0) setIntervalHours('');
+    setTimes((current) => current.map((item, i) => (i === index ? value : item)));
   }
 
   function failed(error: unknown): void {
@@ -463,67 +464,34 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
             No fuso da sua conta. Até {MAX_SCHEDULE_TIMES} horários. Para “1 vez ao dia” ou “à
             noite”, informe a hora em que você toma.
           </p>
-          <fieldset
-            className="mb-3 rounded border border-line p-3"
-            aria-describedby={
-              intervalError === undefined
-                ? 'intervalo-descricao'
-                : 'intervalo-descricao intervalo-erro'
-            }
-          >
-            <legend className="px-1 font-medium">Receita de N em N horas</legend>
-            <p id="intervalo-descricao" className="mb-2 text-sm text-muted">
-              Por exemplo “de 8 em 8 horas”. Preenche os horários abaixo, que continuam editáveis.
+          <div className="mb-3">
+            <label htmlFor="intervalo" className="mb-1 block">
+              Intervalo
+            </label>
+            <select
+              id="intervalo"
+              value={intervalHours}
+              aria-describedby="intervalo-descricao"
+              onChange={(event) => {
+                const hours = event.target.value;
+                setIntervalHours(hours);
+                applyInterval(hours, times[0] ?? '');
+              }}
+              className="rounded border border-line bg-surface p-2"
+            >
+              <option value="">Sem intervalo fixo</option>
+              {INTERVAL_HOURS.map((hours) => (
+                <option key={hours} value={String(hours)}>
+                  De {hours} em {hours} horas
+                </option>
+              ))}
+            </select>
+            <p id="intervalo-descricao" className="mt-1 text-sm text-muted">
+              {intervalHours !== '' && (times[0] ?? '') === ''
+                ? 'Informe o Horário 1: os demais são calculados a partir dele.'
+                : 'Para receita “de N em N horas”: os horários são calculados a partir do Horário 1 e continuam editáveis.'}
             </p>
-            <div className="flex flex-wrap items-end gap-3">
-              <div>
-                <label htmlFor="intervalo" className="mb-1 block">
-                  Intervalo
-                </label>
-                <select
-                  id="intervalo"
-                  value={intervalHours}
-                  onChange={(event) => {
-                    setIntervalHours(event.target.value);
-                  }}
-                  className="rounded border border-line bg-surface p-2"
-                >
-                  <option value="">Escolha</option>
-                  {INTERVAL_HOURS.map((hours) => (
-                    <option key={hours} value={String(hours)}>
-                      De {hours} em {hours} horas
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="primeiro-horario" className="mb-1 block">
-                  Primeiro horário
-                </label>
-                <input
-                  id="primeiro-horario"
-                  type="time"
-                  value={firstTime}
-                  onChange={(event) => {
-                    setFirstTime(event.target.value);
-                  }}
-                  className="rounded border border-line p-2"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={fillInterval}
-                className="rounded border border-line px-3 py-2"
-              >
-                Preencher horários
-              </button>
-            </div>
-            {intervalError !== undefined && (
-              <p id="intervalo-erro" className="mt-2 text-sm font-medium text-danger">
-                {intervalError}
-              </p>
-            )}
-          </fieldset>
+          </div>
           {times.map((time, index) => {
             const label = `Horário ${String(index + 1)}`;
             return (
@@ -536,8 +504,7 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
                   type="time"
                   value={time}
                   onChange={(event) => {
-                    const value = event.target.value;
-                    setTimes((current) => current.map((item, i) => (i === index ? value : item)));
+                    changeTime(index, event.target.value);
                   }}
                   aria-invalid={timesError === undefined ? undefined : true}
                   aria-describedby={timesError === undefined ? undefined : 'horarios-erro'}
@@ -548,6 +515,7 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
                     type="button"
                     aria-label={`Remover ${label.toLowerCase()}`}
                     onClick={() => {
+                      setIntervalHours('');
                       setTimes((current) => current.filter((_item, i) => i !== index));
                     }}
                     className="rounded border border-line px-2 py-1"
@@ -567,6 +535,7 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
             type="button"
             disabled={times.length >= MAX_SCHEDULE_TIMES}
             onClick={() => {
+              setIntervalHours('');
               setTimes((current) => [...current, '']);
             }}
             className="rounded border border-line px-3 py-1 disabled:opacity-70"
