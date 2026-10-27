@@ -1,5 +1,5 @@
 // Regras do TS-040 (contrato). Cada regra e pura: recebe o contexto e devolve a lista de violacoes.
-// Fontes: OpenAPI 02.33.7, matriz de rastreabilidade, AGENTS.md (secoes 13 e 14), Especificacao 02.33
+// Fontes: OpenAPI 02.33.8, matriz de rastreabilidade, AGENTS.md (secoes 13 e 14), Especificacao 02.33
 // (secao 13) e ADR-001 v1.5. Excecoes explicitas ficam em ALLOWANCES e exigem GAP registrado na matriz.
 import {
   asArray,
@@ -42,6 +42,7 @@ const PUBLIC_OPERATIONS = [
   'verifyAccount',
 ];
 const IDEMPOTENT_OPERATIONS = [
+  'changePlanStatus',
   'createAccount',
   'createExport',
   'createPlan',
@@ -52,6 +53,7 @@ const IDEMPOTENT_OPERATIONS = [
 ];
 const CSRF_OPERATIONS = [
   'cancelExport',
+  'changePlanStatus',
   'createExport',
   'createPlan',
   'createResponse',
@@ -63,6 +65,8 @@ const CSRF_OPERATIONS = [
   'updateCurrentAccount',
   'updatePlan',
 ];
+// Concorrencia otimista (CA-006; DEC-036).
+const IF_MATCH_OPERATIONS = ['changePlanStatus', 'updatePlan'];
 const METHODS = ['get', 'post', 'put', 'delete'] as const;
 const CATALOGS = [
   'requirements',
@@ -316,7 +320,7 @@ export const RULES: readonly Rule[] = [
   },
   {
     id: 'R08',
-    title: 'Idempotency-Key obrigatoria exatamente nas 7 mutacoes criticas, com 409 declarado',
+    title: 'Idempotency-Key obrigatoria exatamente nas 8 mutacoes criticas, com 409 declarado',
     check: (ctx) => {
       const out: string[] = [];
       const withKey = operations(ctx.api)
@@ -343,7 +347,7 @@ export const RULES: readonly Rule[] = [
   {
     id: 'R09',
     title:
-      'CSRF exatamente nas 11 mutacoes autenticadas, com 403; leituras e rotas publicas sem CSRF',
+      'CSRF exatamente nas 12 mutacoes autenticadas, com 403; leituras e rotas publicas sem CSRF',
     check: (ctx) => {
       const out: string[] = [];
       const withCsrf = operations(ctx.api)
@@ -423,12 +427,13 @@ export const RULES: readonly Rule[] = [
   {
     id: 'R13',
     title:
-      'ETag em getPlan/updatePlan (200) e createPlan (201); If-Match obrigatorio so em updatePlan',
+      'ETag em getPlan/updatePlan/changePlanStatus (200) e createPlan (201); If-Match obrigatorio so em updatePlan e changePlanStatus',
     check: (ctx) => {
       const out: string[] = [];
       const expectEtag: [string, string][] = [
         ['getPlan', '200'],
         ['updatePlan', '200'],
+        ['changePlanStatus', '200'],
         ['createPlan', '201'],
       ];
       const ops = new Map(operations(ctx.api).map((o) => [o.id, o]));
@@ -440,8 +445,9 @@ export const RULES: readonly Rule[] = [
       }
       for (const op of ops.values()) {
         const hasIfMatch = parameterNames(op).includes('IfMatch');
-        if (op.id === 'updatePlan' && !hasIfMatch) out.push('updatePlan: sem If-Match');
-        if (op.id !== 'updatePlan' && hasIfMatch) out.push(`${op.id}: If-Match fora de updatePlan`);
+        const versioned = IF_MATCH_OPERATIONS.includes(op.id);
+        if (versioned && !hasIfMatch) out.push(`${op.id}: sem If-Match`);
+        if (!versioned && hasIfMatch) out.push(`${op.id}: If-Match fora da lista normativa`);
       }
       const ifMatch = asObject(
         asObject(asObject(ctx.api['components'], 'components')['parameters'], 'parameters')[

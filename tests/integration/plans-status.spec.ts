@@ -136,6 +136,15 @@ describe('changePlanStatus: interromper (DEC-036)', () => {
     ).toEqual([]);
   });
 
+  it('relogio com milissegundos (o do sistema): a data de hoje da conta continua valendo', async () => {
+    const plan = await createPlan();
+    h.now = '2026-10-05T11:05:15.123Z';
+    ana = await login(h, 'ana.silva@example.com');
+    const response = await changeStatus(ana, plan.plan_id, INTERRUPT);
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({ status: 'INTERRUPTED' });
+  });
+
   it('plano que ainda nao comecou ou ja terminou: 409 STATE_CONFLICT sem efeito', async () => {
     const future = await createPlan({ ...PLAN, start_date: '2026-10-10' });
     const finished = await createPlan({ ...PLAN, end_date: '2026-10-04' });
