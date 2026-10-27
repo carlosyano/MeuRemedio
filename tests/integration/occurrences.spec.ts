@@ -1,8 +1,9 @@
-// @trace RF-004 RF-005 RF-006 RN-008 RN-009 CA-007 CA-012 CA-013 TS-001 TS-007 TS-008 TS-015 TS-023 TS-038 ERR-004 ERR-006 listOccurrences createResponse
+// @trace RF-004 RF-005 RF-006 RN-008 RN-009 CA-007 CA-012 CA-013 TS-001 TS-007 TS-008 TS-015 TS-023 TS-038 ERR-004 ERR-006 DEC-035 listOccurrences createResponse
 // Ocorrencias e respostas por HTTP contra PostgreSQL 17 real: lista das ocorrencias acionaveis do
 // titular (DC-036), primeira resposta aceita e imutavel (RN-008, CA-007, TS-001), resposta tardia
 // com is_late e marco preservado (RN-009, TS-007), idempotencia de createResponse (CA-013, TS-038)
-// e acesso horizontal com 404 indistinguivel e auditoria (TS-008, TS-023).
+// e acesso horizontal com 404 indistinguivel e auditoria (TS-008, TS-023). Com local_date, as
+// ocorrencias daquele dia civil, inclusive as ainda nao alcancadas (DEC-035).
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { handleOccurrencesRequested } from '../../apps/api/src/modules/occurrences/application/occurrences-requested.js';
 import { login, startHarness, type Harness, type LoggedIn } from './support/http.js';
@@ -270,6 +271,58 @@ describe('listOccurrences: ocorrencias acionaveis do titular (RF-004, RF-005, DC
     const response = await listOccurrences(bruno);
     expect(response.status).toBe(200);
     expect((response.body as PageBody).items).toEqual([]);
+  });
+});
+
+describe('listOccurrences com local_date: remedios do dia (DEC-035)', () => {
+  const day = async (session: LoggedIn, query: string) => {
+    const response = await listOccurrences(session, query);
+    expect(response.status).toBe(200);
+    return (response.body as PageBody).items.map(
+      (o) => `${o.local_scheduled_date} ${o.local_time} ${o.status}`,
+    );
+  };
+
+  it('lista as do dia, inclusive as ainda nao alcancadas; sem local_date segue so as alcancadas', async () => {
+    await planWithOccurrences();
+    expect(await day(ana, '?local_date=2026-10-05')).toEqual([
+      '2026-10-05 20:00 PROGRAMMED',
+      '2026-10-05 08:00 PROGRAMMED',
+    ]);
+    expect(await day(ana, '')).not.toContain('2026-10-05 20:00 PROGRAMMED');
+  });
+
+  it('so o dia pedido: outros dias ficam de fora', async () => {
+    await planWithOccurrences();
+    expect(await day(ana, '?local_date=2026-10-06')).toEqual([
+      '2026-10-06 20:00 PROGRAMMED',
+      '2026-10-06 08:00 PROGRAMMED',
+    ]);
+  });
+
+  it('inclui as respondidas e combina com o filtro de status', async () => {
+    const planId = await planWithOccurrences();
+    expect(
+      (await respond(ana, await occurrenceId(planId, '2026-10-05', '08:00'), TAKEN)).status,
+    ).toBe(201);
+    expect(await day(ana, '?local_date=2026-10-05')).toEqual([
+      '2026-10-05 20:00 PROGRAMMED',
+      '2026-10-05 08:00 TAKEN',
+    ]);
+    expect(await day(ana, '?local_date=2026-10-05&status=PROGRAMMED')).toEqual([
+      '2026-10-05 20:00 PROGRAMMED',
+    ]);
+  });
+
+  it('data invalida: 400 VALIDATION_FAILED', async () => {
+    const response = await listOccurrences(ana, '?local_date=2026-13-40');
+    expect(response.status).toBe(400);
+    expect((response.body as { code: string }).code).toBe('VALIDATION_FAILED');
+  });
+
+  it('TS-023: U2 nao ve as ocorrencias do dia de U1', async () => {
+    await planWithOccurrences();
+    expect(await day(bruno, '?local_date=2026-10-05')).toEqual([]);
   });
 });
 
