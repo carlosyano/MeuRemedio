@@ -31,3 +31,16 @@ O token de sessão (`mr_session`) é guardado como SHA-256, sem segredo do servi
 ## 4. Fora deste procedimento
 
 A criptografia em repouso (RNF-002) e as chaves do banco, do armazenamento de exportações e dos backups ficam no serviço gerenciado (KMS), com rotação própria. A prova correspondente entra com a infraestrutura.
+
+## 5. Na AWS (DC-071)
+
+Cada segredo é um recipiente do Secrets Manager criado pelo Terraform (`meuremedio-<ambiente>/CSRF_KEY`, `/REQUEST_HASH_KEY` e `/EMAIL_PEPPER`), cifrado com a chave KMS do projeto. O valor nunca passa pelo Terraform: o operador grava o JSON abaixo, e o ECS injeta `current` em `NOME` e `previous` em `NOME_PREVIOUS`.
+
+```json
+{ "current": "<base64 de 32 bytes>", "previous": "" }
+```
+
+- Gerar a chave sem que ela apareça no histórico do shell: `openssl rand -base64 32`, colada direto no comando ou no console.
+- Gravar: `aws secretsmanager put-secret-value --secret-id meuremedio-homologacao/CSRF_KEY --secret-string file://valor.json` e apagar o `valor.json` em seguida.
+- Na rotação planejada, mover a chave atual para `previous` (lista separada por vírgula) e gravar a nova em `current`. Depois, forçar nova implantação dos serviços (`aws ecs update-service --force-new-deployment`), porque o ECS só lê o segredo ao iniciar a tarefa.
+- `previous` precisa existir no JSON, mesmo vazio: o ECS não inicia a tarefa se a chave do JSON faltar.
