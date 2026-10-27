@@ -1,9 +1,16 @@
-// Leitura de um plano no formato do schema Plan (OpenAPI 02.33.7) e ETag derivado de row_version.
+// Leitura de um plano no formato do schema Plan (OpenAPI 02.33.8) e ETag derivado de row_version.
 import type { Pool, PoolClient } from 'pg';
+
+/** Situacao do plano (DEC-036); DELETED nunca chega ao titular. */
+export type PlanStatus = 'ACTIVE' | 'CANCELED' | 'INTERRUPTED' | 'DELETED';
+
+/** Motivo da ultima mudanca de situacao (PlanStatusReason, DEC-036). */
+export type PlanStatusReason =
+  'MEDICAL_ADVICE' | 'SIDE_EFFECT' | 'IMPROVED' | 'COST_OR_ACCESS' | 'OWN_DECISION' | 'OTHER';
 
 export interface PlanView {
   readonly plan_id: string;
-  readonly status: 'ACTIVE' | 'DELETED';
+  readonly status: PlanStatus;
   readonly medication_name: string;
   readonly dose_text: string;
   readonly medication_form: string;
@@ -14,6 +21,9 @@ export interface PlanView {
   readonly start_date: string;
   readonly end_date: string | null;
   readonly schedule_times: string[];
+  readonly status_reason: PlanStatusReason | null;
+  readonly status_note: string | null;
+  readonly status_changed_at: string | null;
   readonly row_version: number;
   readonly created_at: string;
   readonly updated_at: string;
@@ -25,7 +35,7 @@ export const etagOf = (rowVersion: number): string => `"${String(rowVersion)}"`;
 export interface PlanRow {
   id: string;
   user_id: string;
-  status: 'ACTIVE' | 'DELETED';
+  status: PlanStatus;
   medication_name: string;
   dose_text: string;
   medication_form: string;
@@ -36,6 +46,9 @@ export interface PlanRow {
   start_date: string;
   end_date: string | null;
   schedule_times: string[] | null;
+  status_reason: PlanStatusReason | null;
+  status_note: string | null;
+  status_changed_at: Date | null;
   row_version: string;
   created_at: Date;
   updated_at: Date;
@@ -52,6 +65,7 @@ export const PLAN_COLUMNS = `
   (SELECT array_agg(to_char(s.time_of_day, 'HH24:MI') ORDER BY s.time_of_day)
      FROM schedule_times s
     WHERE s.plan_id = p.id AND s.removed_at IS NULL) AS schedule_times,
+  p.status_reason, p.status_note, p.status_changed_at,
   p.row_version, p.created_at, p.updated_at,
   to_char(p.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS created_at_us`;
 
@@ -69,6 +83,9 @@ export function toPlanView(row: PlanRow): PlanView {
     start_date: row.start_date,
     end_date: row.end_date,
     schedule_times: row.schedule_times ?? [],
+    status_reason: row.status_reason,
+    status_note: row.status_note,
+    status_changed_at: row.status_changed_at?.toISOString().replace('.000Z', 'Z') ?? null,
     row_version: Number(row.row_version),
     created_at: row.created_at.toISOString(),
     updated_at: row.updated_at.toISOString(),

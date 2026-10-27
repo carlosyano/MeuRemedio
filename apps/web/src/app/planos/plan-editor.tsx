@@ -12,6 +12,8 @@
 // Cadastro no formato da receita (DC-074): horarios de N em N horas a partir do primeiro horario,
 // duracao em dias que preenche o termino, frase de conferencia e "Salvar e cadastrar outro item",
 // que mantem prescritor e inicio. Nada e inferido: as ajudas so preenchem campos editaveis.
+// Situacao do plano (DEC-036): cancelar, interromper e retomar com motivo (PlanStatusPanel); plano
+// cancelado ou interrompido nao se edita, so mostra a situacao e pode ser retomado ou excluido.
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, type SubmitEvent } from 'react';
@@ -39,6 +41,8 @@ import {
   describeRoutine,
   durationDays,
   endDateForDays,
+  formatDate,
+  formatPeriod,
   parseDays,
   timesEvery,
   toFormInput,
@@ -49,7 +53,9 @@ import {
   type PlanFormInput,
   type PlanPayload,
 } from '@/lib/plan-form';
+import { statusReasonText } from '@/lib/plan-status';
 import { loginPath, useAccount } from '@/lib/use-account';
+import { PlanStatusPanel } from './plan-status-panel';
 
 const VALIDATION = 'Revise os campos destacados e tente novamente.';
 const TIMEOUT =
@@ -71,7 +77,13 @@ const FIELDS = [
 
 type LoadState =
   | { readonly status: 'loading' }
-  | { readonly status: 'ready'; readonly initial: PlanFormInput; readonly etag?: string }
+  | {
+      readonly status: 'ready';
+      readonly initial: PlanFormInput;
+      readonly etag?: string;
+      /** Plano lido da API (so na edicao). */
+      readonly plan?: Plan;
+    }
   | { readonly status: 'not-found' }
   | { readonly status: 'error'; readonly message: string };
 
@@ -134,8 +146,13 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
   const keyFor = useRef(createIdempotencyKeys());
   const panelHeading = useRef<HTMLHeadingElement>(null);
 
-  const ready = useCallback((initial: PlanFormInput, etag?: string) => {
-    setLoad(etag === undefined ? { status: 'ready', initial } : { status: 'ready', initial, etag });
+  const ready = useCallback((initial: PlanFormInput, etag?: string, plan?: Plan) => {
+    setLoad({
+      status: 'ready',
+      initial,
+      ...(etag === undefined ? {} : { etag }),
+      ...(plan === undefined ? {} : { plan }),
+    });
     setTimes(initial.schedule_times);
     setDraft(draftOf(initial));
     setStartDate(initial.start_date);
@@ -155,7 +172,7 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
     api
       .request<Plan>({ method: 'GET', path: `/plans/${planId}` })
       .then((response) => {
-        ready(toFormInput(response.body), response.headers.get('etag') ?? undefined);
+        ready(toFormInput(response.body), response.headers.get('etag') ?? undefined, response.body);
       })
       .catch((error: unknown) => {
         if (error instanceof ApiProblem && error.status === 401) {
@@ -339,7 +356,10 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
     }
   }
 
-  const title = planId === undefined ? 'Novo plano' : 'Editar plano';
+  const plan = load.status === 'ready' ? load.plan : undefined;
+  // Cancelado e interrompido nao aceitam updatePlan (DEC-036).
+  const editable = plan === undefined || plan.status === 'ACTIVE';
+  const title = planId === undefined ? 'Novo plano' : editable ? 'Editar plano' : 'Plano';
   const header = (
     <>
       <p className="mb-4">
@@ -408,283 +428,302 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
           {notice}
         </p>
       )}
-      <form
-        key={formKey}
-        onSubmit={(event) => void onSubmit(event)}
-        onChange={(event) => {
-          const form = new FormData(event.currentTarget);
-          setDraft({
-            medication_name: textOf(form, 'medication_name'),
-            dose_text: textOf(form, 'dose_text'),
-            medication_form: textOf(form, 'medication_form'),
-            administration_route: textOf(form, 'administration_route'),
-          });
-        }}
-        noValidate
-        aria-busy={busy}
-      >
-        <TextField
-          id="medication_name"
-          label="Medicamento"
-          description="Nome e concentração, como na receita, por exemplo Levofloxacino 500 mg."
-          maxLength={120}
-          defaultValue={initial.medication_name}
-          error={errors['medication_name']}
-        />
-        <TextField
-          id="dose_text"
-          label="Dose"
-          description="Quanto tomar de cada vez, como na receita, por exemplo 1 comprimido, 3 ml ou 10 gotas."
-          maxLength={80}
-          defaultValue={initial.dose_text}
-          error={errors['dose_text']}
-        />
-        <SelectField
-          id="medication_form"
-          label="Forma farmacêutica"
-          options={MEDICATION_FORMS}
-          defaultValue={initial.medication_form}
-          error={errors['medication_form']}
-        />
-        <SelectField
-          id="administration_route"
-          label="Via de administração"
-          options={ADMINISTRATION_ROUTES}
-          defaultValue={initial.administration_route}
-          error={errors['administration_route']}
-        />
-        <fieldset
-          className="mb-4"
-          aria-describedby={
-            timesError === undefined ? 'horarios-descricao' : 'horarios-descricao horarios-erro'
-          }
+      {plan !== undefined && plan.status_reason !== null && timeZone !== undefined && (
+        <StatusSummary plan={plan} reason={plan.status_reason} timeZone={timeZone} />
+      )}
+      {editable && (
+        <form
+          key={formKey}
+          onSubmit={(event) => void onSubmit(event)}
+          onChange={(event) => {
+            const form = new FormData(event.currentTarget);
+            setDraft({
+              medication_name: textOf(form, 'medication_name'),
+              dose_text: textOf(form, 'dose_text'),
+              medication_form: textOf(form, 'medication_form'),
+              administration_route: textOf(form, 'administration_route'),
+            });
+          }}
+          noValidate
+          aria-busy={busy}
         >
-          <legend className="mb-1 font-medium">Horários</legend>
-          <p id="horarios-descricao" className="mb-2 text-sm text-muted">
-            No fuso da sua conta. Até {MAX_SCHEDULE_TIMES} horários. Para “1 vez ao dia” ou “à
-            noite”, informe a hora em que você toma.
-          </p>
-          <div className="mb-3">
-            <label htmlFor="intervalo" className="mb-1 block">
-              Intervalo
-            </label>
-            <select
-              id="intervalo"
-              value={intervalHours}
-              aria-describedby="intervalo-descricao"
-              onChange={(event) => {
-                const hours = event.target.value;
-                setIntervalHours(hours);
-                applyInterval(hours, times[0] ?? '');
-              }}
-              className="rounded border border-line bg-surface p-2"
-            >
-              <option value="">Sem intervalo fixo</option>
-              {INTERVAL_HOURS.map((hours) => (
-                <option key={hours} value={String(hours)}>
-                  De {hours} em {hours} horas
-                </option>
-              ))}
-            </select>
-            <p id="intervalo-descricao" className="mt-1 text-sm text-muted">
-              {intervalHours !== '' && (times[0] ?? '') === ''
-                ? 'Informe o Horário 1: os demais são calculados a partir dele.'
-                : 'Para receita “de N em N horas”: os horários são calculados a partir do Horário 1 e continuam editáveis.'}
-            </p>
-          </div>
-          {times.map((time, index) => {
-            const label = `Horário ${String(index + 1)}`;
-            return (
-              <div key={index} className="mb-2 flex items-center gap-2">
-                <label htmlFor={`horario-${String(index)}`} className="w-24">
-                  {label}
-                </label>
-                <input
-                  id={`horario-${String(index)}`}
-                  type="time"
-                  value={time}
-                  onChange={(event) => {
-                    changeTime(index, event.target.value);
-                  }}
-                  aria-invalid={timesError === undefined ? undefined : true}
-                  aria-describedby={timesError === undefined ? undefined : 'horarios-erro'}
-                  className="rounded border border-line p-2 aria-invalid:border-danger"
-                />
-                {times.length > 1 && (
-                  <button
-                    type="button"
-                    aria-label={`Remover ${label.toLowerCase()}`}
-                    onClick={() => {
-                      setIntervalHours('');
-                      setTimes((current) => current.filter((_item, i) => i !== index));
-                    }}
-                    className="rounded border border-line px-2 py-1"
-                  >
-                    Remover
-                  </button>
-                )}
-              </div>
-            );
-          })}
-          {timesError !== undefined && (
-            <p id="horarios-erro" className="mb-2 text-sm font-medium text-danger">
-              {timesError}
-            </p>
-          )}
-          <button
-            type="button"
-            disabled={times.length >= MAX_SCHEDULE_TIMES}
-            onClick={() => {
-              setIntervalHours('');
-              setTimes((current) => [...current, '']);
-            }}
-            className="rounded border border-line px-3 py-1 disabled:opacity-70"
+          <TextField
+            id="medication_name"
+            label="Medicamento"
+            description="Nome e concentração, como na receita, por exemplo Levofloxacino 500 mg."
+            maxLength={120}
+            defaultValue={initial.medication_name}
+            error={errors['medication_name']}
+          />
+          <TextField
+            id="dose_text"
+            label="Dose"
+            description="Quanto tomar de cada vez, como na receita, por exemplo 1 comprimido, 3 ml ou 10 gotas."
+            maxLength={80}
+            defaultValue={initial.dose_text}
+            error={errors['dose_text']}
+          />
+          <SelectField
+            id="medication_form"
+            label="Forma farmacêutica"
+            options={MEDICATION_FORMS}
+            defaultValue={initial.medication_form}
+            error={errors['medication_form']}
+          />
+          <SelectField
+            id="administration_route"
+            label="Via de administração"
+            options={ADMINISTRATION_ROUTES}
+            defaultValue={initial.administration_route}
+            error={errors['administration_route']}
+          />
+          <fieldset
+            className="mb-4"
+            aria-describedby={
+              timesError === undefined ? 'horarios-descricao' : 'horarios-descricao horarios-erro'
+            }
           >
-            Adicionar horário
-          </button>
-        </fieldset>
-        <TextField
-          id="start_date"
-          label="Data de início"
-          type="date"
-          value={startDate}
-          onValueChange={changeStart}
-          error={errors['start_date']}
-        />
-        <TextField
-          id="duration_days"
-          label="Duração em dias"
-          inputMode="numeric"
-          description="Opcional. Para “por 7 dias”, informe 7: a data de término é calculada."
-          maxLength={4}
-          value={days}
-          onValueChange={changeDays}
-          error={errors['duration_days']}
-        />
-        <TextField
-          id="end_date"
-          label="Data de término"
-          type="date"
-          description="Opcional. Deixe em branco para uso contínuo."
-          value={endDate}
-          onValueChange={changeEnd}
-          error={errors['end_date']}
-        />
-        <TextAreaField
-          id="instructions"
-          label="Instruções"
-          description="Opcional. Por exemplo: após o café da manhã."
-          maxLength={500}
-          defaultValue={initial.instructions}
-          error={errors['instructions']}
-        />
-        <TextField
-          id="prescriber_name"
-          label="Nome de quem prescreveu"
-          description="Opcional."
-          maxLength={120}
-          defaultValue={initial.prescriber_name}
-          error={errors['prescriber_name']}
-        />
-        <TextField
-          id="prescriber_crm"
-          label="CRM de quem prescreveu"
-          description="Opcional. Formato UF-número, por exemplo SP-123456. Não é consultado em nenhum cadastro."
-          maxLength={13}
-          defaultValue={initial.prescriber_crm}
-          error={errors['prescriber_crm']}
-        />
-
-        {duplicate !== undefined && (
-          <section
-            aria-labelledby="duplicidade-titulo"
-            className="mb-4 rounded border border-line p-4"
-          >
-            <h2
-              id="duplicidade-titulo"
-              ref={panelHeading}
-              tabIndex={-1}
-              className="mb-2 text-lg font-semibold"
-            >
-              Já existe um plano parecido
-            </h2>
-            <p className="mb-2">{catalogMessage('DUPLICATE_CONFIRMATION_REQUIRED')}</p>
-            <ul className="mb-4 list-disc pl-6">
-              {duplicate.candidates.map((candidate) => (
-                <li key={candidate.planId}>
-                  {candidate.medicationName}, {candidate.doseText}
-                </li>
-              ))}
-            </ul>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void send(duplicate.payload, duplicate.confirmationToken)}
-                className="rounded bg-accent px-4 py-2 font-medium text-white disabled:opacity-70"
-              >
-                Criar mesmo assim
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setDuplicate(undefined);
+            <legend className="mb-1 font-medium">Horários</legend>
+            <p id="horarios-descricao" className="mb-2 text-sm text-muted">
+              No fuso da sua conta. Até {MAX_SCHEDULE_TIMES} horários. Para “1 vez ao dia” ou “à
+              noite”, informe a hora em que você toma.
+            </p>
+            <div className="mb-3">
+              <label htmlFor="intervalo" className="mb-1 block">
+                Intervalo
+              </label>
+              <select
+                id="intervalo"
+                value={intervalHours}
+                aria-describedby="intervalo-descricao"
+                onChange={(event) => {
+                  const hours = event.target.value;
+                  setIntervalHours(hours);
+                  applyInterval(hours, times[0] ?? '');
                 }}
-                className="rounded border border-line px-4 py-2"
+                className="rounded border border-line bg-surface p-2"
               >
-                Revisar o plano
-              </button>
+                <option value="">Sem intervalo fixo</option>
+                {INTERVAL_HOURS.map((hours) => (
+                  <option key={hours} value={String(hours)}>
+                    De {hours} em {hours} horas
+                  </option>
+                ))}
+              </select>
+              <p id="intervalo-descricao" className="mt-1 text-sm text-muted">
+                {intervalHours !== '' && (times[0] ?? '') === ''
+                  ? 'Informe o Horário 1: os demais são calculados a partir dele.'
+                  : 'Para receita “de N em N horas”: os horários são calculados a partir do Horário 1 e continuam editáveis.'}
+              </p>
             </div>
-          </section>
-        )}
-
-        <FormAlert message={alert} />
-        {conflict && (
-          <button
-            type="button"
-            onClick={() => {
-              setConflict(false);
-              setAlert(undefined);
-              setErrors({});
-              loadPlan();
-            }}
-            className="mb-4 rounded border border-line px-3 py-1"
-          >
-            Recarregar plano
-          </button>
-        )}
-        <section aria-labelledby="resumo-titulo" className="mb-4 rounded border border-line p-4">
-          <h2 id="resumo-titulo" className="mb-2 text-lg font-semibold">
-            Confira antes de salvar
-          </h2>
-          {summary === undefined ? (
-            <p className="text-muted">
-              Preencha medicamento, dose, forma, via, horários e data de início para ver o resumo.
-            </p>
-          ) : (
-            <>
-              <p className="font-medium">{draft.medication_name.trim()}</p>
-              <p>{summary}</p>
-            </>
-          )}
-        </section>
-        {duplicate === undefined && (
-          <div className="flex flex-wrap gap-2">
-            <SubmitButton label="Salvar plano" busyLabel="Salvando…" busy={busy} />
-            {planId === undefined && (
-              <button
-                type="submit"
-                name="proximo"
-                disabled={busy}
-                className="rounded border border-accent px-4 py-2 font-medium text-accent disabled:opacity-70"
-              >
-                Salvar e cadastrar outro item
-              </button>
+            {times.map((time, index) => {
+              const label = `Horário ${String(index + 1)}`;
+              return (
+                <div key={index} className="mb-2 flex items-center gap-2">
+                  <label htmlFor={`horario-${String(index)}`} className="w-24">
+                    {label}
+                  </label>
+                  <input
+                    id={`horario-${String(index)}`}
+                    type="time"
+                    value={time}
+                    onChange={(event) => {
+                      changeTime(index, event.target.value);
+                    }}
+                    aria-invalid={timesError === undefined ? undefined : true}
+                    aria-describedby={timesError === undefined ? undefined : 'horarios-erro'}
+                    className="rounded border border-line p-2 aria-invalid:border-danger"
+                  />
+                  {times.length > 1 && (
+                    <button
+                      type="button"
+                      aria-label={`Remover ${label.toLowerCase()}`}
+                      onClick={() => {
+                        setIntervalHours('');
+                        setTimes((current) => current.filter((_item, i) => i !== index));
+                      }}
+                      className="rounded border border-line px-2 py-1"
+                    >
+                      Remover
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+            {timesError !== undefined && (
+              <p id="horarios-erro" className="mb-2 text-sm font-medium text-danger">
+                {timesError}
+              </p>
             )}
-          </div>
-        )}
-      </form>
+            <button
+              type="button"
+              disabled={times.length >= MAX_SCHEDULE_TIMES}
+              onClick={() => {
+                setIntervalHours('');
+                setTimes((current) => [...current, '']);
+              }}
+              className="rounded border border-line px-3 py-1 disabled:opacity-70"
+            >
+              Adicionar horário
+            </button>
+          </fieldset>
+          <TextField
+            id="start_date"
+            label="Data de início"
+            type="date"
+            value={startDate}
+            onValueChange={changeStart}
+            error={errors['start_date']}
+          />
+          <TextField
+            id="duration_days"
+            label="Duração em dias"
+            inputMode="numeric"
+            description="Opcional. Para “por 7 dias”, informe 7: a data de término é calculada."
+            maxLength={4}
+            value={days}
+            onValueChange={changeDays}
+            error={errors['duration_days']}
+          />
+          <TextField
+            id="end_date"
+            label="Data de término"
+            type="date"
+            description="Opcional. Deixe em branco para uso contínuo."
+            value={endDate}
+            onValueChange={changeEnd}
+            error={errors['end_date']}
+          />
+          <TextAreaField
+            id="instructions"
+            label="Instruções"
+            description="Opcional. Por exemplo: após o café da manhã."
+            maxLength={500}
+            defaultValue={initial.instructions}
+            error={errors['instructions']}
+          />
+          <TextField
+            id="prescriber_name"
+            label="Nome de quem prescreveu"
+            description="Opcional."
+            maxLength={120}
+            defaultValue={initial.prescriber_name}
+            error={errors['prescriber_name']}
+          />
+          <TextField
+            id="prescriber_crm"
+            label="CRM de quem prescreveu"
+            description="Opcional. Formato UF-número, por exemplo SP-123456. Não é consultado em nenhum cadastro."
+            maxLength={13}
+            defaultValue={initial.prescriber_crm}
+            error={errors['prescriber_crm']}
+          />
 
+          {duplicate !== undefined && (
+            <section
+              aria-labelledby="duplicidade-titulo"
+              className="mb-4 rounded border border-line p-4"
+            >
+              <h2
+                id="duplicidade-titulo"
+                ref={panelHeading}
+                tabIndex={-1}
+                className="mb-2 text-lg font-semibold"
+              >
+                Já existe um plano parecido
+              </h2>
+              <p className="mb-2">{catalogMessage('DUPLICATE_CONFIRMATION_REQUIRED')}</p>
+              <ul className="mb-4 list-disc pl-6">
+                {duplicate.candidates.map((candidate) => (
+                  <li key={candidate.planId}>
+                    {candidate.medicationName}, {candidate.doseText}
+                  </li>
+                ))}
+              </ul>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void send(duplicate.payload, duplicate.confirmationToken)}
+                  className="rounded bg-accent px-4 py-2 font-medium text-white disabled:opacity-70"
+                >
+                  Criar mesmo assim
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDuplicate(undefined);
+                  }}
+                  className="rounded border border-line px-4 py-2"
+                >
+                  Revisar o plano
+                </button>
+              </div>
+            </section>
+          )}
+
+          <FormAlert message={alert} />
+          {conflict && (
+            <button
+              type="button"
+              onClick={() => {
+                setConflict(false);
+                setAlert(undefined);
+                setErrors({});
+                loadPlan();
+              }}
+              className="mb-4 rounded border border-line px-3 py-1"
+            >
+              Recarregar plano
+            </button>
+          )}
+          <section aria-labelledby="resumo-titulo" className="mb-4 rounded border border-line p-4">
+            <h2 id="resumo-titulo" className="mb-2 text-lg font-semibold">
+              Confira antes de salvar
+            </h2>
+            {summary === undefined ? (
+              <p className="text-muted">
+                Preencha medicamento, dose, forma, via, horários e data de início para ver o resumo.
+              </p>
+            ) : (
+              <>
+                <p className="font-medium">{draft.medication_name.trim()}</p>
+                <p>{summary}</p>
+              </>
+            )}
+          </section>
+          {duplicate === undefined && (
+            <div className="flex flex-wrap gap-2">
+              <SubmitButton label="Salvar plano" busyLabel="Salvando…" busy={busy} />
+              {planId === undefined && (
+                <button
+                  type="submit"
+                  name="proximo"
+                  disabled={busy}
+                  className="rounded border border-accent px-4 py-2 font-medium text-accent disabled:opacity-70"
+                >
+                  Salvar e cadastrar outro item
+                </button>
+              )}
+            </div>
+          )}
+        </form>
+      )}
+      {plan !== undefined && timeZone !== undefined && (
+        <PlanStatusPanel
+          plan={plan}
+          etag={load.etag ?? ''}
+          today={todayIn(timeZone)}
+          onChanged={(changed, etag, message) => {
+            setAlert(undefined);
+            setConflict(false);
+            setErrors({});
+            ready(toFormInput(changed), etag, changed);
+            setNotice(message);
+          }}
+          onFailed={failed}
+        />
+      )}
       {planId !== undefined && (
         <div className="mt-8 border-t border-line pt-4">
           {confirmingDelete ? (
@@ -734,5 +773,43 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
         </div>
       )}
     </>
+  );
+}
+
+const SITUATION: Readonly<Record<Plan['status'], string>> = {
+  ACTIVE: 'Retomado',
+  CANCELED: 'Cancelado',
+  INTERRUPTED: 'Interrompido',
+  DELETED: 'Excluído',
+};
+
+/** Ultima mudanca de situacao: o que aconteceu, quando, o motivo e a observacao. */
+function StatusSummary(props: {
+  readonly plan: Plan;
+  readonly reason: NonNullable<Plan['status_reason']>;
+  readonly timeZone: string;
+}) {
+  const { plan } = props;
+  const changedOn =
+    plan.status_changed_at === null
+      ? undefined
+      : formatDate(todayIn(props.timeZone, new Date(plan.status_changed_at)));
+  return (
+    <section
+      aria-labelledby="situacao-atual-titulo"
+      className="mb-6 rounded border border-line p-4"
+    >
+      <h2 id="situacao-atual-titulo" className="mb-2 text-lg font-semibold">
+        {SITUATION[plan.status]}
+        {changedOn === undefined ? '' : ` em ${changedOn}`}
+      </h2>
+      {plan.status !== 'ACTIVE' && (
+        <p className="mb-2 font-medium">
+          {plan.medication_name}, {plan.dose_text} · {formatPeriod(plan.start_date, plan.end_date)}
+        </p>
+      )}
+      <p>Motivo: {statusReasonText(plan.status, props.reason)}</p>
+      {plan.status_note !== null && <p>Observação: {plan.status_note}</p>}
+    </section>
   );
 }

@@ -21,6 +21,7 @@ export type IdempotentOperation =
   | 'createAccount'
   | 'createPlan'
   | 'updatePlan'
+  | 'changePlanStatus'
   | 'createResponse'
   | 'createExport'
   | 'requestAccountDeletion'

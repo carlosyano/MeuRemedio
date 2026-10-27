@@ -4,6 +4,7 @@
 //   - Idempotency-Key com escopo no titular; o If-Match e o plan_id entram no hash (TS-038);
 //   - plano inexistente, DELETED ou de outro titular -> 404 (o de outro titular e auditado,
 //     DC-032; a auditoria e confirmada mesmo com o 404, sem snapshot);
+//   - plano cancelado ou interrompido -> 409 STATE_CONFLICT (DEC-036): so retomar ou excluir;
 //   - If-Match diferente da row_version -> 409 VERSION_CONFLICT; sucesso incrementa a versao 1x;
 //   - horarios retirados ganham removed_at (preserva a FK das ocorrencias); os novos sao incluidos;
 //   - ocorrencias PROGRAMMED com scheduled_at > instante da acao sao canceladas; as iniciadas e as
@@ -82,10 +83,11 @@ export class UpdatePlan {
   ): Promise<IdempotentResponse> {
     const { planId, request } = input;
     const plan = await lockOwnPlan(client, { ...input, now });
-    if (plan?.status !== 'ACTIVE') return NOT_FOUND;
+    if (plan === undefined || plan.status === 'DELETED') return NOT_FOUND;
     if (etagOf(Number(plan.row_version)) !== input.ifMatch) {
       throw new ProblemError('VERSION_CONFLICT');
     }
+    if (plan.status !== 'ACTIVE') throw new ProblemError('STATE_CONFLICT');
 
     await client.query(
       `UPDATE medication_plans

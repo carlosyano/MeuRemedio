@@ -38,6 +38,7 @@ import { ReadHistory } from './modules/history/application/read-history.js';
 import { HistoryController } from './modules/history/infrastructure/history.controller.js';
 import { ReadOccurrences } from './modules/occurrences/application/read-occurrences.js';
 import { OccurrencesController } from './modules/occurrences/infrastructure/occurrences.controller.js';
+import { ChangePlanStatus } from './modules/plans/application/change-plan-status.js';
 import { CreatePlan } from './modules/plans/application/create-plan.js';
 import { DeletePlan } from './modules/plans/application/delete-plan.js';
 import { ReadPlans } from './modules/plans/application/read-plans.js';
@@ -189,6 +190,10 @@ class AppModule {
           useValue: new UpdatePlan(options.database, options.clock, hashRequest),
         },
         { provide: DeletePlan, useValue: new DeletePlan(options.database, options.clock) },
+        {
+          provide: ChangePlanStatus,
+          useValue: new ChangePlanStatus(options.database, options.clock, hashRequest),
+        },
         { provide: ReadHistory, useValue: new ReadHistory(options.database, options.clock) },
         {
           provide: Exports,
