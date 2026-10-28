@@ -33,6 +33,8 @@ export const occurrences = pgTable('occurrences', {
   noResponseReachedAt: timestamp('no_response_reached_at', { withTimezone: true }),
   medicationNameSnapshot: varchar('medication_name_snapshot', { length: 120 }).notNull(),
   doseTextSnapshot: varchar('dose_text_snapshot', { length: 80 }).notNull(),
+  // Migracao 0016_treatment_reasons (DEC-038).
+  treatmentReasonSnapshot: varchar('treatment_reason_snapshot'),
   isLate: boolean('is_late').notNull().default(false),
   rowVersion: bigint('row_version', { mode: 'number' }).notNull().default(1),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

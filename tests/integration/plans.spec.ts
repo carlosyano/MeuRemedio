@@ -132,6 +132,7 @@ describe('createPlan', () => {
       end_date: null,
       schedule_times: ['08:00', '20:00'],
       recurrence: { kind: 'DAILY' },
+      treatment_reason: null,
       status_reason: null,
       status_note: null,
       status_changed_at: null,

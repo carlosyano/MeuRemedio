@@ -1,5 +1,5 @@
-# MeuRemedio OpenAPI 02.33.9 - completo
-# Base: MeuRemedio_OpenAPI_02.33.8_COMPLETO.yaml
+# MeuRemedio OpenAPI 02.33.10 - completo
+# Base: MeuRemedio_OpenAPI_02.33.9_COMPLETO.yaml
 # Mudancas 02.33.3 (decisao de 04/10/2026): removido o 410 de createResponse (GAP-008); X-Correlation-ID em toda resposta, inclusive 202, 204 e getHealth (GAP-009).
 # Mudancas 02.33.4 (decisao de 06/10/2026, DEC-026, GAP-010): falha inesperada documentada em toda operacao,
 # com 500 INTERNAL_ERROR (ERR-016, resposta InternalError) e 503 DEPENDENCY_UNAVAILABLE (ERR-011).
@@ -15,12 +15,16 @@
 # Mudancas 02.33.9 (decisao de 27/10/2026, DEC-037): periodicidade do plano. PlanWrite, CreatePlanRequest e Plan
 # ganham recurrence (PlanRecurrence): todos os dias (DAILY, padrao quando omitido), dias da semana escolhidos
 # (WEEKDAYS) ou a cada N dias contados da data de inicio (EVERY_N_DAYS, de 2 a 365).
-# Mantem os operationId da 02.33.2 e acrescenta listExports e changePlanStatus (29 operacoes).
+# Mudancas 02.33.10 (decisao de 28/10/2026, DEC-038): motivo do tratamento. PlanWrite e CreatePlanRequest
+# ganham treatment_reason (texto opcional); Plan devolve o motivo (TreatmentReasonRef); Occurrence ganha
+# treatment_reason_snapshot; nova operacao listTreatmentReasons (GET /treatment-reasons).
+# Mantem os operationId da 02.33.2 e acrescenta listExports, changePlanStatus e listTreatmentReasons
+# (30 operacoes).
 openapi: 3.1.1
 info:
   title: MeuRemedio API
-  version: 02.33.9
-  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.9
+  version: 02.33.10
+  summary: Contrato normativo revisado da baseline de desenvolvimento 02.33.10
   description: API declaratoria para conta individual, planos de medicamentos, ocorrencias, respostas, historico,
     exportacoes e privacidade. Nao prescreve, nao valida medicamentos ou interacoes e nao substitui orientacao profissional.
     Todas as mutacoes autenticadas exigem protecao CSRF (cookie mr_csrf + cabecalho X-CSRF-Token) e validacao do
@@ -466,6 +470,7 @@ paths:
       - RF-003
       - TS-037
       - DEC-037
+      - DEC-038
       x-security-requirements:
       - TLS 1.3
       - UTF-8
@@ -525,6 +530,7 @@ paths:
       - CA-017
       - TS-043
       - DEC-037
+      - DEC-038
       description: Se houver candidato de duplicidade e o corpo nao trouxer duplicate_confirmation_token valido,
         retorna 409 com code DUPLICATE_CONFIRMATION_REQUIRED (schema DuplicateConfirmationProblem). Esse 409 nao
         e persistido como snapshot de idempotencia; a confirmacao e reenviada com o token e uma NOVA Idempotency-Key.
@@ -573,6 +579,7 @@ paths:
       - TS-008
       - TS-037
       - DEC-037
+      - DEC-038
       x-security-requirements:
       - TLS 1.3
       - UTF-8
@@ -635,6 +642,7 @@ paths:
       - CA-018
       - TS-041
       - DEC-037
+      - DEC-038
       x-security-requirements:
       - TLS 1.3
       - UTF-8
@@ -751,6 +759,46 @@ paths:
         retorna 409 STATE_CONFLICT. Cancelar e interromper cancelam as ocorrencias futuras PROGRAMMED; a retomada
         so gera horarios a partir dela. Concorrencia otimista como em updatePlan: If-Match ausente ou malformado
         retorna 400 VALIDATION_FAILED; ETag obsoleto retorna 409 VERSION_CONFLICT.'
+  /treatment-reasons:
+    get:
+      tags:
+      - Plans
+      summary: Listar motivos do tratamento
+      operationId: listTreatmentReasons
+      responses:
+        '200':
+          description: Pagina de motivos do tratamento
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreatmentReasonPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      x-traceability:
+      - RF-003
+      - DEC-038
+      x-security-requirements:
+      - TLS 1.3
+      - UTF-8
+      - application/problem+json
+      - correlation_id
+      description: Lista os motivos do tratamento do titular usados por pelo menos um plano nao excluido, em
+        ordem alfabetica, com a quantidade de planos de cada um e paginacao por cursor (padrao 20, maximo
+        100). Motivo sem plano deixa de existir (DEC-038).
   /occurrences:
     get:
       tags:
@@ -801,6 +849,7 @@ paths:
       - RF-004
       - RF-005
       - DEC-035
+      - DEC-038
       x-security-requirements:
       - TLS 1.3
       - UTF-8
@@ -912,6 +961,7 @@ paths:
       x-traceability:
       - RF-007
       - CA-009
+      - DEC-038
       x-security-requirements:
       - TLS 1.3
       - UTF-8
@@ -1789,6 +1839,49 @@ components:
       - CANCELED
       - INTERRUPTED
       - DELETED
+    TreatmentReasonRef:
+      type: object
+      additionalProperties: false
+      properties:
+        treatment_reason_id:
+          $ref: '#/components/schemas/Uuid'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+      required:
+      - treatment_reason_id
+      - name
+    TreatmentReason:
+      type: object
+      additionalProperties: false
+      properties:
+        treatment_reason_id:
+          $ref: '#/components/schemas/Uuid'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        plan_count:
+          type: integer
+          minimum: 1
+      required:
+      - treatment_reason_id
+      - name
+      - plan_count
+    TreatmentReasonPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreatmentReason'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+      required:
+      - items
+      - page
     PlanRecurrenceKind:
       type: string
       description: Periodicidade do plano (DEC-037).
@@ -1954,6 +2047,14 @@ components:
           uniqueItems: true
         recurrence:
           $ref: '#/components/schemas/PlanRecurrence'
+        treatment_reason:
+          description: Motivo do tratamento (DEC-038), aparado; o mesmo nome normalizado reaproveita o motivo
+            ja existente do titular. Omitido ou null, o plano fica sem motivo.
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 80
+          - type: 'null'
       required: &id001
       - medication_name
       - dose_text
@@ -2008,6 +2109,14 @@ components:
           uniqueItems: true
         recurrence:
           $ref: '#/components/schemas/PlanRecurrence'
+        treatment_reason:
+          description: Motivo do tratamento (DEC-038), aparado; o mesmo nome normalizado reaproveita o motivo
+            ja existente do titular. Omitido ou null, o plano fica sem motivo.
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 80
+          - type: 'null'
         duplicate_confirmation_token:
           type: string
           minLength: 16
@@ -2066,6 +2175,10 @@ components:
           uniqueItems: true
         recurrence:
           $ref: '#/components/schemas/PlanRecurrence'
+        treatment_reason:
+          anyOf:
+          - $ref: '#/components/schemas/TreatmentReasonRef'
+          - type: 'null'
         status_reason:
           anyOf:
           - $ref: '#/components/schemas/PlanStatusReason'
@@ -2098,6 +2211,7 @@ components:
       - start_date
       - schedule_times
       - recurrence
+      - treatment_reason
       - row_version
       - created_at
       - updated_at
@@ -2183,6 +2297,12 @@ components:
         dose_text_snapshot:
           type: string
           maxLength: 80
+        treatment_reason_snapshot:
+          description: Nome do motivo do tratamento do plano quando a ocorrencia foi gerada (DEC-038).
+          anyOf:
+          - type: string
+            maxLength: 80
+          - type: 'null'
         is_late:
           type: boolean
         no_response_reached_at:
@@ -2201,6 +2321,7 @@ components:
       - status
       - medication_name_snapshot
       - dose_text_snapshot
+      - treatment_reason_snapshot
       - is_late
       - no_response_reached_at
       - row_version

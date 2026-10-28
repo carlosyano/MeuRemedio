@@ -33,6 +33,7 @@
 | ENT-015 | `incident_records` | Registro segregado de incidente de segurança. | 9 |
 | ENT-016 | `external_rights_requests` | Protocolo de solicitação externa de direito. | 10 |
 | ENT-017 | `performance_profiles` | Perfil versionado e reproduzível de desempenho. | 8 |
+| ENT-018 | `treatment_reasons` | Motivo do tratamento declarado pelo titular, reaproveitado por vários planos (DEC-038). | 5 |
 
 Tabelas de plataforma (não são ENT do domínio): `rate_limit_counters`; `login_failure_counters`; `schema pgboss`.
 
@@ -155,6 +156,7 @@ Plano declaratório, período, status e versão.
 | `status_note` | varchar | não | 1..200 | texto | null | não | - | saúde sensível | observação opcional da última mudança; só com motivo |
 | `recurrence_kind` | plan_recurrence_kind | sim | - | DAILY\|WEEKDAYS\|EVERY_N_DAYS | DAILY | não | - | saúde sensível | periodicidade (DEC-037) |
 | `recurrence_weekdays` | smallint | não | 1..127 | máscara de bits: segunda = 1, terça = 2, ..., domingo = 64 | null | não | - | saúde sensível | só em WEEKDAYS |
+| `treatment_reason_id` | uuid | não | 128 bits | UUID | null | não | treatment_reasons(id, user_id) | saúde sensível | motivo do tratamento (DEC-038); `plans_treatment_reason_owner_fk`, ON DELETE SET NULL só nesta coluna |
 | `recurrence_interval_days` | smallint | não | 2..365 | dias | null | não | - | saúde sensível | só em EVERY_N_DAYS; contado da `start_date` |
 | `status_changed_at` | timestamptz | não | us UTC | RFC 3339 UTC | null | não | - | operacional | instante da última mudança; num plano ACTIVE, marca a retomada: o gerador só cria horários posteriores a ele |
 | `created_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | UTC |
@@ -208,6 +210,7 @@ Ocorrência civil, instantes, estado, snapshots e versão.
 | `no_response_reached_at` | timestamptz | não | us UTC | RFC 3339 UTC | null | não | - | operacional | instante da varredura de prazo ou da geração tardia (DC-038, DEC-027); preservado na resposta tardia |
 | `medication_name_snapshot` | varchar | sim | 1..120 | texto | - | não | - | saúde sensível | cópia imutável do plano |
 | `dose_text_snapshot` | varchar | sim | 1..80 | texto | - | não | - | saúde sensível | cópia imutável do plano |
+| `treatment_reason_snapshot` | varchar | não | 1..80 | texto | null | não | - | saúde sensível | nome do motivo do plano quando a ocorrência foi gerada (DEC-038); `occurrences_treatment_reason_snapshot_len_chk` |
 | `is_late` | boolean | sim | - | true\|false | false | não | - | operacional | true se resposta após deadline_at |
 | `created_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | UTC |
 | `updated_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | atualizado a cada escrita |
@@ -441,6 +444,26 @@ Perfil versionado e reproduzível de desempenho.
 - Perfil registrado é imutável (trigger `performance_profiles_immutable`); a única escrita posterior aceita é aprovar uma vez o perfil que ainda não tem aprovação (DC-064)
 - Migração: `0011_performance_profiles.sql`
 
+### ENT-018 — `treatment_reasons`
+
+Motivo do tratamento declarado pelo titular (DEC-038): por que ele toma o medicamento, como sintoma, doença ou prevenção. Um motivo vale para vários planos; cada plano tem no máximo um.
+
+| Campo | Tipo | Obrig. | Tam./prec. | Formato/valores | Padrão | Unicidade | FK | LGPD | Validação |
+|---|---|---|---|---|---|---|---|---|---|
+| `id` | uuid | sim | 128 bits | UUID v4 | gen_random_uuid() | PK | - | operacional | gerado no servidor |
+| `user_id` | uuid | sim | 128 bits | UUID | - | composta | users(id) ON DELETE CASCADE | operacional | ownership em toda consulta |
+| `name` | varchar | sim | 1..80 | texto, como gravado da primeira vez | - | não | - | saúde sensível | aparado |
+| `name_norm` | varchar | sim | 1..80 | mesma normalização de `medication_name_norm` | - | composta | - | saúde sensível | derivado; identifica o motivo do titular |
+| `created_at` | timestamptz | sim | us UTC | RFC 3339 UTC | now() | não | - | operacional | UTC |
+
+**Constraints e índices:**
+- `treatment_reasons_id_user_key`: UNIQUE(id,user_id), alvo da FK composta de `medication_plans`
+- `treatment_reasons_user_name_key`: UNIQUE(user_id,name_norm)
+- `treatment_reasons_name_len_chk`: CHECK(char_length(name) e char_length(name_norm) entre 1 e 80)
+- Índice parcial `plans_treatment_reason_idx` em `medication_plans(treatment_reason_id)`
+- Motivo sem plano não excluído é apagado pela aplicação na mesma transação de `updatePlan` e `deletePlan` (minimização de dado de saúde)
+- Migração: `0016_treatment_reasons.sql`
+
 ## 4. Tabelas de plataforma
 
 - `rate_limit_counters`: UNLOGGED; (scope text, key_hash bytea, window_start timestamptz, count int); PK(scope,key_hash,window_start); limpeza por job a cada 5 min (DEC-019).
@@ -451,7 +474,7 @@ Perfil versionado e reproduzível de desempenho.
 ## 5. Regras de completude
 
 - Cada campo possui as 11 propriedades exigidas pela Especificação §5.1 (campo, tipo, obrigatoriedade, tamanho, formato, padrão, unicidade, FK, LGPD, validação e entidade).
-- Os campos expostos pela API devem ser equivalentes aos schemas da OpenAPI 02.33.9, comprovado por testes de contrato (RNF-014, TS-040).
+- Os campos expostos pela API devem ser equivalentes aos schemas da OpenAPI 02.33.10, comprovado por testes de contrato (RNF-014, TS-040).
 - Pendências explícitas: retenção definitiva de `audit_events` (GX-003; padrão provisório de 180 dias configuráveis) e conteúdo final de `incident_records` (GX-006).
 
 ## 6. Estado de implementação (migrações)
@@ -469,6 +492,7 @@ Perfil versionado e reproduzível de desempenho.
 | `apps/api/migrations/0011_performance_profiles.sql` | ENT-017 `performance_profiles` (imutável depois de registrado, DC-064) | Implementada e coberta por `tests/integration/db-performance.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0012_rights_requests.sql` | ENT-016 `external_rights_requests` (DC-066) | Implementada e coberta por `tests/integration/db-rights.spec.ts` e `tests/security/ts-032.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0013_incidents.sql` | ENT-015 `security.incident_records` (DC-067) | Implementada e coberta por `tests/integration/db-incidents.spec.ts` e `tests/security/ts-030.spec.ts` (PostgreSQL 17 real) |
+| `apps/api/migrations/0016_treatment_reasons.sql` | ENT-018 `treatment_reasons`, `medication_plans.treatment_reason_id` e `occurrences.treatment_reason_snapshot` (DEC-038) | Implementada e coberta por `tests/integration/treatment-reasons.spec.ts` e `tests/integration/db-core.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0015_plan_recurrence.sql` | Periodicidade de ENT-005 (`recurrence_kind`, `recurrence_weekdays`, `recurrence_interval_days`, DEC-037) | Implementada e coberta por `tests/integration/plans-recurrence.spec.ts` e `tests/integration/db-core.spec.ts` (PostgreSQL 17 real) |
 | `apps/api/migrations/0014_plan_status.sql` | Situação de ENT-005 (CANCELED, INTERRUPTED, `status_reason`, `status_note`, `status_changed_at`) e `changePlanStatus` em `idempotency_records_operation_chk` (DEC-036) | Implementada e coberta por `tests/integration/plans-status.spec.ts` e `tests/integration/db-core.spec.ts` (PostgreSQL 17 real) |
 | Demais entidades | ENT-003 (o schema do pg-boss é criado pela biblioteca) | Pendentes; entram em migrações próprias junto de cada funcionalidade |

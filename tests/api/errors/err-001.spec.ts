@@ -1,4 +1,4 @@
-// @trace ERR-001 RNF-003 DEC-036 (400 VALIDATION_FAILED nas operacoes com entrada)
+// @trace ERR-001 RNF-003 DEC-036 DEC-038 (400 VALIDATION_FAILED nas operacoes com entrada)
 // ERR-001: toda operacao que a matriz liga ao erro recusa a entrada fora do contrato (corpo vazio,
 // campo de tipo ou formato errado, consulta fora dos limites) com 400 antes de qualquer efeito.
 // Cada operacao tem ao menos duas entradas invalidas; a tabela precisa cobrir exatamente as
@@ -62,6 +62,7 @@ const INVALID: Record<string, readonly InvalidInput[]> = {
     { body: { text_scale: 'ENORME', high_contrast: 'sim' } },
   ],
   listPlans: [{ query: '?limit=0' }, { query: '?limit=101' }],
+  listTreatmentReasons: [{ query: '?limit=0' }, { query: '?cursor=nao-e-cursor' }],
   createPlan: [{ body: {} }, { body: { ...PLAN, schedule_times: ['25:00'] } }],
   updatePlan: [{ body: {} }, { body: { ...PLAN, medication_form: 'NAO_EXISTE' } }],
   changePlanStatus: [{ body: {} }, { body: { action: 'PAUSE', reason: 'OTHER' } }],

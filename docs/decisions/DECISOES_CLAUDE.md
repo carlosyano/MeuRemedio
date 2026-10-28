@@ -872,3 +872,16 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
 - **Decisão:** (b). `dayItems` ordena pelo horário local decrescente (20:00 antes de 08:00). A API e a seção "Para registrar" não mudam.
 - **Riscos:** a tela pede até 100 horários do dia. Acima disso, a API devolve os primeiros 100 em ordem crescente e a tela inverte só esses, com o aviso de lista truncada que já existe. Na prática, um dia com mais de 100 doses não é esperado.
 - **Aplica-se a:** `apps/web/src/lib/occurrences.ts` (`dayItems`), `apps/web/src/app/hoje/today-screen.tsx` e aos testes `tests/unit/web-occurrences.spec.ts` e `tests/e2e/occurrences.spec.ts`.
+
+## DC-078 — Detalhes de implementação do motivo do tratamento (28/10/2026)
+
+- **Contexto:** a DEC-038 define o motivo do tratamento (texto opcional, entidade do titular reaproveitada pelo nome normalizado, um por plano, no histórico e no PDF). Faltava decidir a forma da entidade na API, a limpeza dos motivos sem uso e a paginação da lista.
+- **Alternativas:** (a) CRUD próprio do motivo (criar, renomear e excluir), com o plano apontando por id; (b) o plano recebe o texto e o servidor acha ou cria o motivo pelo nome normalizado, com uma única operação de leitura para as sugestões. Para o cursor de `listTreatmentReasons`: o nome no cursor ou só o id.
+- **Decisão:**
+  - **Entidade:** (b). Menos superfície (uma operação nova, só de leitura) e o mesmo resultado para o titular. Renomear um motivo é editar o plano com o novo nome; o antigo some quando fica sem plano.
+  - **Limpeza:** `updatePlan` e `deletePlan` apagam, na mesma transação, os motivos do titular que nenhum plano não excluído usa. Cancelado e interrompido continuam com o motivo. O vínculo usa FK composta `(treatment_reason_id, user_id)` com `ON DELETE SET NULL (treatment_reason_id)`, de modo que plano excluído não impede a limpeza.
+  - **Cursor:** só o id do último motivo entregue, para o nome (dado de saúde) não ir para a URL nem para os logs de acesso. A posição vem do próprio motivo do titular; se ele sumiu entre as páginas, a página seguinte vem vazia.
+  - **Snapshot:** o gerador copia o nome do motivo para `occurrences.treatment_reason_snapshot`, como já faz com o nome e a dose. Snapshots de exportação anteriores (sem o campo) continuam válidos.
+  - **Web:** campo "Motivo do tratamento" com `datalist` dos motivos em uso; falha ao carregar as sugestões não bloqueia o campo.
+- **Riscos:** dois nomes parecidos ("Pressão alta" e "Hipertensão") viram motivos diferentes; a sugestão do campo reduz o risco. O aviso de privacidade definitivo precisa citar o motivo entre os dados de saúde declarados.
+- **Aplica-se a:** `apps/api/migrations/0016_treatment_reasons.sql`, `apps/api/src/modules/plans/application/treatment-reasons.ts`, `create-plan.ts`, `update-plan.ts`, `delete-plan.ts`, `plan-view.ts`, o gerador de ocorrências, `read-occurrences.ts`, `history-pdf.ts` e, na web, `plan-form.ts`, `plan-editor.tsx`, `plans-screen.tsx` e `history-screen.tsx`.

@@ -1,4 +1,4 @@
-// Rotas de planos (OpenAPI 02.33.9, tag Plans).
+// Rotas de planos (OpenAPI 02.33.10, tag Plans).
 import {
   Body,
   Controller,
@@ -25,6 +25,10 @@ import {
 import { CreatePlan, type CreatePlanRequest } from '../application/create-plan.js';
 import { DeletePlan } from '../application/delete-plan.js';
 import { ReadPlans, type PlanPage } from '../application/read-plans.js';
+import {
+  ReadTreatmentReasons,
+  type TreatmentReasonPage,
+} from '../application/treatment-reasons.js';
 import type { PlanView } from '../application/plan-view.js';
 import type { PlanWriteRequest } from '../application/plan-write.js';
 import { UpdatePlan } from '../application/update-plan.js';
@@ -37,7 +41,20 @@ export class PlansController {
     @Inject(UpdatePlan) private readonly updatePlan: UpdatePlan,
     @Inject(DeletePlan) private readonly deletePlan: DeletePlan,
     @Inject(ChangePlanStatus) private readonly changePlanStatus: ChangePlanStatus,
+    @Inject(ReadTreatmentReasons) private readonly readTreatmentReasons: ReadTreatmentReasons,
   ) {}
+
+  @Get('treatment-reasons')
+  @OperationId('listTreatmentReasons')
+  async listReasons(
+    @Req() request: FastifyRequest,
+    @Query('cursor') cursor: string | undefined,
+    @Query('limit') limit: string | number | undefined,
+  ): Promise<TreatmentReasonPage> {
+    // O contrato ja validou limit (1..100); a query chega como texto.
+    const size = limit === undefined ? DEFAULT_PAGE_LIMIT : Number(limit);
+    return this.readTreatmentReasons.list(sessionOf(request).userId, cursor, size);
+  }
 
   @Get('plans')
   @OperationId('listPlans')

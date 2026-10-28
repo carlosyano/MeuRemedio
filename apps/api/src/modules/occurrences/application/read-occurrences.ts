@@ -26,6 +26,7 @@ export interface OccurrenceView {
   readonly status: OccurrenceStatus;
   readonly medication_name_snapshot: string;
   readonly dose_text_snapshot: string;
+  readonly treatment_reason_snapshot: string | null;
   readonly is_late: boolean;
   readonly no_response_reached_at: string | null;
   readonly row_version: number;
@@ -46,6 +47,7 @@ export interface OccurrenceRow {
   status: OccurrenceStatus;
   medication_name_snapshot: string;
   dose_text_snapshot: string;
+  treatment_reason_snapshot: string | null;
   is_late: boolean;
   no_response_reached_at: Date | null;
   row_version: string;
@@ -55,7 +57,8 @@ export interface OccurrenceRow {
 export const OCCURRENCE_COLUMNS = `o.id, o.plan_id,
   to_char(o.local_scheduled_date, 'YYYY-MM-DD') AS local_scheduled_date,
   to_char(o.local_time, 'HH24:MI') AS local_time, o.scheduled_at, o.deadline_at, o.status,
-  o.medication_name_snapshot, o.dose_text_snapshot, o.is_late, o.no_response_reached_at,
+  o.medication_name_snapshot, o.dose_text_snapshot, o.treatment_reason_snapshot, o.is_late,
+  o.no_response_reached_at,
   o.row_version`;
 
 /** Instante UTC sem a fracao vazia (.000). */
@@ -71,6 +74,7 @@ export const toOccurrenceView = (row: OccurrenceRow): OccurrenceView => ({
   status: row.status,
   medication_name_snapshot: row.medication_name_snapshot,
   dose_text_snapshot: row.dose_text_snapshot,
+  treatment_reason_snapshot: row.treatment_reason_snapshot,
   is_late: row.is_late,
   no_response_reached_at:
     row.no_response_reached_at === null ? null : instantOf(row.no_response_reached_at),

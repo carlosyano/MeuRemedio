@@ -1,4 +1,4 @@
-// X-Correlation-ID: um UUID novo por requisicao, presente em toda resposta (OpenAPI 02.33.9,
+// X-Correlation-ID: um UUID novo por requisicao, presente em toda resposta (OpenAPI 02.33.10,
 // info.description) e repetido em Problem.correlation_id. O servidor nao aceita valor do cliente.
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage } from 'node:http';

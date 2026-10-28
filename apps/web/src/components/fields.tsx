@@ -17,6 +17,8 @@ export function TextField(props: {
   readonly maxLength?: number;
   readonly defaultValue?: string;
   readonly inputMode?: 'numeric';
+  /** id de um <datalist> com sugestoes. */
+  readonly list?: string;
   /** Campo controlado: com `value`, informar tambem `onValueChange`. */
   readonly value?: string;
   readonly onValueChange?: (value: string) => void;
@@ -39,6 +41,7 @@ export function TextField(props: {
         name={props.id}
         type={props.type ?? 'text'}
         inputMode={props.inputMode}
+        list={props.list}
         autoComplete={props.autoComplete}
         maxLength={props.maxLength}
         defaultValue={props.defaultValue}

@@ -1,6 +1,7 @@
 // Mapeamento Drizzle de ENT-005 medication_plans e ENT-006 schedule_times (migracoes 0001_core,
-// 0014_plan_status e 0015_plan_recurrence) e da tabela de plataforma plan_duplicate_confirmations
-// (migracao 0005_plans, RN-016, DC-028).
+// 0014_plan_status, 0015_plan_recurrence e 0016_treatment_reasons), de ENT-018 treatment_reasons
+// (0016) e da tabela de plataforma plan_duplicate_confirmations (migracao 0005_plans, RN-016,
+// DC-028).
 // O SQL e a fonte do esquema: constraints, FKs, triggers e indices vivem nas migracoes.
 import {
   bigint,
@@ -84,9 +85,19 @@ export const medicationPlans = pgTable('medication_plans', {
   /** Dias da semana em mascara de bits (segunda = 1, ..., domingo = 64). */
   recurrenceWeekdays: smallint('recurrence_weekdays'),
   recurrenceIntervalDays: smallint('recurrence_interval_days'),
+  treatmentReasonId: uuid('treatment_reason_id'),
   rowVersion: bigint('row_version', { mode: 'number' }).notNull().default(1),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ENT-018 treatment_reasons (migracao 0016_treatment_reasons, DEC-038).
+export const treatmentReasons = pgTable('treatment_reasons', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull(),
+  name: varchar('name').notNull(),
+  nameNorm: varchar('name_norm').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const scheduleTimes = pgTable('schedule_times', {

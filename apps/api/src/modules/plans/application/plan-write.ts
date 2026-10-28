@@ -21,6 +21,8 @@ export interface PlanWriteRequest {
   readonly schedule_times: readonly string[];
   /** Periodicidade (DEC-037); omitida vale DAILY. */
   readonly recurrence?: PlanRecurrence;
+  /** Motivo do tratamento (DEC-038); omitido ou null, sem motivo. */
+  readonly treatment_reason?: string | null;
 }
 
 export interface NormalizedPlanText {

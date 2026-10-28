@@ -118,6 +118,7 @@ describe('toPlanPayload', () => {
       end_date: null,
       schedule_times: ['08:00', '20:00'],
       recurrence: { kind: 'DAILY' },
+      treatment_reason: null,
     });
   });
 

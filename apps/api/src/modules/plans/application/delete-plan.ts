@@ -10,6 +10,7 @@ import type { Clock } from '../../../platform/clock.js';
 import { withTransaction } from '../../../platform/db/transaction.js';
 import { ProblemError } from '../../../platform/http/problem-catalog.js';
 import { cancelFutureOccurrences, lockOwnPlan } from './plan-write.js';
+import { removeUnusedTreatmentReasons } from './treatment-reasons.js';
 
 export class DeletePlan {
   constructor(
@@ -31,6 +32,7 @@ export class DeletePlan {
           [input.planId, now],
         );
         await cancelFutureOccurrences(client, input.planId, now);
+        await removeUnusedTreatmentReasons(client, input.userId);
       }
       return true;
     });

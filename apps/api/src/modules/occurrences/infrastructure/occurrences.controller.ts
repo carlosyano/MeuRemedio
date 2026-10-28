@@ -1,4 +1,4 @@
-// Rotas de ocorrencias e respostas (OpenAPI 02.33.9, tag Occurrences).
+// Rotas de ocorrencias e respostas (OpenAPI 02.33.10, tag Occurrences).
 import {
   Body,
   Controller,

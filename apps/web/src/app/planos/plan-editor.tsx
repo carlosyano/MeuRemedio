@@ -15,6 +15,7 @@
 // Situacao do plano (DEC-036): cancelar, interromper e retomar com motivo (PlanStatusPanel); plano
 // cancelado ou interrompido nao se edita, so mostra a situacao e pode ser retomado ou excluido.
 // Periodicidade (DEC-037): todos os dias, dias da semana marcados ou a cada N dias (do inicio).
+// Motivo do tratamento (DEC-038): opcional, com os motivos ja usados como sugestao do campo.
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, type SubmitEvent } from 'react';
@@ -78,6 +79,7 @@ const FIELDS = [
   'end_date',
   'schedule_times',
   'recurrence',
+  'treatment_reason',
 ];
 
 type LoadState =
@@ -91,6 +93,10 @@ type LoadState =
     }
   | { readonly status: 'not-found' }
   | { readonly status: 'error'; readonly message: string };
+
+interface TreatmentReasonPage {
+  readonly items: readonly { readonly name: string }[];
+}
 
 interface PendingDuplicate extends DuplicateConfirmation {
   readonly payload: PlanPayload;
@@ -142,6 +148,7 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
   const [recurrenceKind, setRecurrenceKind] = useState<RecurrenceKind>('DAILY');
   const [weekdays, setWeekdays] = useState<readonly string[]>([]);
   const [intervalDays, setIntervalDays] = useState('');
+  const [reasonSuggestions, setReasonSuggestions] = useState<readonly string[]>([]);
   const [notice, setNotice] = useState<string | undefined>();
   // Botao que enviou a criacao: "proximo" volta ao formulario para o proximo item da receita.
   const afterCreate = useRef<'list' | 'next'>('list');
@@ -203,6 +210,21 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
     if (planId === undefined) ready(emptyPlan(todayIn(timeZone)));
     else loadPlan();
   }, [timeZone, planId, ready, loadPlan]);
+
+  // Sugestoes do campo de motivo; sem elas o campo continua livre, entao a falha e silenciosa.
+  useEffect(() => {
+    if (!accountReady) return;
+    let active = true;
+    api
+      .request<TreatmentReasonPage>({ method: 'GET', path: '/treatment-reasons?limit=100' })
+      .then((response) => {
+        if (active) setReasonSuggestions(response.body.items.map((item) => item.name));
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [accountReady]);
 
   useEffect(() => {
     if (duplicate !== undefined || confirmingDelete) panelHeading.current?.focus();
@@ -334,6 +356,7 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
       medication_form: textOf(form, 'medication_form'),
       administration_route: textOf(form, 'administration_route'),
       instructions: textOf(form, 'instructions'),
+      treatment_reason: textOf(form, 'treatment_reason'),
       prescriber_name: textOf(form, 'prescriber_name'),
       prescriber_crm: textOf(form, 'prescriber_crm'),
       start_date: textOf(form, 'start_date'),
@@ -494,6 +517,20 @@ export function PlanEditor({ planId }: { readonly planId?: string }) {
             defaultValue={initial.administration_route}
             error={errors['administration_route']}
           />
+          <TextField
+            id="treatment_reason"
+            label="Motivo do tratamento"
+            description="Opcional. Por que você toma este remédio, por exemplo pressão alta ou dor de cabeça. O mesmo motivo pode valer para vários remédios."
+            maxLength={80}
+            list="motivos-sugeridos"
+            defaultValue={initial.treatment_reason ?? ''}
+            error={errors['treatment_reason']}
+          />
+          <datalist id="motivos-sugeridos">
+            {reasonSuggestions.map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
           <fieldset
             className="mb-4"
             aria-describedby={

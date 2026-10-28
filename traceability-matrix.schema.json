@@ -253,8 +253,8 @@
     },
     "entities": {
       "type": "object",
-      "minProperties": 17,
-      "maxProperties": 17,
+      "minProperties": 18,
+      "maxProperties": 18,
       "propertyNames": {
         "pattern": "^ENT-\\d{3}$"
       }
@@ -286,7 +286,7 @@
     "decisions": {
       "type": "object",
       "minProperties": 10,
-      "maxProperties": 37,
+      "maxProperties": 38,
       "propertyNames": {
         "pattern": "^DEC-\\d{3}$"
       }
