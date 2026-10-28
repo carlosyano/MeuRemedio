@@ -1,4 +1,4 @@
-// @trace TS-023 TS-008 RNF-003 CA-012 RN-002 deleteCurrentSession getAccessibilityPreferences updateAccessibilityPreferences listPlans createPlan getPlan updatePlan deletePlan changePlanStatus listOccurrences createResponse getHistory listExports createExport getExport cancelExport downloadExport getPrivacy requestAccountDeletion getCurrentAccount updateCurrentAccount revokeAllSessions
+// @trace TS-023 TS-008 RNF-003 CA-012 RN-002 deleteCurrentSession getAccessibilityPreferences updateAccessibilityPreferences listPlans listTreatmentReasons createPlan getPlan updatePlan deletePlan changePlanStatus listOccurrences createResponse getHistory listExports createExport getExport cancelExport downloadExport getPrivacy requestAccountDeletion getCurrentAccount updateCurrentAccount revokeAllSessions
 // TS-023 (BOLA/IDOR em todas as rotas privadas, QG-009), gerado a partir da OpenAPI: cada operacao
 // privada precisa de um caso, ou o teste reprova.
 //   - com identificador no caminho: U2 usa o identificador de U1 -> 404 RESOURCE_NOT_FOUND
@@ -20,6 +20,7 @@ import {
 
 const NOW = '2026-10-05T11:05:15Z';
 const MEDICATION = 'Losartana Sintética';
+const REASON = 'Pressão Sintética';
 let h: Harness;
 
 beforeAll(async () => {
@@ -68,6 +69,7 @@ async function anaResources(): Promise<Fixture> {
       administration_route: 'ORAL',
       start_date: '2026-10-01',
       schedule_times: ['08:00'],
+      treatment_reason: REASON,
     },
     headers: { ...ana.mutation, 'idempotency-key': nextKey() },
   });
@@ -180,6 +182,7 @@ const anaIdFor = (operationId: string): string => {
 /** Leituras sem identificador: U2 so pode receber os proprios dados. */
 const READS: Record<string, Call> = {
   listPlans: { method: 'GET', url: '/plans' },
+  listTreatmentReasons: { method: 'GET', url: '/treatment-reasons' },
   listOccurrences: { method: 'GET', url: '/occurrences' },
   getHistory: { method: 'GET', url: '/history?start=2026-10-01&end=2026-10-31' },
   listExports: { method: 'GET', url: '/exports' },
@@ -291,6 +294,7 @@ describe('TS-023 leituras sem identificador: so os dados do proprio titular', ()
       fixture.exportId,
       'ana.silva',
       MEDICATION,
+      REASON,
     ]) {
       expect(text).not.toContain(forbidden);
     }

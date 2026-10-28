@@ -1,4 +1,4 @@
-// @trace TS-001 TS-025 RN-002 RN-003 RN-004 RN-006 RN-007 RN-008 RN-009 RN-013 RF-001 RF-002 RF-003 RF-004 RF-006 DEC-036 DEC-037
+// @trace TS-001 TS-025 RN-002 RN-003 RN-004 RN-006 RN-007 RN-008 RN-009 RN-013 RF-001 RF-002 RF-003 RF-004 RF-006 DEC-036 DEC-037 DEC-038
 // Esquema central no PostgreSQL 17 REAL (docs/architecture/DATA_MODEL.md: ENT-001 e ENT-004 a ENT-008).
 // Base de banco do TS-001 (concorrencia TAKEN x NOT_TAKEN): o teste HTTP completo vem com a API.
 import pg from 'pg';
@@ -532,6 +532,74 @@ describe('medication_plans (ENT-005)', () => {
 });
 
 // ---------- ENT-006 schedule_times ----------
+describe('treatment_reasons (ENT-018, DEC-038)', () => {
+  const reasonRow = (userId: string, over: Record<string, unknown> = {}) => ({
+    user_id: userId,
+    name: 'Pressão alta',
+    name_norm: 'pressao alta',
+    ...over,
+  });
+
+  it('nome e nome normalizado de 1 a 80 caracteres', async () => {
+    const userId = await insert('users', userRow());
+    for (const over of [{ name: '' }, { name_norm: '' }, { name: 'x'.repeat(81) }]) {
+      await expectPgError(insert('treatment_reasons', reasonRow(userId, over)), {
+        code: '23514',
+        constraint: 'treatment_reasons_name_len_chk',
+      });
+    }
+  });
+
+  it('um motivo por nome normalizado e titular; outro titular pode repetir', async () => {
+    const ana = await insert('users', userRow());
+    const bruno = await insert('users', userRow());
+    await insert('treatment_reasons', reasonRow(ana));
+    await expectPgError(insert('treatment_reasons', reasonRow(ana, { name: 'PRESSÃO ALTA' })), {
+      code: '23505',
+      constraint: 'treatment_reasons_user_name_key',
+    });
+    await expect(insert('treatment_reasons', reasonRow(bruno))).resolves.toBeTypeOf('string');
+  });
+
+  it('o plano so aponta para motivo do mesmo titular (defesa contra BOLA)', async () => {
+    const owner = await insert('users', userRow());
+    const stranger = await insert('users', userRow());
+    const reasonId = await insert('treatment_reasons', reasonRow(stranger));
+    await expectPgError(
+      insert('medication_plans', planRow(owner, { treatment_reason_id: reasonId })),
+      { code: '23503', constraint: 'plans_treatment_reason_owner_fk' },
+    );
+  });
+
+  it('apagar o motivo desfaz o vinculo sem apagar o plano', async () => {
+    const userId = await insert('users', userRow());
+    const reasonId = await insert('treatment_reasons', reasonRow(userId));
+    const planId = await insert(
+      'medication_plans',
+      planRow(userId, { treatment_reason_id: reasonId }),
+    );
+    await pool.query('DELETE FROM treatment_reasons WHERE id = $1', [reasonId]);
+    const plan = await pool.query<{ treatment_reason_id: string | null; user_id: string }>(
+      'SELECT treatment_reason_id, user_id FROM medication_plans WHERE id = $1',
+      [planId],
+    );
+    expect(plan.rows).toEqual([{ treatment_reason_id: null, user_id: userId }]);
+  });
+
+  it('snapshot do motivo na ocorrencia com ate 80 caracteres', async () => {
+    const userId = await insert('users', userRow());
+    const planId = await insert('medication_plans', planRow(userId));
+    const timeId = await insert('schedule_times', timeRow(planId));
+    await expectPgError(
+      insert(
+        'occurrences',
+        occurrenceRow(userId, planId, timeId, { treatment_reason_snapshot: 'x'.repeat(81) }),
+      ),
+      { code: '23514', constraint: 'occurrences_treatment_reason_snapshot_len_chk' },
+    );
+  });
+});
+
 describe('schedule_times (ENT-006)', () => {
   it('nao repete horario ativo no mesmo plano, mas permite recriar apos remocao', async () => {
     const userId = await insert('users', userRow());

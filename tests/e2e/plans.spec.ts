@@ -1,4 +1,4 @@
-// @trace TL-003 TL-004 RF-003 RN-001 RN-016 CA-005 CA-006 CA-012 CA-013 CA-017 TS-008 TS-010 TS-019 TS-022 TS-037 TS-043 ERR-001 ERR-003 ERR-005 ERR-009 ERR-011 ERR-014 DEC-036 listPlans createPlan getPlan updatePlan deletePlan changePlanStatus DEC-037
+// @trace TL-003 TL-004 RF-003 RN-001 RN-016 CA-005 CA-006 CA-012 CA-013 CA-017 TS-008 TS-010 TS-019 TS-022 TS-037 TS-043 ERR-001 ERR-003 ERR-005 ERR-009 ERR-011 ERR-014 DEC-036 listPlans createPlan getPlan updatePlan deletePlan changePlanStatus DEC-037 DEC-038 listTreatmentReasons
 // Planos (TL-003) e editor de plano (TL-004) na aplicacao web (DC-054), contra a API e o
 // PostgreSQL reais: lista vazia e lista, validacao, criacao, confirmacao de possivel duplicidade,
 // edicao com If-Match e conflito de versao, exclusao logica, plano de outro titular (404), servico
@@ -438,5 +438,34 @@ test.describe('TL-004 periodicidade (DEC-037)', () => {
     await expect(page.getByRole('listitem').filter({ hasText: 'Vitamina D' })).toContainText(
       'A cada 7 dias',
     );
+  });
+});
+
+test.describe('TL-004 motivo do tratamento (DEC-038)', () => {
+  test('motivo opcional, sugerido nos planos seguintes e mostrado na lista', async ({ page }) => {
+    await signedIn(page, '/planos/novo');
+    await fillPlan(page, { name: 'Losartana', dose: '50 mg' });
+    await page.getByLabel('Motivo do tratamento').fill('Pressão alta');
+    await expectNoA11yViolations(page);
+    await save(page);
+    await expect(statusIn(page)).toHaveText('Plano criado.');
+    await expect(page.getByRole('listitem').filter({ hasText: 'Losartana' })).toContainText(
+      'Motivo do tratamento: Pressão alta',
+    );
+
+    await page.goto('/planos/novo');
+    await fillPlan(page, { name: 'Hidroclorotiazida', dose: '25 mg' });
+    // Os motivos ja usados aparecem como sugestao do campo.
+    await expect(page.locator('#motivos-sugeridos option[value="Pressão alta"]')).toHaveCount(1);
+    await page.getByLabel('Motivo do tratamento').fill('pressão alta');
+    await save(page);
+    await expect(statusIn(page)).toHaveText('Plano criado.');
+    // O mesmo motivo, com o nome como foi cadastrado da primeira vez.
+    await expect(page.getByRole('listitem').filter({ hasText: 'Hidroclorotiazida' })).toContainText(
+      'Motivo do tratamento: Pressão alta',
+    );
+
+    await page.getByRole('link', { name: 'Hidroclorotiazida' }).click();
+    await expect(page.getByLabel('Motivo do tratamento')).toHaveValue('Pressão alta');
   });
 });

@@ -18,8 +18,8 @@ afterAll(async () => {
 const fastifyPath = (path: string): string => path.replace(/\{([^}]+)\}/g, ':$1');
 
 describe('TS-040 rotas da aplicacao x OpenAPI', () => {
-  it('o contrato tem as 29 operacoes da baseline (DEC-036)', () => {
-    expect(h.contract.operations).toHaveLength(29);
+  it('o contrato tem as 30 operacoes da baseline (DEC-038)', () => {
+    expect(h.contract.operations).toHaveLength(30);
   });
 
   it('toda operacao do contrato esta registrada na API em execucao', () => {
