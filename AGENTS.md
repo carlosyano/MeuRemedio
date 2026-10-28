@@ -2,7 +2,7 @@
 
 ## Política operacional para agentes de desenvolvimento, testes e integração contínua
 
-**Versão:** 1.10  
+**Versão:** 1.11  
 **Status:** Baseline operacional aprovada  
 **Baseline contratual:** OpenAPI 02.33.10  
 **Baseline funcional:** Especificação Funcional 02.33  
@@ -88,7 +88,7 @@ Para a superfície HTTP, deverá ser utilizado exclusivamente o seguinte contrat
 MeuRemedio_OpenAPI_02.33.10_COMPLETO.yaml
 ```
 
-Reproduções históricas da OpenAPI (02.32, 02.33, 02.33.1, 02.33.2, 02.33.3, 02.33.4, 02.33.5, 02.33.6, 02.33.7 e 02.33.8) não deverão ser utilizadas como fonte normativa para:
+Reproduções históricas da OpenAPI (02.32, 02.33, 02.33.1, 02.33.2, 02.33.3, 02.33.4, 02.33.5, 02.33.6, 02.33.7, 02.33.8 e 02.33.9) não deverão ser utilizadas como fonte normativa para:
 
 - implementação;
 - geração de código;

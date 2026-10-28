@@ -15,16 +15,16 @@ generated_from:
     artifacts:
       functional_specification:
         file: MeuRemedio_Especificacao_Funcional_02.33.docx
-        sha256: 730df0f86fc7414d3f2500e1a89c477fa6ad8e1519ea9971c246a28961406af0
+        sha256: 808163ad2b3c445dbda1f6b7e7ca52d84c924392ca1d38e4d2486d3b5373c8c8
       openapi:
         file: MeuRemedio_OpenAPI_02.33.10_COMPLETO.yaml
-        sha256: 98c0a4e4bd16ecf515cffdb9a874aa33688f10d876acfd429c5061e9c1373396
+        sha256: 3283d040b4b0aa13dd7667df3e30bd198ef2a0e968fb2fec7e17a01490f6f600
       architecture:
         file: ADR-001_Arquitetura_Base_MeuRemedio_v1.5.docx
-        sha256: 592b53e2f9c3954e9c56e15e66def4e055aa6e80128271735d4f17f29303f9dc
+        sha256: a98878a93d85a3eb21596c763a182bd9ff9b84a1302700aadd9ad2d00e3994a4
       agents_policy:
         file: AGENTS.md
-        sha256: ecb6b81e755f6451875d6ba5547a6550785fd0bc6ce482663d637071124c0942
+        sha256: 0b7b8f1b92e03aa3132655b32a649bcbdcc91b511f67f279493ac483c858b489
 governance:
   http_source_of_truth: MeuRemedio_OpenAPI_02.33.10_COMPLETO.yaml
   functional_source_of_truth: MeuRemedio_Especificacao_Funcional_02.33.docx
