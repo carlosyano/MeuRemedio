@@ -9,7 +9,8 @@
 //     nada e enfileirado e o sucesso so aparece com a resposta da API (RN-015, TS-010);
 //   - tempo limite (30 s): repetir usa a mesma Idempotency-Key e nao registra duas vezes (CA-013);
 //   - remedios do dia (DEC-035): todos os horarios do dia civil da conta, com a situacao de cada
-//     um, so para consulta; atualizados junto com a lista acionavel.
+//     um, so para consulta, do horario mais tarde para o mais cedo (DC-077); atualizados junto com
+//     a lista acionavel.
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppNav } from '@/components/app-nav';

@@ -49,13 +49,13 @@ describe('remedios do dia (DEC-035)', () => {
     status: status as 'PROGRAMMED' | 'NO_RESPONSE' | 'TAKEN' | 'NOT_TAKEN' | 'CANCELED',
   });
 
-  it('ordena pelo horario local, do mais cedo para o mais tarde', () => {
+  it('ordena pelo horario local, do mais tarde para o mais cedo (o mais recente antes)', () => {
     const items = [
       at('20:00', '2026-10-15T23:00:00Z', 'PROGRAMMED'),
       at('08:00', '2026-10-15T11:00:00Z', 'TAKEN'),
       at('14:00', '2026-10-15T17:00:00Z', 'PROGRAMMED'),
     ];
-    expect(dayItems(items).map((o) => o.local_time)).toEqual(['08:00', '14:00', '20:00']);
+    expect(dayItems(items).map((o) => o.local_time)).toEqual(['20:00', '14:00', '08:00']);
     // nao altera a lista recebida
     expect(items[0]?.local_time).toBe('20:00');
   });

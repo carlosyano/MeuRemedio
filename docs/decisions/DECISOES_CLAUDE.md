@@ -864,3 +864,11 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Validação na tela:** pelo menos um dia em "Dias da semana" e inteiro de 2 a 365 em "A cada quantos dias", com as mesmas mensagens nos dois casos de erro do grupo.
 - **Riscos:** a máscara de bits não é legível numa consulta SQL direta sem a tabela de conversão do `DATA_MODEL.md`. A contagem de "a cada N dias" pelo início não acompanha atrasos: quem toma um dia depois continua com a agenda original, como na receita.
 - **Aplica-se a:** `apps/api/migrations/0015_plan_recurrence.sql`, `packages/domain/src/occurrence-slots.ts`, `plan-rules.ts`, `apps/api/src/modules/plans/application/plan-recurrence.ts`, o gerador de ocorrências e `apps/web/src/lib/plan-form.ts`, `plan-editor.tsx` e `plans-screen.tsx`.
+
+## DC-077 — Remédios de hoje do horário mais tarde para o mais cedo (28/10/2026)
+
+- **Contexto:** testando a tela Hoje, o mantenedor pediu que "Remédios de hoje" (DEC-035) mostre o mais recente antes. A lista vinha do horário mais cedo para o mais tarde.
+- **Alternativas:** (a) inverter a ordem de `listOccurrences` com `local_date` na API, o que muda o contrato (DEC-035 fixa "a mesma ordem e paginação"); (b) inverter só na tela, que já ordena a lista do dia.
+- **Decisão:** (b). `dayItems` ordena pelo horário local decrescente (20:00 antes de 08:00). A API e a seção "Para registrar" não mudam.
+- **Riscos:** a tela pede até 100 horários do dia. Acima disso, a API devolve os primeiros 100 em ordem crescente e a tela inverte só esses, com o aviso de lista truncada que já existe. Na prática, um dia com mais de 100 doses não é esperado.
+- **Aplica-se a:** `apps/web/src/lib/occurrences.ts` (`dayItems`), `apps/web/src/app/hoje/today-screen.tsx` e aos testes `tests/unit/web-occurrences.spec.ts` e `tests/e2e/occurrences.spec.ts`.
