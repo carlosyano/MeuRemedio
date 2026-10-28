@@ -1,5 +1,11 @@
-// Leitura de um plano no formato do schema Plan (OpenAPI 02.33.8) e ETag derivado de row_version.
+// Leitura de um plano no formato do schema Plan (OpenAPI 02.33.9) e ETag derivado de row_version.
 import type { Pool, PoolClient } from 'pg';
+import {
+  RECURRENCE_COLUMNS,
+  toPlanRecurrence,
+  type PlanRecurrence,
+  type RecurrenceRow,
+} from './plan-recurrence.js';
 
 /** Situacao do plano (DEC-036); DELETED nunca chega ao titular. */
 export type PlanStatus = 'ACTIVE' | 'CANCELED' | 'INTERRUPTED' | 'DELETED';
@@ -21,6 +27,7 @@ export interface PlanView {
   readonly start_date: string;
   readonly end_date: string | null;
   readonly schedule_times: string[];
+  readonly recurrence: PlanRecurrence;
   readonly status_reason: PlanStatusReason | null;
   readonly status_note: string | null;
   readonly status_changed_at: string | null;
@@ -32,7 +39,7 @@ export interface PlanView {
 /** ETag forte com a versao da linha (CA-006): row_version 7 -> "7". */
 export const etagOf = (rowVersion: number): string => `"${String(rowVersion)}"`;
 
-export interface PlanRow {
+export interface PlanRow extends RecurrenceRow {
   id: string;
   user_id: string;
   status: PlanStatus;
@@ -65,7 +72,7 @@ export const PLAN_COLUMNS = `
   (SELECT array_agg(to_char(s.time_of_day, 'HH24:MI') ORDER BY s.time_of_day)
      FROM schedule_times s
     WHERE s.plan_id = p.id AND s.removed_at IS NULL) AS schedule_times,
-  p.status_reason, p.status_note, p.status_changed_at,
+  p.status_reason, p.status_note, p.status_changed_at, ${RECURRENCE_COLUMNS},
   p.row_version, p.created_at, p.updated_at,
   to_char(p.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS created_at_us`;
 
@@ -83,6 +90,7 @@ export function toPlanView(row: PlanRow): PlanView {
     start_date: row.start_date,
     end_date: row.end_date,
     schedule_times: row.schedule_times ?? [],
+    recurrence: toPlanRecurrence(row),
     status_reason: row.status_reason,
     status_note: row.status_note,
     status_changed_at: row.status_changed_at?.toISOString().replace('.000Z', 'Z') ?? null,

@@ -5,6 +5,7 @@ import { normalizePlanText } from '@meuremedio/domain';
 import type { PoolClient } from 'pg';
 import { recordAudit } from '../../../platform/audit/audit.js';
 import { ProblemError, type FieldError } from '../../../platform/http/problem-catalog.js';
+import type { PlanRecurrence } from './plan-recurrence.js';
 import type { PlanStatus } from './plan-view.js';
 
 export interface PlanWriteRequest {
@@ -18,6 +19,8 @@ export interface PlanWriteRequest {
   readonly start_date: string;
   readonly end_date?: string | null;
   readonly schedule_times: readonly string[];
+  /** Periodicidade (DEC-037); omitida vale DAILY. */
+  readonly recurrence?: PlanRecurrence;
 }
 
 export interface NormalizedPlanText {

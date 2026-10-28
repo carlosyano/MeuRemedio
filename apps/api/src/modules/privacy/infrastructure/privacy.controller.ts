@@ -1,4 +1,4 @@
-// Rotas de privacidade (OpenAPI 02.33.8, tag Privacy).
+// Rotas de privacidade (OpenAPI 02.33.9, tag Privacy).
 import { Body, Controller, Get, Headers, Inject, Post, Req, Res } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { clearedSessionCookies } from '../../identity/infrastructure/session-cookies.js';

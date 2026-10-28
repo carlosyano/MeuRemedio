@@ -21,6 +21,7 @@ import {
   type IdempotentResponse,
   type RequestHasher,
 } from '../../../platform/idempotency/idempotency.js';
+import { recurrenceColumns } from './plan-recurrence.js';
 import { etagOf, findPlan, toPlanView } from './plan-view.js';
 import {
   addScheduleTimes,
@@ -184,12 +185,14 @@ export class CreatePlan {
     normalized: NormalizedPlanText,
     now: string,
   ): Promise<string> {
+    const recurrence = recurrenceColumns(request.recurrence);
     const inserted = await client.query<{ id: string }>(
       `INSERT INTO medication_plans (user_id, medication_name, medication_name_norm, dose_text,
                                      dose_text_norm, medication_form, administration_route,
                                      instructions, prescriber_name, prescriber_crm, start_date,
-                                     end_date, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $13)
+                                     end_date, recurrence_kind, recurrence_weekdays,
+                                     recurrence_interval_days, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $14, $15, $16, $13, $13)
        RETURNING id`,
       [
         userId,
@@ -205,6 +208,9 @@ export class CreatePlan {
         request.start_date,
         request.end_date ?? null,
         now,
+        recurrence.kind,
+        recurrence.weekdays,
+        recurrence.intervalDays,
       ],
     );
     const planId = inserted.rows[0]?.id;

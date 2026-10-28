@@ -852,3 +852,15 @@ Cada entrada traz: contexto, alternativas analisadas, decisão, riscos e onde se
   - **Tela do plano:** cancelado e interrompido mostram a situação, a data, o motivo e a observação, sem o formulário de edição; continuam com a exclusão.
 - **Riscos:** as regras de transição ficam em dois lugares (API e web). Uma mudança na DEC-036 precisa atualizar os dois, e os testes unitário (`tests/unit/web-plan-status.spec.ts`) e de integração (`tests/integration/plans-status.spec.ts`) cobrem cada lado.
 - **Aplica-se a:** `apps/api/src/modules/plans/application/change-plan-status.ts`, `update-plan.ts`, `apps/web/src/lib/plan-status.ts`, `apps/web/src/app/planos/plan-status-panel.tsx`, `plan-editor.tsx` e `plans-screen.tsx`.
+
+## DC-076 — Detalhes de implementação da periodicidade do plano (27/10/2026)
+
+- **Contexto:** a DEC-037 define o contrato (`PlanRecurrence` com `DAILY`, `WEEKDAYS` e `EVERY_N_DAYS`) e a regra de cada periodicidade. O mantenedor escolheu, em 27/10/2026, dias da semana marcados (não "1 vez por semana") e a contagem a partir da data de início (não da última tomada). Faltava decidir o armazenamento, a forma do corpo e os textos da tela.
+- **Alternativas:** para os dias da semana no banco, (a) array de enum, (b) tabela à parte ou (c) máscara de bits num `smallint`; para o corpo, campos soltos no plano ou um objeto `recurrence` com `oneOf` por `kind`.
+- **Decisão:**
+  - **Banco:** (c), máscara de bits (segunda = 1, ..., domingo = 64), com `CHECK` de 1 a 127. Não repete dia, cabe numa coluna e tem limite simples. A conversão (`weekdayMask` e `weekdaysFromMask`) fica no domínio puro, usada pela API e pelo gerador sem importação entre módulos.
+  - **Contrato:** objeto `recurrence` com `oneOf` por `kind`, validado pelo próprio contrato (Ajv). Opcional na escrita, para não quebrar clientes atuais; obrigatório na leitura.
+  - **Web:** o editor sempre envia `recurrence`, mesmo quando é todos os dias. A frase de conferência usa o artigo de cada dia ("às segundas, às quintas e aos sábados") e "a cada N dias"; a lista mostra "Todos os dias", "Às segundas e às quintas" ou "A cada 7 dias".
+  - **Validação na tela:** pelo menos um dia em "Dias da semana" e inteiro de 2 a 365 em "A cada quantos dias", com as mesmas mensagens nos dois casos de erro do grupo.
+- **Riscos:** a máscara de bits não é legível numa consulta SQL direta sem a tabela de conversão do `DATA_MODEL.md`. A contagem de "a cada N dias" pelo início não acompanha atrasos: quem toma um dia depois continua com a agenda original, como na receita.
+- **Aplica-se a:** `apps/api/migrations/0015_plan_recurrence.sql`, `packages/domain/src/occurrence-slots.ts`, `plan-rules.ts`, `apps/api/src/modules/plans/application/plan-recurrence.ts`, o gerador de ocorrências e `apps/web/src/lib/plan-form.ts`, `plan-editor.tsx` e `plans-screen.tsx`.

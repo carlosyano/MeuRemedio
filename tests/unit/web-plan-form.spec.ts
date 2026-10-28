@@ -117,6 +117,7 @@ describe('toPlanPayload', () => {
       start_date: '2026-10-15',
       end_date: null,
       schedule_times: ['08:00', '20:00'],
+      recurrence: { kind: 'DAILY' },
     });
   });
 

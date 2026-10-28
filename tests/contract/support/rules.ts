@@ -1,5 +1,5 @@
 // Regras do TS-040 (contrato). Cada regra e pura: recebe o contexto e devolve a lista de violacoes.
-// Fontes: OpenAPI 02.33.8, matriz de rastreabilidade, AGENTS.md (secoes 13 e 14), Especificacao 02.33
+// Fontes: OpenAPI 02.33.9, matriz de rastreabilidade, AGENTS.md (secoes 13 e 14), Especificacao 02.33
 // (secao 13) e ADR-001 v1.5. Excecoes explicitas ficam em ALLOWANCES e exigem GAP registrado na matriz.
 import {
   asArray,

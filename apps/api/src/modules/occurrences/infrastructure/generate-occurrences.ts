@@ -6,6 +6,8 @@
 //   removidos sao ignorados;
 // - plano retomado (DEC-036) so gera os horarios posteriores a retomada (status_changed_at): o
 //   periodo interrompido nao renasce;
+// - so os dias da periodicidade do plano geram slots (DEC-037): todos os dias, dias da semana
+//   escolhidos ou a cada N dias contados do inicio;
 // - a linha do plano fica bloqueada (FOR SHARE) durante a geracao, serializando com a edicao;
 // - horario com prazo ja atingido em `now` nasce NO_RESPONSE (DEC-027).
 // generateOccurrencesForHorizon aplica o horizonte de 30 dias da DEC-027; generateOccurrences
@@ -14,7 +16,9 @@ import {
   generationHorizon,
   initialOccurrenceState,
   occurrenceSlots,
+  weekdaysFromMask,
   type GenerationWindow,
+  type Recurrence,
 } from '@meuremedio/domain';
 import type { Pool } from 'pg';
 
@@ -44,6 +48,21 @@ interface PlanRow {
   account_timezone: string;
   /** Instante da retomada, se houve (num plano ACTIVE, so a retomada grava status_changed_at). */
   status_changed_at: Date | null;
+  recurrence_kind: Recurrence['kind'];
+  /** Mascara de bits dos dias da semana (migracao 0015). */
+  recurrence_weekdays: number | null;
+  recurrence_interval_days: number | null;
+}
+
+/** Periodicidade gravada no plano, no formato do dominio. */
+function recurrenceOf(plan: PlanRow): Recurrence {
+  if (plan.recurrence_kind === 'WEEKDAYS' && plan.recurrence_weekdays !== null) {
+    return { kind: 'WEEKDAYS', weekdays: weekdaysFromMask(plan.recurrence_weekdays) };
+  }
+  if (plan.recurrence_kind === 'EVERY_N_DAYS' && plan.recurrence_interval_days !== null) {
+    return { kind: 'EVERY_N_DAYS', intervalDays: plan.recurrence_interval_days };
+  }
+  return { kind: 'DAILY' };
 }
 
 /** Gera as ocorrencias do horizonte de 30 dias (DEC-027) a partir de `now`, no fuso da conta. */
@@ -86,7 +105,8 @@ async function generate(
         `SELECT p.user_id,
                 to_char(p.start_date, 'YYYY-MM-DD') AS start_date,
                 to_char(p.end_date, 'YYYY-MM-DD') AS end_date,
-                p.medication_name, p.dose_text, u.account_timezone, p.status_changed_at
+                p.medication_name, p.dose_text, u.account_timezone, p.status_changed_at,
+                p.recurrence_kind, p.recurrence_weekdays, p.recurrence_interval_days
            FROM medication_plans p
            JOIN users u ON u.id = p.user_id
           WHERE p.id = $1 AND p.status = 'ACTIVE'
@@ -115,6 +135,7 @@ async function generate(
       planStartDate: plan.start_date,
       planEndDate: plan.end_date,
       times: times.rows.map((row) => ({ id: row.id, timeOfDay: row.time_of_day })),
+      recurrence: recurrenceOf(plan),
       fromDate: window.fromDate,
       toDate: window.toDate,
     }).filter((slot) => resumedAt === null || Date.parse(slot.scheduledAt) > resumedAt);

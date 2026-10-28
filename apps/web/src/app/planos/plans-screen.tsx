@@ -11,7 +11,13 @@ import { AppNav } from '@/components/app-nav';
 import { FormAlert } from '@/components/fields';
 import { ApiProblem, messageFor } from '@/lib/api-client';
 import { api } from '@/lib/browser-api';
-import { describeForm, formatPeriod, todayIn, type Plan } from '@/lib/plan-form';
+import {
+  describeForm,
+  describeRecurrence,
+  formatPeriod,
+  todayIn,
+  type Plan,
+} from '@/lib/plan-form';
 import { PLAN_GROUPS, planGroup, statusReasonText } from '@/lib/plan-status';
 import { loginPath, useAccount } from '@/lib/use-account';
 
@@ -176,6 +182,7 @@ function PlanGroups(props: { readonly items: readonly Plan[]; readonly today: st
                     {describeForm(plan.medication_form, plan.administration_route)}
                   </p>
                   <p>Horários: {plan.schedule_times.join(', ')}</p>
+                  <p>{describeRecurrence(plan.recurrence)}</p>
                   <p className="text-sm text-muted">
                     {formatPeriod(plan.start_date, plan.end_date)}
                   </p>
