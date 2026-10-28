@@ -57,9 +57,12 @@ export function responseBody(
   return { type, reason: type === 'TAKEN' ? null : reason };
 }
 
-/** Remedios do dia (DEC-035): do horario local mais cedo para o mais tarde, sem alterar a lista. */
+/**
+ * Remedios do dia (DEC-035): do horario local mais tarde para o mais cedo, o mais recente antes
+ * (pedido do mantenedor em 28/10/2026, DC-077), sem alterar a lista recebida.
+ */
 export function dayItems<T extends Pick<Occurrence, 'local_time'>>(items: readonly T[]): T[] {
-  return [...items].sort((a, b) => a.local_time.localeCompare(b.local_time));
+  return [...items].sort((a, b) => b.local_time.localeCompare(a.local_time));
 }
 
 /** Situacao de um horario do dia; PROGRAMMED so pede registro quando o horario ja chegou. */

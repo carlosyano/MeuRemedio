@@ -90,10 +90,11 @@ test.describe('TL-005 ocorrencias', () => {
     await page.reload();
     const items = dayList(page).getByRole('listitem');
     await expect(items).toHaveCount(2);
-    await expect(items.nth(0)).toContainText(`${taken?.localTime ?? ''} Losartana · 50 mg`);
-    await expect(items.nth(0)).toContainText('Tomado');
-    await expect(items.nth(1)).toContainText(`${future?.localTime ?? ''} Losartana · 50 mg`);
-    await expect(items.nth(1)).toContainText('Previsto');
+    // O horario mais tarde do dia vem primeiro.
+    await expect(items.nth(0)).toContainText(`${future?.localTime ?? ''} Losartana · 50 mg`);
+    await expect(items.nth(0)).toContainText('Previsto');
+    await expect(items.nth(1)).toContainText(`${taken?.localTime ?? ''} Losartana · 50 mg`);
+    await expect(items.nth(1)).toContainText('Tomado');
     // A lista do dia so informa: registrar continua em "Para registrar".
     await expect(dayList(page).getByRole('button')).toHaveCount(0);
     await expectNoA11yViolations(page);
