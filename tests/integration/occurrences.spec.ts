@@ -181,6 +181,7 @@ describe('listOccurrences: ocorrencias acionaveis do titular (RF-004, RF-005, DC
         status: 'PROGRAMMED',
         medication_name_snapshot: 'Comprimido',
         dose_text_snapshot: '1 comprimido',
+        treatment_reason_snapshot: null,
         is_late: false,
         no_response_reached_at: null,
         row_version: 1,

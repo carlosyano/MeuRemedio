@@ -21,6 +21,11 @@ import {
   type RequestHasher,
 } from '../../../platform/idempotency/idempotency.js';
 import { recurrenceColumns } from './plan-recurrence.js';
+import {
+  normalizeTreatmentReason,
+  removeUnusedTreatmentReasons,
+  treatmentReasonId,
+} from './treatment-reasons.js';
 import { etagOf, findPlan, toPlanView } from './plan-view.js';
 import {
   addScheduleTimes,
@@ -84,6 +89,7 @@ export class UpdatePlan {
   ): Promise<IdempotentResponse> {
     const { planId, request } = input;
     const recurrence = recurrenceColumns(request.recurrence);
+    const reason = normalizeTreatmentReason(request.treatment_reason);
     const plan = await lockOwnPlan(client, { ...input, now });
     if (plan === undefined || plan.status === 'DELETED') return NOT_FOUND;
     if (etagOf(Number(plan.row_version)) !== input.ifMatch) {
@@ -97,6 +103,7 @@ export class UpdatePlan {
               medication_form = $6, administration_route = $7, instructions = $8,
               prescriber_name = $9, prescriber_crm = $10, start_date = $11, end_date = $12,
               recurrence_kind = $14, recurrence_weekdays = $15, recurrence_interval_days = $16,
+              treatment_reason_id = $17,
               row_version = row_version + 1, updated_at = $13
         WHERE id = $1`,
       [
@@ -116,8 +123,10 @@ export class UpdatePlan {
         recurrence.kind,
         recurrence.weekdays,
         recurrence.intervalDays,
+        await treatmentReasonId(client, input.userId, reason),
       ],
     );
+    await removeUnusedTreatmentReasons(client, input.userId);
     // Retira primeiro, para o limite de 10 horarios ativos (RN-006) valer sobre o conjunto final.
     await client.query(
       `UPDATE schedule_times SET removed_at = $3

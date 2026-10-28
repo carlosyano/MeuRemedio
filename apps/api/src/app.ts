@@ -42,6 +42,7 @@ import { ChangePlanStatus } from './modules/plans/application/change-plan-status
 import { CreatePlan } from './modules/plans/application/create-plan.js';
 import { DeletePlan } from './modules/plans/application/delete-plan.js';
 import { ReadPlans } from './modules/plans/application/read-plans.js';
+import { ReadTreatmentReasons } from './modules/plans/application/treatment-reasons.js';
 import { UpdatePlan } from './modules/plans/application/update-plan.js';
 import { PlansController } from './modules/plans/infrastructure/plans.controller.js';
 import { CreateResponse } from './modules/responses/application/create-response.js';
@@ -185,6 +186,7 @@ class AppModule {
           useValue: new CreatePlan(options.database, options.clock, hashRequest),
         },
         { provide: ReadPlans, useValue: new ReadPlans(options.database, options.clock) },
+        { provide: ReadTreatmentReasons, useValue: new ReadTreatmentReasons(options.database) },
         {
           provide: UpdatePlan,
           useValue: new UpdatePlan(options.database, options.clock, hashRequest),

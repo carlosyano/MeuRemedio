@@ -3,7 +3,8 @@
 //     as CANCELED, com a resposta de cada uma (mesmo recorte de getHistory, DC-041);
 //   - o PDF sai so do snapshot: edicao posterior do plano nao o altera (TS-020);
 //   - texto em fonte padrao (Helvetica, WinAnsi): o PDF e pesquisavel (RN-011);
-//   - sem nome nem e-mail do titular; com medicamento, dose, horario e resposta declarada.
+//   - sem nome nem e-mail do titular; com medicamento, dose, motivo do tratamento (DEC-038), horario e
+//     resposta declarada.
 import { historyWindow } from '@meuremedio/domain';
 import type { PoolClient } from 'pg';
 import PDFDocument from 'pdfkit';
@@ -15,6 +16,8 @@ export interface SnapshotItem {
   readonly local_time: string;
   readonly medication_name: string;
   readonly dose_text: string;
+  /** Snapshot do motivo do tratamento; ausente nos snapshots anteriores a DEC-038. */
+  readonly treatment_reason?: string | null;
   readonly status: 'PROGRAMMED' | 'NO_RESPONSE' | 'TAKEN' | 'NOT_TAKEN';
   readonly response: {
     readonly type: 'TAKEN' | 'NOT_TAKEN';
@@ -50,6 +53,7 @@ export async function freezeHistory(
       local_time: string;
       medication_name: string;
       dose_text: string;
+      treatment_reason: string | null;
       status: SnapshotItem['status'];
       response_type: 'TAKEN' | 'NOT_TAKEN' | null;
       response_reason: string | null;
@@ -59,6 +63,7 @@ export async function freezeHistory(
       `SELECT to_char(o.local_scheduled_date, 'YYYY-MM-DD') AS local_date,
               to_char(o.local_time, 'HH24:MI') AS local_time,
               o.medication_name_snapshot AS medication_name, o.dose_text_snapshot AS dose_text,
+              o.treatment_reason_snapshot AS treatment_reason,
               o.status, r.type AS response_type, r.reason AS response_reason,
               r.captured_at AS response_captured_at, r.is_late AS response_is_late
          FROM occurrences o
@@ -80,6 +85,7 @@ export async function freezeHistory(
       local_time: row.local_time,
       medication_name: row.medication_name,
       dose_text: row.dose_text,
+      treatment_reason: row.treatment_reason,
       status: row.status,
       response:
         row.response_type === null ||
@@ -201,6 +207,9 @@ export function renderHistoryPdf(snapshot: HistorySnapshot): Promise<Buffer> {
         .text(`${civilDate(item.local_date)} ${item.local_time}`, { continued: true })
         .font('Helvetica')
         .text(`  ${item.medication_name}, ${item.dose_text}`);
+      if (item.treatment_reason != null) {
+        doc.text(`Motivo do tratamento: ${item.treatment_reason}`);
+      }
       doc.text(outcome(item, snapshot.time_zone));
       doc.moveDown(0.4);
     }

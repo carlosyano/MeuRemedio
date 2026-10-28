@@ -28,6 +28,7 @@ export interface PlanView {
   readonly end_date: string | null;
   readonly schedule_times: string[];
   readonly recurrence: PlanRecurrence;
+  readonly treatment_reason: { readonly treatment_reason_id: string; readonly name: string } | null;
   readonly status_reason: PlanStatusReason | null;
   readonly status_note: string | null;
   readonly status_changed_at: string | null;
@@ -55,6 +56,8 @@ export interface PlanRow extends RecurrenceRow {
   schedule_times: string[] | null;
   status_reason: PlanStatusReason | null;
   status_note: string | null;
+  treatment_reason_id: string | null;
+  treatment_reason_name: string | null;
   status_changed_at: Date | null;
   row_version: string;
   created_at: Date;
@@ -73,6 +76,9 @@ export const PLAN_COLUMNS = `
      FROM schedule_times s
     WHERE s.plan_id = p.id AND s.removed_at IS NULL) AS schedule_times,
   p.status_reason, p.status_note, p.status_changed_at, ${RECURRENCE_COLUMNS},
+  p.treatment_reason_id,
+  (SELECT tr.name FROM treatment_reasons tr WHERE tr.id = p.treatment_reason_id)
+    AS treatment_reason_name,
   p.row_version, p.created_at, p.updated_at,
   to_char(p.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS created_at_us`;
 
@@ -91,6 +97,10 @@ export function toPlanView(row: PlanRow): PlanView {
     end_date: row.end_date,
     schedule_times: row.schedule_times ?? [],
     recurrence: toPlanRecurrence(row),
+    treatment_reason:
+      row.treatment_reason_id === null || row.treatment_reason_name === null
+        ? null
+        : { treatment_reason_id: row.treatment_reason_id, name: row.treatment_reason_name },
     status_reason: row.status_reason,
     status_note: row.status_note,
     status_changed_at: row.status_changed_at?.toISOString().replace('.000Z', 'Z') ?? null,

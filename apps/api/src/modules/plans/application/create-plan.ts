@@ -22,6 +22,7 @@ import {
   type RequestHasher,
 } from '../../../platform/idempotency/idempotency.js';
 import { recurrenceColumns } from './plan-recurrence.js';
+import { normalizeTreatmentReason, treatmentReasonId } from './treatment-reasons.js';
 import { etagOf, findPlan, toPlanView } from './plan-view.js';
 import {
   addScheduleTimes,
@@ -67,6 +68,8 @@ export class CreatePlan {
     request: CreatePlanRequest,
   ): Promise<IdempotentResponse> {
     const normalized = validatePlanWrite(request);
+    // Motivo so com espacos -> 400 antes da duplicidade e da idempotencia.
+    normalizeTreatmentReason(request.treatment_reason);
     const now = this.clock.now();
     const { duplicate_confirmation_token: token, ...payload } = request;
     const payloadHash = this.hashRequest({ body: payload });
@@ -186,13 +189,19 @@ export class CreatePlan {
     now: string,
   ): Promise<string> {
     const recurrence = recurrenceColumns(request.recurrence);
+    const reasonId = await treatmentReasonId(
+      client,
+      userId,
+      normalizeTreatmentReason(request.treatment_reason),
+    );
     const inserted = await client.query<{ id: string }>(
       `INSERT INTO medication_plans (user_id, medication_name, medication_name_norm, dose_text,
                                      dose_text_norm, medication_form, administration_route,
                                      instructions, prescriber_name, prescriber_crm, start_date,
                                      end_date, recurrence_kind, recurrence_weekdays,
-                                     recurrence_interval_days, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $14, $15, $16, $13, $13)
+                                     recurrence_interval_days, treatment_reason_id, created_at,
+                                     updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $14, $15, $16, $17, $13, $13)
        RETURNING id`,
       [
         userId,
@@ -211,6 +220,7 @@ export class CreatePlan {
         recurrence.kind,
         recurrence.weekdays,
         recurrence.intervalDays,
+        reasonId,
       ],
     );
     const planId = inserted.rows[0]?.id;

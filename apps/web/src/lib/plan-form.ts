@@ -2,6 +2,7 @@
 // (termino >= inicio, ERR-009), montagem do payload e rotulos em pt-BR. A API valida tudo de novo;
 // o CRM so tem o formato conferido, sem consulta externa (RN-001, TS-012).
 // Periodicidade (DEC-037): todos os dias (padrao), dias da semana ou a cada N dias (2 a 365).
+// Motivo do tratamento (DEC-038): texto opcional de ate 80 caracteres, enviado aparado.
 
 /** Mesmo formato de FieldErrors de forms.ts (sem importar: este modulo roda nos testes). */
 export type FieldErrors = Readonly<Record<string, string>>;
@@ -23,6 +24,8 @@ export interface PlanFormInput {
   readonly weekdays?: readonly string[];
   /** Texto digitado em "A cada quantos dias". */
   readonly interval_days?: string;
+  /** Motivo do tratamento digitado; vazio = sem motivo. */
+  readonly treatment_reason?: string;
 }
 
 export type RecurrenceKind = 'DAILY' | 'WEEKDAYS' | 'EVERY_N_DAYS';
@@ -47,11 +50,20 @@ export interface PlanPayload {
   readonly schedule_times: readonly string[];
   /** Omitida, a API usa todos os dias. */
   readonly recurrence?: PlanRecurrence;
+  /** Motivo do tratamento; null ou omitido, sem motivo. */
+  readonly treatment_reason?: string | null;
+}
+
+/** Motivo do tratamento como a API devolve no plano (TreatmentReasonRef). */
+export interface TreatmentReasonRef {
+  readonly treatment_reason_id: string;
+  readonly name: string;
 }
 
 /** Plano como a API devolve (schema Plan). */
-export interface Plan extends PlanPayload {
+export interface Plan extends Omit<PlanPayload, 'treatment_reason'> {
   readonly plan_id: string;
+  readonly treatment_reason: TreatmentReasonRef | null;
   /** Situacao (DEC-036); os tipos ficam em plan-status.ts, repetidos aqui sem importar. */
   readonly status: 'ACTIVE' | 'CANCELED' | 'INTERRUPTED' | 'DELETED';
   /** Ultima mudanca de situacao; null se nunca houve. */
@@ -179,6 +191,9 @@ export function validatePlanForm(input: PlanFormInput): FieldErrors {
   } else if (times.length > MAX_SCHEDULE_TIMES) {
     errors['schedule_times'] = `Informe no máximo ${String(MAX_SCHEDULE_TIMES)} horários.`;
   }
+  if ((input.treatment_reason ?? '').trim().length > 80) {
+    errors['treatment_reason'] = tooLong(80);
+  }
   if (input.recurrence_kind === 'WEEKDAYS' && (input.weekdays ?? []).length === 0) {
     errors['recurrence'] = 'Escolha pelo menos um dia da semana.';
   } else if (
@@ -208,6 +223,7 @@ export function toPlanPayload(input: PlanFormInput): PlanPayload {
     end_date: optional(input.end_date),
     schedule_times: [...input.schedule_times].sort(),
     recurrence: recurrenceOf(input),
+    treatment_reason: optional(input.treatment_reason ?? ''),
   };
 }
 
@@ -227,7 +243,11 @@ function recurrenceOf(input: PlanFormInput): PlanRecurrence {
 }
 
 /** Plano carregado como valores iniciais do formulario. */
-export function toFormInput(plan: PlanPayload): PlanFormInput {
+/** Nome do motivo, tanto do payload (texto) quanto do plano lido (TreatmentReasonRef). */
+const reasonName = (reason: string | TreatmentReasonRef | null | undefined): string =>
+  typeof reason === 'string' ? reason : (reason?.name ?? '');
+
+export function toFormInput(plan: PlanPayload | Plan): PlanFormInput {
   return {
     medication_name: plan.medication_name,
     dose_text: plan.dose_text,
@@ -243,6 +263,7 @@ export function toFormInput(plan: PlanPayload): PlanFormInput {
     weekdays: plan.recurrence?.kind === 'WEEKDAYS' ? plan.recurrence.weekdays : [],
     interval_days:
       plan.recurrence?.kind === 'EVERY_N_DAYS' ? String(plan.recurrence.interval_days) : '',
+    treatment_reason: reasonName(plan.treatment_reason),
   };
 }
 

@@ -17,6 +17,8 @@ export interface Occurrence {
   readonly status: OccurrenceStatus;
   readonly medication_name_snapshot: string;
   readonly dose_text_snapshot: string;
+  /** Motivo do tratamento quando a ocorrencia foi gerada (DEC-038). */
+  readonly treatment_reason_snapshot?: string | null;
   readonly is_late: boolean;
   readonly no_response_reached_at: string | null;
   readonly row_version: number;

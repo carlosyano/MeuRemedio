@@ -186,6 +186,9 @@ function PlanGroups(props: { readonly items: readonly Plan[]; readonly today: st
                   <p className="text-sm text-muted">
                     {formatPeriod(plan.start_date, plan.end_date)}
                   </p>
+                  {plan.treatment_reason !== null && (
+                    <p className="text-sm">Motivo do tratamento: {plan.treatment_reason.name}</p>
+                  )}
                   {plan.status !== 'ACTIVE' && plan.status_reason !== null && (
                     <p className="text-sm">
                       Motivo: {statusReasonText(plan.status, plan.status_reason)}

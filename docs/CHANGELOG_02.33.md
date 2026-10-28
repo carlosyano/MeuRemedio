@@ -236,3 +236,14 @@ Pedido do mantenedor: todo plano gerava horários todos os dias, sem como cadast
 Efeitos: OpenAPI `02.33.9` (arquivo renomeado; oasdiff sem incompatibilidade, pois `recurrence` é opcional na escrita), matriz `2.1.16` (hashes das quatro fontes, referências vigentes, DEC-037 no catálogo e em `listPlans`, `createPlan`, `getPlan` e `updatePlan`), `maxProperties` de `decisions` no schema (36 → 37), `AGENTS.md` 1.10 (referências vigentes e versões históricas), Especificação (DEC-037 e nota no Anexo C), ADR (referências vigentes), `validate_all.py`, workflow de rastreabilidade e `CLAUDE.md`. A descrição de `listPlans` passou a citar os planos cancelados e interrompidos (DEC-036).
 
 **Aprovação:** pedido do mantenedor em 27/10/2026, que autorizou o merge com a CI verde.
+
+## DEC-038 e revisão 02.33.10 da OpenAPI: motivo do tratamento (28/10/2026)
+
+Pedido do mantenedor: ao criar um plano, registrar por que o medicamento é tomado, com um mesmo motivo valendo para vários remédios. As escolhas foram dele: nome "Motivo do tratamento", opcional, um por plano, presente no histórico e no PDF.
+
+1. **DEC-038:** `PlanWrite` e `CreatePlanRequest` ganham `treatment_reason` (texto opcional de 1 a 80 caracteres). O motivo é uma entidade do titular (`TreatmentReason`, ENT-018), identificada pelo nome normalizado: o mesmo nome em outro plano reaproveita o motivo, que mantém o nome da primeira gravação. `Plan` devolve `treatment_reason` (`TreatmentReasonRef`) ou null; `Occurrence` ganha `treatment_reason_snapshot`; a nova operação `listTreatmentReasons` (`GET /treatment-reasons`) lista os motivos em uso, em ordem alfabética, com a quantidade de planos. Motivo sem plano não excluído é apagado.
+2. **Implementação:** migração `0016_treatment_reasons`; o gerador copia o nome do motivo para a ocorrência; histórico e PDF mostram "Motivo do tratamento"; na web, campo opcional no editor com os motivos já usados como sugestão, e o motivo na lista de planos e no histórico. O cursor de `listTreatmentReasons` guarda só o id do último motivo, para o nome não ir para a URL (DC-078).
+
+Efeitos: OpenAPI `02.33.10` (arquivo renomeado; oasdiff sem incompatibilidade), matriz `2.1.17` (hashes, DEC-038, ENT-018, operação `listTreatmentReasons` com vínculos de RF-003, CA-012, TS-023 e erros ERR-001, ERR-002, ERR-010, ERR-011 e ERR-016, DEC-038 em `listPlans`, `createPlan`, `getPlan`, `updatePlan`, `listOccurrences` e `getHistory`), schema da matriz (`decisions` 37 → 38, `entities` 17 → 18), `AGENTS.md` 1.11, Especificação (DEC-038, ENT-018 e nota no Anexo C), ADR (referências vigentes), `validate_all.py`, workflow de rastreabilidade e `CLAUDE.md`. Pendência: o aviso de privacidade definitivo (GX-001 a GX-006) precisa citar o motivo do tratamento entre os dados de saúde declarados.
+
+**Aprovação:** pedido do mantenedor em 28/10/2026 ("adotar essas melhorias e gerar nova versão").

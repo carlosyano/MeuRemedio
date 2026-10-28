@@ -6,8 +6,8 @@ import {
   toFormInput,
   toPlanPayload,
   validatePlanForm,
+  type Plan,
   type PlanFormInput,
-  type PlanPayload,
 } from '../../apps/web/src/lib/plan-form.js';
 
 const input: PlanFormInput = {
@@ -41,11 +41,17 @@ describe('motivo do tratamento no formulario', () => {
   });
 
   it('o plano lido volta para o formulario com o nome do motivo', () => {
-    const plan: PlanPayload & {
-      treatment_reason: { treatment_reason_id: string; name: string } | null;
-    } = {
+    const plan: Plan = {
       ...toPlanPayload(input),
+      plan_id: 'p-1',
       treatment_reason: { treatment_reason_id: 'r-1', name: 'Pressão alta' },
+      status: 'ACTIVE',
+      status_reason: null,
+      status_note: null,
+      status_changed_at: null,
+      row_version: 1,
+      created_at: '2026-11-02T10:00:00Z',
+      updated_at: '2026-11-02T10:00:00Z',
     };
     expect(toFormInput(plan)).toMatchObject({ treatment_reason: 'Pressão alta' });
     expect(toFormInput({ ...plan, treatment_reason: null })).toMatchObject({

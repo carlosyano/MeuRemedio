@@ -202,6 +202,11 @@ export function HistoryScreen() {
                 <p>
                   {occurrence.medication_name_snapshot} · {occurrence.dose_text_snapshot}
                 </p>
+                {occurrence.treatment_reason_snapshot != null && (
+                  <p className="text-sm">
+                    Motivo do tratamento: {occurrence.treatment_reason_snapshot}
+                  </p>
+                )}
                 <p>{outcomeText(occurrence, response)}</p>
               </li>
             ))}

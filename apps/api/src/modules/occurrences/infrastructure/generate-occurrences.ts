@@ -52,6 +52,8 @@ interface PlanRow {
   /** Mascara de bits dos dias da semana (migracao 0015). */
   recurrence_weekdays: number | null;
   recurrence_interval_days: number | null;
+  /** Nome do motivo do tratamento, copiado como snapshot (DEC-038). */
+  treatment_reason_name: string | null;
 }
 
 /** Periodicidade gravada no plano, no formato do dominio. */
@@ -106,7 +108,9 @@ async function generate(
                 to_char(p.start_date, 'YYYY-MM-DD') AS start_date,
                 to_char(p.end_date, 'YYYY-MM-DD') AS end_date,
                 p.medication_name, p.dose_text, u.account_timezone, p.status_changed_at,
-                p.recurrence_kind, p.recurrence_weekdays, p.recurrence_interval_days
+                p.recurrence_kind, p.recurrence_weekdays, p.recurrence_interval_days,
+                (SELECT tr.name FROM treatment_reasons tr WHERE tr.id = p.treatment_reason_id)
+                  AS treatment_reason_name
            FROM medication_plans p
            JOIN users u ON u.id = p.user_id
           WHERE p.id = $1 AND p.status = 'ACTIVE'
@@ -147,9 +151,10 @@ async function generate(
     const result = await client.query(
       `INSERT INTO occurrences (user_id, plan_id, schedule_time_id, local_scheduled_date, local_time,
                                 scheduled_at, deadline_at, status, no_response_reached_at,
-                                medication_name_snapshot, dose_text_snapshot)
+                                medication_name_snapshot, dose_text_snapshot,
+                                treatment_reason_snapshot)
        SELECT $1, $2, s.schedule_time_id, s.local_date, s.local_time, s.scheduled_at, s.deadline_at,
-              s.status, s.no_response_reached_at, $3, $4
+              s.status, s.no_response_reached_at, $3, $4, $12
          FROM unnest($5::uuid[], $6::date[], $7::time[], $8::timestamptz[], $9::timestamptz[],
                      $10::occurrence_status[], $11::timestamptz[])
               AS s (schedule_time_id, local_date, local_time, scheduled_at, deadline_at, status,
@@ -167,6 +172,7 @@ async function generate(
         slots.map((slot) => slot.deadlineAt),
         states.map((state) => state.status),
         states.map((state) => state.noResponseReachedAt),
+        plan.treatment_reason_name,
       ],
     );
     await client.query('COMMIT');
